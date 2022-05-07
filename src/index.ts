@@ -1,4 +1,4 @@
-import { BroadcastClient } from './client/BroadcastClient';
+import { BroadcastClient } from './client/BroadcastClient.js';
 import "dotenv/config";
 import publicIp from "public-ip";
 import { EntryClient } from './client/EntryClient.js';
