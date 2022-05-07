@@ -3,19 +3,19 @@ import cors from "cors";
 import express from "express";
 const app = express();
 
-let ips: string[] = [];
+let peers: string[] = [];
 const EXPRESS_PORT = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
-  res.json({ ips });
+  res.json({ ips: peers });
 });
 
 app.post("/", (req, res) => {
-  if (req?.body?.ip && ips.indexOf(req?.body?.ip) === -1) {
-    ips.push(req.body.ip);
+  if (req?.body?.ip && peers.indexOf(req?.body?.ip) === -1) {
+    peers.push(req.body.ip);
     res.sendStatus(204);
   } else {
     res.sendStatus(403);
@@ -24,7 +24,7 @@ app.post("/", (req, res) => {
 
 app.delete("/:ip", (req, res) => {
   if (req?.params?.ip) {
-    ips = ips.filter((ip) => ip != req.params.ip);
+    peers = peers.filter((ip) => ip != req.params.ip);
     res.sendStatus(204);
   } else {
     res.sendStatus(403);

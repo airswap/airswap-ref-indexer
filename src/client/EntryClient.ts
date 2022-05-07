@@ -31,7 +31,8 @@ export class EntryClient implements BroadcastClient {
                 case "PUT":
                     return await axios.put(url, data);
                 case "DELETE":
-                    return await axios.delete(url);
+                    console.log("Tried to broadcast to method that does not exists", method, url, data);
+                    return Promise.reject;
             }
         } catch (e) {
             console.log("Client did not answer !", method, url, data, e);

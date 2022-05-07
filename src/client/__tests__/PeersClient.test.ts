@@ -44,14 +44,12 @@ describe("Peers client", () => {
     });
 
     describe("Broadcast", () => {
-        it("should rebuild PUT request", async () => {
+        it("should not rebuild put request", async () => {
             mockedAxios.put.mockImplementation((url: string, data: any) => {
-                expect(url).toBe("a_url")
-                expect(data).toEqual({ key: "value" })
-                return Promise.resolve(axios200Response({}));
+                return Promise.reject();
             });
-            const response = await new PeersClient().sendTo("PUT", "a_url", { key: "value" });
-            expect(response).toBeDefined();
+            await new PeersClient().sendTo("PUT", "a_url", { key: "value" });
+            expect(mockedAxios.put).not.toHaveBeenCalled();
         });
 
         it("should rebuild get request", async () => {

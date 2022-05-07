@@ -63,6 +63,6 @@ export class EntryController {
 
     getEntries = (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
-        response.json(this.database.getEntries());
+        response.json({ entries: this.database.getEntries() });
     }
 }

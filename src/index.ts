@@ -46,12 +46,12 @@ process.on("SIGINT", () => {
 
 
 async function requestDataFromOtherPeer() {
-  if (peersFromRegistry?.ips?.length > 0) {
-    peers.addPeers(peersFromRegistry.ips);
+  if (peersFromRegistry?.peers?.length > 0) {
+    peers.addPeers(peersFromRegistry.peers);
     const peerUrl = "http://" + peers.getConnectablePeers()[0];
     console.log("Configure client");
     const { data } = await entryClient.getEntries(peerUrl);
-    database.addAll(data);
+    database.addAll(data.entries);
     console.log("Asked all queries to", peerUrl);
   } else {
     console.log("/!\\ FIRST NODE AVAILABLE !");

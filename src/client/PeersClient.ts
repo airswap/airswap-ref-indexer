@@ -26,7 +26,8 @@ export class PeersClient implements BroadcastClient {
                 case "POST":
                     return await axios.post(url, data);
                 case "PUT":
-                    return await axios.put(url, data);
+                    console.log("Tried to broadcast to method that does not exists", method, url, data);
+                    return Promise.reject;
                 case "DELETE":
                     return await axios.delete(url);
             }

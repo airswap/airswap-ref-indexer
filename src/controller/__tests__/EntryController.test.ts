@@ -40,14 +40,16 @@ describe("Entry controller", () => {
 
         const expected =
         {
-            aze: {
-                by: "by",
-                from: "from",
-                nb: 3,
-                price: 4,
-                status: "IN_PROGRESS",
-                to: "to",
-            },
+            entries: {
+                aze: {
+                    by: "by",
+                    from: "from",
+                    nb: 3,
+                    price: 4,
+                    status: "IN_PROGRESS",
+                    to: "to",
+                },
+            }
         };
 
         new EntryController(fakePeers as Peers, fakeDb as Database).getEntries(mockRequest, mockResponse as Response);
@@ -100,7 +102,7 @@ describe("Entry controller", () => {
             } as Partial<Response>;
 
             //@ts-ignore
-            fakeDb.entryExists.mockImplementation(() => false);            
+            fakeDb.entryExists.mockImplementation(() => false);
             //@ts-ignore
             fakeDb.isIdConsistent.mockImplementation(() => true);
 
