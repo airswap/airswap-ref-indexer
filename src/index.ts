@@ -89,6 +89,6 @@ async function gracefulShutdown() {
   } catch (e) {
     console.log("Error while sending data to registry", e);
   }
-  peers.broadcastDisconnectionToOtherPeer();
+  await peers.broadcastDisconnectionToOtherPeer();
   process.exit(0);
 }

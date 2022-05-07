@@ -1,3 +1,4 @@
+import { AxiosResponse } from 'axios';
 import { BroadcastClient } from './../client/BroadcastClient';
 import { PeersClient } from '../client/PeersClient.js';
 import { Database } from '../database/Database.js';
@@ -66,12 +67,14 @@ export class Peers {
     });
   };
 
-  broadcastDisconnectionToOtherPeer = () => {
+  broadcastDisconnectionToOtherPeer = async () => {
+    const promises: Promise<AxiosResponse<any, any>>[] = [];
     this.peers.forEach((clientUrl) => {
       if (clientUrl && clientUrl != this.host) {
-        this.peersClient.removePeer(HTTP_PREFIX + clientUrl, this.host);
+        promises.push(this.peersClient.removePeer(HTTP_PREFIX + clientUrl, this.host));
       }
     });
+    return await Promise.all(promises);
   };
 
   getPeers = () => {
