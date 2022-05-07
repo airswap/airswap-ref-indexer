@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { BroadcastClient } from "./BroadcastClient.js";
 
 const peersPath = "/peers/";
-export class PeersClient implements BroadcastClient {
+export class PeersClient {
 
     async getPeers(url: string) {
         console.log("S---> GET" + url + peersPath);
@@ -15,24 +14,5 @@ export class PeersClient implements BroadcastClient {
     async removePeer(url: string, peerUrl: string) {
         console.log("S---> DELETE", url + peersPath + peerUrl);
         return axios.delete(url + peersPath + peerUrl);
-    }
-
-    async sendTo(method: string, url: string, data?: any) {
-        console.log("S--->", method, url, data);
-        try {
-            switch (method) {
-                case "GET":
-                    return await axios.get(url);
-                case "POST":
-                    return await axios.post(url, data);
-                case "PUT":
-                    console.log("Tried to broadcast to method that does not exists", method, url, data);
-                    return Promise.reject;
-                case "DELETE":
-                    return await axios.delete(url);
-            }
-        } catch (e) {
-            console.log("Client did not answer !", method, url, data, e);
-        }
     }
 }

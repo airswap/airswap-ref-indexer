@@ -46,44 +46,4 @@ describe("Entry client", () => {
         const response = await new EntryClient().editEntry("my_url", "entry_id", TransactionStatus.DONE);
         expect(response).toBeDefined();
     });
-
-    describe("Broadcast", () => {
-        it("should rebuild PUT request", async () => {
-            mockedAxios.put.mockImplementation((url: string, data: any) => {
-                expect(url).toBe("a_url")
-                expect(data).toEqual({ key: "value" })
-                return Promise.resolve(axios200Response({}));
-            });
-            const response = await new EntryClient().sendTo("PUT", "a_url", { key: "value" });
-            expect(response).toBeDefined();
-        });
-
-        it("should rebuild get request", async () => {
-            mockedAxios.get.mockImplementation((url: string, data: any) => {
-                expect(url).toBe("a_url")
-                expect(data).toBeUndefined()
-                return Promise.resolve(axios200Response({}));
-            });
-            const response = await new EntryClient().sendTo("GET", "a_url", { key: "value" });
-            expect(response).toBeDefined();
-        });
-
-        it("should rebuild post request", async () => {
-            mockedAxios.post.mockImplementation((url: string, data: any) => {
-                expect(url).toBe("a_url")
-                expect(data).toEqual({ key: "value" });
-                return Promise.resolve(axios200Response({}));
-            });
-            const response = await new EntryClient().sendTo("POST", "a_url", { key: "value" });
-            expect(response).toBeDefined();
-        });
-
-        it("should not rebuild delete request", async () => {
-            mockedAxios.delete.mockImplementation((url: string, data: any) => {
-                return Promise.reject();
-            });
-            await new EntryClient().sendTo("DELETE", "a_url", { key: "value" });
-            expect(mockedAxios.delete).not.toHaveBeenCalled();
-        });
-    });
 });  

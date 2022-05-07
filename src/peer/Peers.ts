@@ -1,3 +1,4 @@
+import { BroadcastClient } from './../client/BroadcastClient';
 import { PeersClient } from '../client/PeersClient.js';
 import { Database } from '../database/Database.js';
 
@@ -8,13 +9,15 @@ export class Peers {
   peers: string[];
   database: Database;
   host: string;
-  client: PeersClient;
+  peersClient: PeersClient;
+  broadcastClient: BroadcastClient;
 
-  constructor(database: Database, host: string, client: PeersClient) {
+  constructor(database: Database, host: string, peersClient: PeersClient, broadcastClient: BroadcastClient) {
     this.peers = [];
     this.database = database;
     this.host = host;
-    this.client = client;
+    this.peersClient = peersClient;
+    this.broadcastClient = broadcastClient;
   };
 
   addPeer = (url: string) => {
@@ -50,7 +53,7 @@ export class Peers {
     this.peers.forEach((clientUrl) => {
       if (clientUrl && clientUrl != this.host) {
         console.log(HTTP_PREFIX + clientUrl + path, body);
-        this.client.sendTo(method, HTTP_PREFIX + clientUrl + path, body);
+        this.broadcastClient.broadcastTo(method, HTTP_PREFIX + clientUrl + path, body);
       }
     });
   }
@@ -58,7 +61,7 @@ export class Peers {
   broadcastMyHostToOtherPeer = () => {
     this.peers.forEach((clientUrl) => {
       if (clientUrl && clientUrl != this.host) {
-        this.client.addPeer(HTTP_PREFIX + clientUrl, this.host);
+        this.peersClient.addPeer(HTTP_PREFIX + clientUrl, this.host);
       }
     });
   };
@@ -66,7 +69,7 @@ export class Peers {
   broadcastDisconnectionToOtherPeer = () => {
     this.peers.forEach((clientUrl) => {
       if (clientUrl && clientUrl != this.host) {
-        this.client.removePeer(HTTP_PREFIX + clientUrl, this.host);
+        this.peersClient.removePeer(HTTP_PREFIX + clientUrl, this.host);
       }
     });
   };

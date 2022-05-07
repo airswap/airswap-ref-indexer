@@ -1,3 +1,4 @@
+import { BroadcastClient } from './client/BroadcastClient';
 import "dotenv/config";
 import publicIp from "public-ip";
 import { EntryClient } from './client/EntryClient.js';
@@ -23,9 +24,10 @@ console.log("HOST is", host);
 // Injection
 const entryClient = new EntryClient();
 const peersClient = new PeersClient();
+const broadcastClient = new BroadcastClient();
 const registryClient = new RegistryClient(REGISTRY);
 const database = new InMemoryDatabase();
-const peers = new Peers(database, host, peersClient);
+const peers = new Peers(database, host, peersClient, broadcastClient);
 const homeController = new HomeController(peers, database, REGISTRY);
 const entryController = new EntryController(peers, database);
 const peersController = new PeersController(peers);

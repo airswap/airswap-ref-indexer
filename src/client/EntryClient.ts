@@ -4,7 +4,7 @@ import { Entry } from './../model/Entry.js';
 import { TransactionStatus } from './../model/TransactionStatus.js';
 
 const entryPath = "/entries/";
-export class EntryClient implements BroadcastClient {
+export class EntryClient {
     async getEntries(url: string) {
         console.log("S---> GET", url + entryPath);
         return await axios.get(url + entryPath)
@@ -18,24 +18,5 @@ export class EntryClient implements BroadcastClient {
         return await axios.put(url + entryPath + entryId, {
             status
         });
-    }
-
-    async sendTo(method: string, url: string, data?: any) {
-        console.log("S--->", method, url, data);
-        try {
-            switch (method) {
-                case "GET":
-                    return await axios.get(url);
-                case "POST":
-                    return await axios.post(url, data);
-                case "PUT":
-                    return await axios.put(url, data);
-                case "DELETE":
-                    console.log("Tried to broadcast to method that does not exists", method, url, data);
-                    return Promise.reject;
-            }
-        } catch (e) {
-            console.log("Client did not answer !", method, url, data, e);
-        }
     }
 }
