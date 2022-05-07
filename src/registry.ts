@@ -10,7 +10,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
-  res.json({ ips: peers });
+  res.json({ peers });
 });
 
 app.post("/", (req, res) => {
