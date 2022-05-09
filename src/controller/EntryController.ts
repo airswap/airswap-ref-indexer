@@ -12,7 +12,7 @@ export class EntryController {
         this.database = database;
     }
 
-    addEntry = (request: Request, response: Response) => {
+    addEntry = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
         const entryId = request.params.entryId;
         const data = request.body;
@@ -28,7 +28,8 @@ export class EntryController {
         }
 
         const id = entryId || this.database.generateId(data);
-        if (this.database.entryExists(id)) {
+        const entryExists = await this.database.entryExists(id);
+        if (entryExists) {
             response.sendStatus(204);
             return;
         }
@@ -39,7 +40,7 @@ export class EntryController {
         response.sendStatus(204);
     }
 
-    editEntry = (request: Request, response: Response) => {
+    editEntry = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
         if (!request.params.entryId || !request.body.status) {
             response.sendStatus(400);
@@ -51,7 +52,8 @@ export class EntryController {
             return;
         }
 
-        if (this.database.getEntry(request.params.entryId).status == request.body.status) {
+        const entry = await this.database.getEntry(request.params.entryId);
+        if (entry.status == request.body.status) {
             response.sendStatus(204);
             return;
         }
@@ -61,8 +63,9 @@ export class EntryController {
         response.sendStatus(204);
     }
 
-    getEntries = (request: Request, response: Response) => {
+    getEntries = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
-        response.json({ entries: this.database.getEntries() });
+        const entries = await this.database.getEntries();
+        response.json({ entries });
     }
 }

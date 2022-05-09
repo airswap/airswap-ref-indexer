@@ -8,6 +8,7 @@
   "type": "module",
   "license": "MIT",
   "dependencies": {
+    "acebase": "^1.18.0",
     "axios": "^0.27.1",
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
@@ -21,7 +22,7 @@
     "@types/jest": "^27.4.1",
     "@types/ws": "^8.5.3",
     "jest": "^27.0.0",
-    "typescript": "^4.6.3",
-    "ts-jest": "^27.1.4"
+    "ts-jest": "^27.1.4",
+    "typescript": "^4.6.3"
   }
 }

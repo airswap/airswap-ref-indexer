@@ -748,6 +748,19 @@ accepts@~1.3.8:
     mime-types "~2.1.34"
     negotiator "0.6.3"
 
+acebase-core@^1.15.0:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/acebase-core/-/acebase-core-1.15.0.tgz#2fc9d9eec62e0e932af70cc0aecda05dd4c88683"
+  integrity sha512-+ZlBjhFnsEfNsbPUCtZPE9CIQ/x+/Z5w80hwmgo6TyxQuGWEUN9m5qHY+YBQO3TuhSnlIODzYjgXGnLqwiIY/g==
+
+acebase@^1.18.0:
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/acebase/-/acebase-1.18.0.tgz#b654cc57da33a13f6a42795c231ae34fceccbbd2"
+  integrity sha512-AC3QPXjVzMR1vj353AqxICbDtmNa47ChhVVEYr/lWJOn/+EZv3PFnr0u6jX+QS8IjnqC36XmnoPAgoOd/r/1bg==
+  dependencies:
+    acebase-core "^1.15.0"
+    unidecode "^0.1.8"
+
 acorn-globals@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/acorn-globals/-/acorn-globals-6.0.0.tgz#46cdd39f0f8ff08a876619b55f5ac8a6dc770b45"
@@ -3197,6 +3210,11 @@ typescript@^4.6.3:
   version "4.6.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.6.3.tgz#eefeafa6afdd31d725584c67a0eaba80f6fc6c6c"
   integrity sha512-yNIatDa5iaofVozS/uQJEl3JRWLKKGJKh6Yaiv0GLGSuhpFJe7P3SbHZ8/yjAHRQwKRoA6YZqlfjXWmVzoVSMw==
+
+unidecode@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/unidecode/-/unidecode-0.1.8.tgz#efbb301538bc45246a9ac8c559d72f015305053e"
+  integrity sha1-77swFTi8RSRqmsjFWdcvAVMFBT4=
 
 universalify@^0.1.2:
   version "0.1.2"

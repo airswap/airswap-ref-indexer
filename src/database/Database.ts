@@ -7,11 +7,11 @@ export interface Database {
 
     editEntry(id: string, status: TransactionStatus): void;
 
-    getEntry(id: string): Entry;
+    getEntry(id: string): Promise<Entry>;
+    
+    getEntries(): Promise<Record<string, Entry>>;
 
-    getEntries(): Record<string, Entry>;
-
-    entryExists(id: string): boolean;
+    entryExists(id: string): Promise<boolean>;
 
     generateId(entry: Entry): string;
 

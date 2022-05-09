@@ -23,16 +23,16 @@ export class InMemoryDatabase implements Database {
     this.database[id]!.status = status;
   }
 
-  getEntry = (id: string) => {
-    return this.database[id];
+  getEntry(id: string): Promise<Entry> {
+        return Promise.resolve(this.database[id]);
   }
 
-  getEntries = () => {
-    return this.database;
+  async getEntries(): Promise<Record<string, Entry>> {
+    return Promise.resolve(this.database);
   }
 
-  entryExists = (id: string) => {
-    return Object.keys(this.database).indexOf(id) != -1;
+  entryExists = (id: string): Promise<boolean> => {
+    return Promise.resolve(Object.keys(this.database).indexOf(id) != -1);
   }
 
   generateId(entry: Entry) {
@@ -40,7 +40,7 @@ export class InMemoryDatabase implements Database {
     const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
     return hashed.digest("hex");
   }
-  
+
   isIdConsistent(entry: Entry, expectedId: string) {
     return this.generateId(entry) == expectedId;
   }

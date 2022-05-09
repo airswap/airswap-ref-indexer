@@ -12,7 +12,7 @@ describe("Entry controller", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getEntries: jest.fn(() => ({ "aze": entry }) as Record<string, Entry>),
+            getEntries: jest.fn(() => Promise.resolve( ({ "aze": entry })) as Promise<Record<string, Entry>>),
             addEntry: jest.fn(),
             getEntry: jest.fn(),
             entryExists: jest.fn(),

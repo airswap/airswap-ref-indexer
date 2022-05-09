@@ -13,7 +13,7 @@ describe("Home controller", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getEntries: jest.fn(() => ({ "aze": entry }) as Record<string, Entry>)
+            getEntries: jest.fn(() => Promise.resolve( ({ "aze": entry })) as Promise<Record<string, Entry>>),
         };
         fakePeers = {
             getPeers: jest.fn(() => [])

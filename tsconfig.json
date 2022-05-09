@@ -5,7 +5,7 @@
     "esModuleInterop": true,
     "outDir": "dist",
     "target": "es2017",
-    "strict": true,
+    "strict": false,
     "declaration": true
   },
   "include": ["src/**/*"],
