@@ -14,7 +14,7 @@ export class AceBaseClient implements Database {
     constructor() {
         const options = { logLevel: 'verbose', storage: { path: '.' } } as AceBaseLocalSettings; // optional settings
         this.db = new AceBase('mydb', options);  // Creates or opens a database with name "mydb"
-        this.db.ready(() => { console.log("database is ready"); });
+        this.db.ready(() => { this.db.ref(ENTRY_REF).remove() });
     }
 
     addEntry(entry: Entry, entryId: string): void {
