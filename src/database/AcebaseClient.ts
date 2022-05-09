@@ -1,4 +1,4 @@
-import { AceBase } from 'acebase';
+import { AceBase, DataReferencesArray } from 'acebase';
 import crypto from "crypto";
 import { Entry } from '../model/Entry.js';
 import { TransactionStatus } from '../model/TransactionStatus.js';
@@ -18,7 +18,12 @@ export class AceBaseClient implements Database {
     }
 
     addEntry(entry: Entry, entryId: string): void {
+        // extract those lines to the service
         entry.id = entryId;
+        if (!entry.status) {
+            entry.status = TransactionStatus.IN_PROGRESS;
+        }
+        /////
         console.log("addEntry", entry)
         this.db.ref(ENTRY_REF).push(entry);
     }
@@ -28,15 +33,24 @@ export class AceBaseClient implements Database {
             this.addEntry(entries[id], id);
         })
     }
-    editEntry(id: string, status: TransactionStatus): void {
-        throw new Error('Method not implemented.');
+
+    async editEntry(id: string, status: TransactionStatus): Promise<void> {
+        const entry = await this.db.query(ENTRY_REF)
+            .filter('id', '==', id)
+            .get({ snapshots: false }) as DataReferencesArray;
+        console.log(entry);
+        const tmp = await entry[0].get();
+        const storedEntry = this.datarefToRecord(tmp.val())[id];
+        storedEntry.status = status;
+        entry[0].set(storedEntry);
     }
 
     async getEntry(id: string): Promise<Entry> {
         const query = await this.db.query(ENTRY_REF)
             .filter('id', '==', id)
             .get();
-        return Promise.resolve(this.datarefToRecord(query)[id]);
+        const serializedEntry = query.values().next().value.val();
+        return Promise.resolve(this.datarefToRecord(serializedEntry)[id]);
     }
 
     async getEntries(): Promise<Record<string, Entry>> {
@@ -51,7 +65,7 @@ export class AceBaseClient implements Database {
 
     private datarefToRecord(data): Record<string, Entry> {
         const mapped: Record<string, Entry> = {};
-        mapped[data.id] = new Entry(data.by, data.from, data.to, +data.nb, +data.price, data.status);
+        mapped[data.id] = new Entry(data.by, data.from, data.to, +data.nb, +data.price, data.status, data.id);
         return mapped;
     }
 
@@ -59,7 +73,7 @@ export class AceBaseClient implements Database {
         const query = await this.db.query(ENTRY_REF)
             .filter('id', '==', id)
             .get();
-        console.log("entryExists", query);
+        console.log("entryExists", query.length);
         return query.length == 1;
     }
 

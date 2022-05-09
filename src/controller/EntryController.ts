@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { stringToTransactionStatus, TransactionStatus } from './../model/TransactionStatus.js';
 import { Database } from "../database/Database.js";
 import { Peers } from "../peer/Peers.js";
 
@@ -46,6 +47,12 @@ export class EntryController {
             response.sendStatus(400);
             return;
         }
+        
+        const status = stringToTransactionStatus(request.body.status)
+        if (status === TransactionStatus.UNKNOWN) {
+            response.sendStatus(403);
+            return;
+        }
 
         if (!this.database.entryExists(request.params.entryId)) {
             response.sendStatus(403);
@@ -53,12 +60,12 @@ export class EntryController {
         }
 
         const entry = await this.database.getEntry(request.params.entryId);
-        if (entry.status == request.body.status) {
+        if (entry.status == status) {
             response.sendStatus(204);
             return;
         }
 
-        this.database.editEntry(request.params.entryId, request.body.status);
+        this.database.editEntry(request.params.entryId, status);
         this.peers.broadcast(request.method, request.url, request.body);
         response.sendStatus(204);
     }
