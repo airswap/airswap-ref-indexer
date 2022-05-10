@@ -17,13 +17,7 @@ export class AceBaseClient implements Database {
         this.db.ready(() => { this.db.ref(ENTRY_REF).remove() });
     }
 
-    addEntry(entry: Entry, entryId: string): void {
-        // extract those lines to the service
-        entry.id = entryId;
-        if (!entry.status) {
-            entry.status = TransactionStatus.IN_PROGRESS;
-        }
-        /////
+    addEntry(entry: Entry): void {
         console.log("addEntry", entry)
         this.db.ref(ENTRY_REF).push(entry);
     }

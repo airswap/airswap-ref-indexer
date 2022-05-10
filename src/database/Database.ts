@@ -1,7 +1,7 @@
 import { Entry } from './../model/Entry.js';
 import { TransactionStatus } from './../model/TransactionStatus.js';
 export interface Database {
-    addEntry(entry: Entry, entryId: string): void;
+    addEntry(entry: Entry): void;
 
     addAll(entries: Record<string, Entry>): void;
 

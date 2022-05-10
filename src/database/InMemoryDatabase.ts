@@ -10,9 +10,8 @@ export class InMemoryDatabase implements Database {
     this.database = {};
   }
 
-  addEntry = (entry: Entry, entryId: string) => {
-    this.database[entryId] = entry;
-    return { key: entryId, value: entry };
+  addEntry = (entry: Entry) => {
+    this.database[entry.id] = entry;
   }
 
   addAll = (entries: Record<string, Entry>) => {

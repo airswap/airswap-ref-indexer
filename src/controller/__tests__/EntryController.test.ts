@@ -8,12 +8,15 @@ describe("Entry controller", () => {
 
     let fakeDb: Partial<Database>;
     let fakePeers: Partial<Peers>;
-    const entry = new Entry("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
+
+    function forgeEntry() {
+        return new Entry("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
+    }
 
     beforeEach(() => {
         fakeDb = {
-            getEntries: jest.fn(() => Promise.resolve( ({ "aze": entry })) as Promise<Record<string, Entry>>),
-            addEntry: jest.fn(),
+            getEntries: jest.fn(() => Promise.resolve(({ "aze": forgeEntry() })) as Promise<Record<string, Entry>>),
+            addEntry: jest.fn((a) => { console.log("TU", a) }),
             getEntry: jest.fn(),
             entryExists: jest.fn(),
             generateId: jest.fn(),
@@ -59,6 +62,7 @@ describe("Entry controller", () => {
 
     describe("Add Entry", () => {
         test("Add entry nominal & broadcast", async () => {
+            const entry = forgeEntry();
             const mockRequest = {
                 body: entry,
                 params: {},
@@ -76,19 +80,21 @@ describe("Entry controller", () => {
             //@ts-ignore
             fakeDb.entryExists.mockImplementation(() => false);
 
-            const expected = entry;
+            const expected = forgeEntry();
+            expected.id = "a";
 
             await new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
 
             expect(fakeDb.isIdConsistent).toHaveBeenCalledTimes(0);
-            expect(fakeDb.generateId).toHaveBeenCalledWith(expected);
+            expect(fakeDb.generateId).toHaveBeenCalledWith(entry);
             expect(fakeDb.entryExists).toHaveBeenCalledWith("a");
-            expect(fakeDb.addEntry).toHaveBeenCalledWith(expected, "a");
-            expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/entries/a", entry);
+            expect(fakeDb.addEntry).toHaveBeenCalledWith(expected);
+            expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/entries/a", expected);
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
         });
 
         test("Add entry from broadcast", async () => {
+            const entry = forgeEntry();
             const mockRequest = {
                 body: entry,
                 params: { entryId: "a" } as Record<string, any>,
@@ -106,19 +112,21 @@ describe("Entry controller", () => {
             //@ts-ignore
             fakeDb.isIdConsistent.mockImplementation(() => true);
 
-            const expected = entry;
+            const expected = forgeEntry();
+            expected.id = "a"
 
             await new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
 
             expect(fakeDb.isIdConsistent).toHaveBeenCalledWith(entry, "a");
             expect(fakeDb.generateId).toBeCalledTimes(0);
             expect(fakeDb.entryExists).toHaveBeenCalledWith("a");
-            expect(fakeDb.addEntry).toHaveBeenCalledWith(expected, "a");
-            expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/entries/a", entry);
+            expect(fakeDb.addEntry).toHaveBeenCalledWith(expected);
+            expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/entries/a", expected);
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
         });
 
         test("Add: already added", async () => {
+            const entry = forgeEntry();
             const mockRequest = {
                 body: entry,
                 params: {},
@@ -137,6 +145,7 @@ describe("Entry controller", () => {
             fakeDb.entryExists.mockImplementation(() => true);
 
             const expected = entry;
+            expected.id = "a";
 
             await new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
 
@@ -149,6 +158,7 @@ describe("Entry controller", () => {
         });
 
         test("Add: given id is inconsistent", async () => {
+            const entry = forgeEntry();
             const mockRequest = {
                 body: entry,
                 params: { entryId: "a" } as Record<string, any>,

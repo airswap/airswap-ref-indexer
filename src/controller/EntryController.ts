@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Database } from "../database/Database.js";
-import { Peers } from "../peer/Peers.js";
 import { stringToTransactionStatus, TransactionStatus } from '../model/TransactionStatus.js';
+import { Peers } from "../peer/Peers.js";
 
 export class EntryController {
 
@@ -16,26 +16,32 @@ export class EntryController {
     addEntry = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
         const entryId = request.params.entryId;
-        const data = request.body;
+        const entry = request.body;
 
-        if (!data || Object.keys(data).length == 0) {
+        if (!entry || Object.keys(entry).length == 0) {
             response.sendStatus(400);
             return;
         }
 
-        if (entryId && !this.database.isIdConsistent(data, entryId)) {
+        if (entryId && !this.database.isIdConsistent(entry, entryId)) {
             response.sendStatus(400);
             return;
         }
 
-        const id = entryId || this.database.generateId(data);
+        const id = entryId || this.database.generateId(entry);
+        console.log("generated ID", id)
         const entryExists = await this.database.entryExists(id);
         if (entryExists) {
             response.sendStatus(204);
             return;
         }
 
-        this.database.addEntry(data, id);
+        entry.id = id;
+        if (!entry.status) {
+            entry.status = TransactionStatus.IN_PROGRESS;
+        }
+
+        this.database.addEntry(entry);
         const url = entryId ? request.url : `${request.url}/${id}`
         this.peers.broadcast(request.method, url, request.body);
         response.sendStatus(204);
