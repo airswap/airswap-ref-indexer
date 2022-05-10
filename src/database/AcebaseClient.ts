@@ -11,10 +11,14 @@ export class AceBaseClient implements Database {
 
     private db: AceBase;
 
-    constructor() {
+    constructor(databaseName: string) {
         const options = { logLevel: 'verbose', storage: { path: '.' } } as AceBaseLocalSettings; // optional settings
-        this.db = new AceBase('mydb', options);  // Creates or opens a database with name "mydb"
+        this.db = new AceBase(databaseName, options);  // Creates or opens a database with name "mydb"
         this.db.ready(() => { this.db.ref(ENTRY_REF).remove() });
+    }
+
+    close(): Promise<void> {
+        return this.db.close()
     }
 
     addEntry(entry: Entry): void {
@@ -37,13 +41,17 @@ export class AceBaseClient implements Database {
         const storedEntry = this.datarefToRecord(tmp.val())[id];
         storedEntry.status = status;
         entry[0].set(storedEntry);
+        return Promise.resolve();
     }
 
     async getEntry(id: string): Promise<Entry> {
         const query = await this.db.query(ENTRY_REF)
             .filter('id', '==', id)
             .get();
-        const serializedEntry = query.values().next().value.val();
+        const serializedEntry = query.values()?.next()?.value?.val();
+        if (!serializedEntry) {
+            return Promise.resolve(null);
+        }
         return Promise.resolve(this.datarefToRecord(serializedEntry)[id]);
     }
 
@@ -73,16 +81,13 @@ export class AceBaseClient implements Database {
 
     generateId(entry: Entry) {
         const lightenEntry = this.extractData(entry);
-        console.log("generateId", entry, lightenEntry);
         const stringObject = JSON.stringify(lightenEntry);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
         return hashed.digest("hex");
     }
 
     isIdConsistent(entry: Entry, expectedId: string) {
-        const id = this.generateId(entry);
-        console.log("isIdConsistent", entry, expectedId, id);
-        return id == expectedId;
+        return this.generateId(entry) == expectedId;
     }
 
     private extractData(entry: Entry) {

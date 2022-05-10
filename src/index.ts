@@ -26,7 +26,7 @@ const entryClient = new EntryClient();
 const peersClient = new PeersClient();
 const broadcastClient = new BroadcastClient();
 const registryClient = new RegistryClient(REGISTRY);
-const database = new AceBaseClient();
+const database = new AceBaseClient("mydb");
 const peers = new Peers(database, host, peersClient, broadcastClient);
 const homeController = new HomeController(peers, database, REGISTRY);
 const entryController = new EntryController(peers, database);
@@ -45,7 +45,6 @@ process.on("SIGTERM", () => {
 process.on("SIGINT", () => {
   gracefulShutdown();
 });
-
 
 async function requestDataFromOtherPeer() {
   if (peersFromRegistry?.peers?.length > 0) {
@@ -89,6 +88,7 @@ async function gracefulShutdown() {
   } catch (e) {
     console.log("Error while sending data to registry", e);
   }
+  database.close();
   await peers.broadcastDisconnectionToOtherPeer();
   process.exit(0);
 }
