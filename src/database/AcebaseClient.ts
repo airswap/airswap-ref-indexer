@@ -18,14 +18,14 @@ export class AceBaseClient implements Database {
     }
 
     addEntry(entry: Entry): void {
-        console.log("addEntry", entry)
+        console.log("addEntry", entry);
         this.db.ref(ENTRY_REF).push(entry);
     }
 
     addAll(entries: Record<string, Entry>): void {
         Object.keys(entries).forEach(id => {
-            this.addEntry(entries[id], id);
-        })
+            this.addEntry(entries[id]);
+        });
     }
 
     async editEntry(id: string, status: TransactionStatus): Promise<void> {

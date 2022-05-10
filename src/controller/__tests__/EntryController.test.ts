@@ -93,6 +93,40 @@ describe("Entry controller", () => {
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
         });
 
+        test("Add entry without specified status & broadcast", async () => {
+            const entry = forgeEntry();
+            entry.status = undefined;
+            
+            const mockRequest = {
+                body: entry,
+                params: {},
+                method: "POST",
+                url: "/entries"
+            } as Request;
+
+            const mockResponse = {
+                json: jest.fn(),
+                sendStatus: jest.fn(),
+            } as Partial<Response>;
+
+            //@ts-ignore
+            fakeDb.generateId.mockImplementation(() => "a");
+            //@ts-ignore
+            fakeDb.entryExists.mockImplementation(() => false);
+
+            const expected = forgeEntry();
+            expected.id = "a";
+
+            await new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
+
+            expect(fakeDb.isIdConsistent).toHaveBeenCalledTimes(0);
+            expect(fakeDb.generateId).toHaveBeenCalledWith(entry);
+            expect(fakeDb.entryExists).toHaveBeenCalledWith("a");
+            expect(fakeDb.addEntry).toHaveBeenCalledWith(expected);
+            expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/entries/a", expected);
+            expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
+        });
+
         test("Add entry from broadcast", async () => {
             const entry = forgeEntry();
             const mockRequest = {
@@ -248,6 +282,29 @@ describe("Entry controller", () => {
             expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
         });
 
+        test("Given status does not exists", async () => {
+            const mockRequest = {
+                body: { status: "bla" },
+                params: { entryId: "a" } as Record<string, any>,
+                method: "PUT",
+                url: "/entries/a"
+            } as Request;
+
+            const mockResponse = {
+                json: jest.fn(),
+                sendStatus: jest.fn(),
+            } as Partial<Response>;
+
+            //@ts-ignore
+            fakeDb.entryExists.mockImplementation(() => false);
+
+            await new EntryController(fakePeers as Peers, fakeDb as Database).editEntry(mockRequest, mockResponse as Response);
+
+            expect(mockResponse.sendStatus).toHaveBeenCalledWith(403);
+            expect(fakeDb.editEntry).toHaveBeenCalledTimes(0);
+            expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
+        });
+
         test("Entry does not exists", async () => {
             const mockRequest = {
                 body: { status: TransactionStatus.DONE },
@@ -268,7 +325,6 @@ describe("Entry controller", () => {
 
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(403);
             expect(fakeDb.editEntry).toHaveBeenCalledTimes(0);
-            expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
             expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
         });
 
