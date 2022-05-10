@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { stringToTransactionStatus, TransactionStatus } from './../model/TransactionStatus.js';
 import { Database } from "../database/Database.js";
 import { Peers } from "../peer/Peers.js";
+import { stringToTransactionStatus, TransactionStatus } from '../model/TransactionStatus.js';
 
 export class EntryController {
 
@@ -47,7 +47,7 @@ export class EntryController {
             response.sendStatus(400);
             return;
         }
-        
+
         const status = stringToTransactionStatus(request.body.status)
         if (status === TransactionStatus.UNKNOWN) {
             response.sendStatus(403);

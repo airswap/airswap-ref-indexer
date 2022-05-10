@@ -1,7 +1,18 @@
-/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
+/**  @type {import('@jest/types').Config.ProjectConfig} */
 module.exports = {
-  preset: "ts-jest",
-  testEnvironment: "node",
+  transform: {
+    "\\.[jt]sx?$": "ts-jest",
+  },
+  "globals": {
+    "ts-jest": {
+      "useESM": true
+    }
+  },
+  moduleNameMapper: {
+    "(.+)\\.js": "$1"
+  },
+  extensionsToTreatAsEsm: [".ts"],
   testPathIgnorePatterns: ["node_modules", "dist"],
   collectCoverageFrom: ["**/src/**/*.{js,ts}", "!**/node_modules/**", "!**/src/types/**", "!**/dist/**"],
+
 };

@@ -20,7 +20,7 @@ describe("Home controller", () => {
         };
     })
 
-    test("/", () => {
+    test("/", async () => {
         const mockRequest = {
             body: undefined,
             params: {},
@@ -48,7 +48,7 @@ describe("Home controller", () => {
             registry: "registry",
         };
 
-        new HomeController(fakePeers as Peers, fakeDb as Database, registryAddress).get(mockRequest, mockResponse as Response);
+        await new HomeController(fakePeers as Peers, fakeDb as Database, registryAddress).get(mockRequest, mockResponse as Response);
 
         expect(mockResponse.json).toHaveBeenCalledWith(expected);
     });

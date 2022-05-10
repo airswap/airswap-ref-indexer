@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { Database } from '../../database/Database';
-import { Entry } from './../../model/Entry';
-import { TransactionStatus } from './../../model/TransactionStatus';
-import { Peers } from './../../peer/Peers';
+import { Entry } from '../../model/Entry';
+import { TransactionStatus } from '../../model/TransactionStatus';
+import { Peers } from '../../peer/Peers';
 import { EntryController } from './../EntryController';
 describe("Entry controller", () => {
 
@@ -26,7 +26,7 @@ describe("Entry controller", () => {
         };
     })
 
-    test("get entries", () => {
+    test("get entries", async () => {
         const mockRequest = {
             body: undefined,
             params: {},
@@ -52,13 +52,13 @@ describe("Entry controller", () => {
             }
         };
 
-        new EntryController(fakePeers as Peers, fakeDb as Database).getEntries(mockRequest, mockResponse as Response);
+        await new EntryController(fakePeers as Peers, fakeDb as Database).getEntries(mockRequest, mockResponse as Response);
 
         expect(mockResponse.json).toHaveBeenCalledWith(expected);
     });
 
     describe("Add Entry", () => {
-        test("Add entry nominal & broadcast", () => {
+        test("Add entry nominal & broadcast", async () => {
             const mockRequest = {
                 body: entry,
                 params: {},
@@ -78,7 +78,7 @@ describe("Entry controller", () => {
 
             const expected = entry;
 
-            new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
+            await new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
 
             expect(fakeDb.isIdConsistent).toHaveBeenCalledTimes(0);
             expect(fakeDb.generateId).toHaveBeenCalledWith(expected);
@@ -88,7 +88,7 @@ describe("Entry controller", () => {
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
         });
 
-        test("Add entry from broadcast", () => {
+        test("Add entry from broadcast", async () => {
             const mockRequest = {
                 body: entry,
                 params: { entryId: "a" } as Record<string, any>,
@@ -108,7 +108,7 @@ describe("Entry controller", () => {
 
             const expected = entry;
 
-            new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
+            await new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
 
             expect(fakeDb.isIdConsistent).toHaveBeenCalledWith(entry, "a");
             expect(fakeDb.generateId).toBeCalledTimes(0);
@@ -118,7 +118,7 @@ describe("Entry controller", () => {
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
         });
 
-        test("Add: already added", () => {
+        test("Add: already added", async () => {
             const mockRequest = {
                 body: entry,
                 params: {},
@@ -138,7 +138,7 @@ describe("Entry controller", () => {
 
             const expected = entry;
 
-            new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
+            await new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
 
             expect(fakeDb.isIdConsistent).toHaveBeenCalledTimes(0);
             expect(fakeDb.generateId).toHaveBeenCalledWith(expected);
@@ -148,7 +148,7 @@ describe("Entry controller", () => {
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
         });
 
-        test("Add: given id is inconsistent", () => {
+        test("Add: given id is inconsistent", async () => {
             const mockRequest = {
                 body: entry,
                 params: { entryId: "a" } as Record<string, any>,
@@ -164,7 +164,7 @@ describe("Entry controller", () => {
             //@ts-ignore
             fakeDb.generateId.mockImplementation(() => "b");
 
-            new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
+            await new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
 
             expect(fakeDb.isIdConsistent).toHaveBeenCalledWith(entry, "a");
             expect(fakeDb.generateId).toHaveBeenCalledTimes(0);;
@@ -174,7 +174,7 @@ describe("Entry controller", () => {
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(400);
         });
 
-        test("Missing entry", () => {
+        test("Missing entry", async () => {
             const mockRequest = {
                 body: {},
                 params: {},
@@ -187,7 +187,7 @@ describe("Entry controller", () => {
                 sendStatus: jest.fn(),
             } as Partial<Response>;
 
-            new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
+            await new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
 
             expect(fakeDb.entryExists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addEntry).toHaveBeenCalledTimes(0);
@@ -197,7 +197,7 @@ describe("Entry controller", () => {
     });
 
     describe("Edit Entry", () => {
-        test("Missing id", () => {
+        test("Missing id", async () => {
             const mockRequest = {
                 body: { status: TransactionStatus.DONE },
                 params: {},
@@ -210,7 +210,7 @@ describe("Entry controller", () => {
                 sendStatus: jest.fn(),
             } as Partial<Response>;
 
-            new EntryController(fakePeers as Peers, fakeDb as Database).editEntry(mockRequest, mockResponse as Response);
+            await new EntryController(fakePeers as Peers, fakeDb as Database).editEntry(mockRequest, mockResponse as Response);
 
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(400);
             expect(fakeDb.editEntry).toHaveBeenCalledTimes(0);
@@ -218,7 +218,7 @@ describe("Entry controller", () => {
         });
 
 
-        test("Missing status", () => {
+        test("Missing status", async () => {
             const mockRequest = {
                 body: {},
                 params: { entryId: "a" } as Record<string, any>,
@@ -231,14 +231,14 @@ describe("Entry controller", () => {
                 sendStatus: jest.fn(),
             } as Partial<Response>;
 
-            new EntryController(fakePeers as Peers, fakeDb as Database).editEntry(mockRequest, mockResponse as Response);
+            await new EntryController(fakePeers as Peers, fakeDb as Database).editEntry(mockRequest, mockResponse as Response);
 
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(400);
             expect(fakeDb.editEntry).toHaveBeenCalledTimes(0);
             expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
         });
 
-        test("Entry does not exists", () => {
+        test("Entry does not exists", async () => {
             const mockRequest = {
                 body: { status: TransactionStatus.DONE },
                 params: { entryId: "a" } as Record<string, any>,
@@ -254,7 +254,7 @@ describe("Entry controller", () => {
             //@ts-ignore
             fakeDb.entryExists.mockImplementation(() => false);
 
-            new EntryController(fakePeers as Peers, fakeDb as Database).editEntry(mockRequest, mockResponse as Response);
+            await new EntryController(fakePeers as Peers, fakeDb as Database).editEntry(mockRequest, mockResponse as Response);
 
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(403);
             expect(fakeDb.editEntry).toHaveBeenCalledTimes(0);
@@ -262,7 +262,7 @@ describe("Entry controller", () => {
             expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
         });
 
-        test("Entry already up to date", () => {
+        test("Entry already up to date", async () => {
             const entry = new Entry("by", "from", "to", 3, 4, TransactionStatus.DONE);
             const mockRequest = {
                 body: { status: TransactionStatus.DONE },
@@ -281,7 +281,7 @@ describe("Entry controller", () => {
             //@ts-ignore
             fakeDb.getEntry.mockImplementation(() => entry);
 
-            new EntryController(fakePeers as Peers, fakeDb as Database).editEntry(mockRequest, mockResponse as Response);
+            await new EntryController(fakePeers as Peers, fakeDb as Database).editEntry(mockRequest, mockResponse as Response);
 
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
             expect(fakeDb.entryExists).toHaveBeenCalledWith("a");
@@ -289,7 +289,7 @@ describe("Entry controller", () => {
             expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
         });
 
-        test("Edit entry", () => {
+        test("Edit entry", async () => {
             const entry = new Entry("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
             const mockRequest = {
                 body: { status: TransactionStatus.DONE },
@@ -308,7 +308,7 @@ describe("Entry controller", () => {
             //@ts-ignore
             fakeDb.getEntry.mockImplementation(() => entry);
 
-            new EntryController(fakePeers as Peers, fakeDb as Database).editEntry(mockRequest, mockResponse as Response);
+            await new EntryController(fakePeers as Peers, fakeDb as Database).editEntry(mockRequest, mockResponse as Response);
 
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
             expect(fakeDb.entryExists).toHaveBeenCalledWith("a");

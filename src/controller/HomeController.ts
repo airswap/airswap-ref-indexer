@@ -13,12 +13,13 @@ export class HomeController {
         this.database = database;
     }
 
-    get = (request: Request, response: Response) => {
+    get = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
+        const entries = await this.database.getEntries();
         response.json({
             peers: this.peers.getPeers(),
             registry: this.registry,
-            database: this.database.getEntries(),
+            database: entries,
         });
     }
 }
