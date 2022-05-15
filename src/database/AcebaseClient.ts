@@ -22,7 +22,6 @@ export class AceBaseClient implements Database {
     }
 
     addEntry(entry: Entry): void {
-        console.log("addEntry", entry);
         this.db.ref(ENTRY_REF).push(entry);
     }
 
@@ -75,7 +74,6 @@ export class AceBaseClient implements Database {
         const query = await this.db.query(ENTRY_REF)
             .filter('id', '==', id)
             .get();
-        console.log("entryExists", query.length);
         return query.length == 1;
     }
 
@@ -84,10 +82,6 @@ export class AceBaseClient implements Database {
         const stringObject = JSON.stringify(lightenEntry);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
         return hashed.digest("hex");
-    }
-
-    isIdConsistent(entry: Entry, expectedId: string) {
-        return this.generateId(entry) == expectedId;
     }
 
     private extractData(entry: Entry) {

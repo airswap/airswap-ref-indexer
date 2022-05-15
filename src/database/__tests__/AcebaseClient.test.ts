@@ -86,21 +86,4 @@ describe("ace base implementation", () => {
 
         expect(id).toBe("6d9844c1f4bb9a47aea4c9752782b300085ec376e7ea90f7f966349465dda064");
     });
-
-
-    test("id ignore transaction & id", () => {
-
-        const expected = "6d9844c1f4bb9a47aea4c9752782b300085ec376e7ea90f7f966349465dda064";
-
-        const entry = new Entry("by", "from", "to", 3, 4);
-        const withId = new Entry("by", "from", "to", 3, 4);
-        withId.id = "a";
-        const withTransactionStatus = new Entry("by", "from", "to", 3, 4, TransactionStatus.DONE);
-        const withIdAndTransactionStatus = new Entry("by", "from", "to", 3, 4, TransactionStatus.DONE, 'other_id');
-
-        expect(db.isIdConsistent(entry, expected)).toBe(true);
-        expect(db.isIdConsistent(withId, expected)).toBe(true);
-        expect(db.isIdConsistent(withTransactionStatus, expected)).toBe(true);
-        expect(db.isIdConsistent(withIdAndTransactionStatus, expected)).toBe(true);
-    });
 });

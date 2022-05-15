@@ -18,6 +18,7 @@ assertEnvironmentIsComplete();
 // Configure host value 
 const REGISTRY = process.env.REGISTRY!;
 const EXPRESS_PORT = process.env.EXPRESS_PORT!;
+const debugMode = process.env.DEBUG_ENABLED == "1";
 const host = process.env.LOCAL_ONLY === "1" ? getLocalIp() + ":" + EXPRESS_PORT : (await publicIp.v4()) + ":" + EXPRESS_PORT;
 console.log("HOST is", host);
 
@@ -29,7 +30,7 @@ const registryClient = new RegistryClient(REGISTRY);
 const database = new AceBaseClient("mydb");
 const peers = new Peers(database, host, peersClient, broadcastClient);
 const homeController = new HomeController(peers, database, REGISTRY);
-const entryController = new EntryController(peers, database);
+const entryController = new EntryController(peers, database, debugMode);
 const peersController = new PeersController(peers);
 
 // Network register & synchronization 

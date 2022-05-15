@@ -39,8 +39,4 @@ export class InMemoryDatabase implements Database {
     const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
     return hashed.digest("hex");
   }
-
-  isIdConsistent(entry: Entry, expectedId: string) {
-    return this.generateId(entry) == expectedId;
-  }
 }

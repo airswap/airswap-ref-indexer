@@ -7,15 +7,16 @@ export class EntryController {
 
     private peers: Peers;
     private database: Database;
+    private isDebugMode: boolean;
 
-    constructor(peers: Peers, database: Database) {
+    constructor(peers: Peers, database: Database, isDebugMode: boolean = false) {
         this.peers = peers;
         this.database = database;
+        this.isDebugMode = isDebugMode;
     }
 
     addEntry = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
-        const entryId = request.params.entryId;
         const entry = request.body;
 
         if (!entry || Object.keys(entry).length == 0) {
@@ -23,13 +24,8 @@ export class EntryController {
             return;
         }
 
-        if (entryId && !this.database.isIdConsistent(entry, entryId)) {
-            response.sendStatus(400);
-            return;
-        }
+        const id = this.database.generateId(entry);
 
-        const id = entryId || this.database.generateId(entry);
-        console.log("generated ID", id)
         const entryExists = await this.database.entryExists(id);
         if (entryExists) {
             response.sendStatus(204);
@@ -42,12 +38,15 @@ export class EntryController {
         }
 
         this.database.addEntry(entry);
-        const url = entryId ? request.url : `${request.url}/${id}`
-        this.peers.broadcast(request.method, url, request.body);
+        this.peers.broadcast(request.method, request.url, request.body);
         response.sendStatus(204);
     }
 
     editEntry = async (request: Request, response: Response) => {
+        if (!this.isDebugMode) {
+            response.sendStatus(404);
+            return;
+        }
         console.log("R<---", request.method, request.url, request.body);
         if (!request.params.entryId || !request.body.status) {
             response.sendStatus(400);

@@ -14,6 +14,4 @@ export interface Database {
     entryExists(id: string): Promise<boolean>;
 
     generateId(entry: Entry): string;
-
-    isIdConsistent(entry: Entry, expectedId: string): boolean;
 }
