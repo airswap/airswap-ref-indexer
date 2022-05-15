@@ -1,41 +1,41 @@
 import crypto from "crypto";
 import { Database } from './Database.js';
 import { TransactionStatus } from '../model/TransactionStatus.js';
-import { Entry } from '../model/Entry.js';
+import { Order } from '../model/Order.js';
 
 export class InMemoryDatabase implements Database {
-  database: Record<string, Entry>;
+  database: Record<string, Order>;
 
   constructor() {
     this.database = {};
   }
 
-  addEntry = (entry: Entry) => {
-    this.database[entry.id] = entry;
+  addOrder = (order: Order) => {
+    this.database[order.id] = order;
   }
 
-  addAll = (entries: Record<string, Entry>) => {
-    this.database = { ...entries };
+  addAll = (orders: Record<string, Order>) => {
+    this.database = { ...orders };
   }
 
-  editEntry = (id: string, status: TransactionStatus) => {
+  editOrder = (id: string, status: TransactionStatus) => {
     this.database[id]!.status = status;
   }
 
-  getEntry(id: string): Promise<Entry> {
+  getOrder(id: string): Promise<Order> {
         return Promise.resolve(this.database[id]);
   }
 
-  async getEntries(): Promise<Record<string, Entry>> {
+  async getorders(): Promise<Record<string, Order>> {
     return Promise.resolve(this.database);
   }
 
-  entryExists = (id: string): Promise<boolean> => {
+  orderExists = (id: string): Promise<boolean> => {
     return Promise.resolve(Object.keys(this.database).indexOf(id) != -1);
   }
 
-  generateId(entry: Entry) {
-    const stringObject = JSON.stringify(entry);
+  generateId(order: Order) {
+    const stringObject = JSON.stringify(order);
     const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
     return hashed.digest("hex");
   }

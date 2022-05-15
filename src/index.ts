@@ -1,10 +1,10 @@
 import "dotenv/config";
 import publicIp from "public-ip";
 import { BroadcastClient } from './client/BroadcastClient.js';
-import { EntryClient } from './client/EntryClient.js';
+import { OrderClient } from './client/OrderClient.js';
 import { PeersClient } from './client/PeersClient.js';
 import { RegistryClient } from './client/RegistryClient.js';
-import { EntryController } from './controller/EntryController.js';
+import { OrderController } from './controller/OrderController.js';
 import { HomeController } from './controller/HomeController.js';
 import { PeersController } from './controller/PeersController.js';
 import { AceBaseClient } from './database/AcebaseClient.js';
@@ -23,20 +23,20 @@ const host = process.env.LOCAL_ONLY === "1" ? getLocalIp() + ":" + EXPRESS_PORT 
 console.log("HOST is", host);
 
 // Injection
-const entryClient = new EntryClient();
+const orderClient = new OrderClient();
 const peersClient = new PeersClient();
 const broadcastClient = new BroadcastClient();
 const registryClient = new RegistryClient(REGISTRY);
 const database = new AceBaseClient("mydb");
 const peers = new Peers(database, host, peersClient, broadcastClient);
 const homeController = new HomeController(peers, database, REGISTRY);
-const entryController = new EntryController(peers, database, debugMode);
+const orderController = new OrderController(peers, database, debugMode);
 const peersController = new PeersController(peers);
 
 // Network register & synchronization 
 const { data: peersFromRegistry } = await registryClient.getPeersFromRegistry();
 await requestDataFromOtherPeer();
-new Webserver(+EXPRESS_PORT, entryController, peersController, homeController).run();
+new Webserver(+EXPRESS_PORT, orderController, peersController, homeController).run();
 registerInNetwork();
 
 // Shutdown signals
@@ -52,8 +52,8 @@ async function requestDataFromOtherPeer() {
     peers.addPeers(peersFromRegistry.peers);
     const peerUrl = "http://" + peers.getConnectablePeers()[0];
     console.log("Configure client");
-    const { data } = await entryClient.getEntries(peerUrl);
-    database.addAll(data.entries);
+    const { data } = await orderClient.getorders(peerUrl);
+    database.addAll(data.orders);
     console.log("Asked all queries to", peerUrl);
   } else {
     console.log("/!\\ FIRST NODE AVAILABLE !");

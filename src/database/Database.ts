@@ -1,17 +1,17 @@
-import { Entry } from './../model/Entry.js';
+import { Order } from './../model/Order.js';
 import { TransactionStatus } from './../model/TransactionStatus.js';
 export interface Database {
-    addEntry(entry: Entry): void;
+    addOrder(order: Order): void;
 
-    addAll(entries: Record<string, Entry>): void;
+    addAll(orders: Record<string, Order>): void;
 
-    editEntry(id: string, status: TransactionStatus): void;
+    editOrder(id: string, status: TransactionStatus): void;
 
-    getEntry(id: string): Promise<Entry>;
+    getOrder(id: string): Promise<Order>;
     
-    getEntries(): Promise<Record<string, Entry>>;
+    getorders(): Promise<Record<string, Order>>;
 
-    entryExists(id: string): Promise<boolean>;
+    orderExists(id: string): Promise<boolean>;
 
-    generateId(entry: Entry): string;
+    generateId(order: Order): string;
 }

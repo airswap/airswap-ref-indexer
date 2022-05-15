@@ -3,7 +3,7 @@ import { Database } from "../database/Database.js";
 import { stringToTransactionStatus, TransactionStatus } from '../model/TransactionStatus.js';
 import { Peers } from "../peer/Peers.js";
 
-export class EntryController {
+export class OrderController {
 
     private peers: Peers;
     private database: Database;
@@ -15,40 +15,40 @@ export class EntryController {
         this.isDebugMode = isDebugMode;
     }
 
-    addEntry = async (request: Request, response: Response) => {
+    addOrder = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
-        const entry = request.body;
+        const order = request.body;
 
-        if (!entry || Object.keys(entry).length == 0) {
+        if (!order || Object.keys(order).length == 0) {
             response.sendStatus(400);
             return;
         }
 
-        const id = this.database.generateId(entry);
+        const id = this.database.generateId(order);
 
-        const entryExists = await this.database.entryExists(id);
-        if (entryExists) {
+        const orderExists = await this.database.orderExists(id);
+        if (orderExists) {
             response.sendStatus(204);
             return;
         }
 
-        entry.id = id;
-        if (!entry.status) {
-            entry.status = TransactionStatus.IN_PROGRESS;
+        order.id = id;
+        if (!order.status) {
+            order.status = TransactionStatus.IN_PROGRESS;
         }
 
-        this.database.addEntry(entry);
+        this.database.addOrder(order);
         this.peers.broadcast(request.method, request.url, request.body);
         response.sendStatus(204);
     }
 
-    editEntry = async (request: Request, response: Response) => {
+    editOrder = async (request: Request, response: Response) => {
         if (!this.isDebugMode) {
             response.sendStatus(404);
             return;
         }
         console.log("R<---", request.method, request.url, request.body);
-        if (!request.params.entryId || !request.body.status) {
+        if (!request.params.orderId || !request.body.status) {
             response.sendStatus(400);
             return;
         }
@@ -59,25 +59,25 @@ export class EntryController {
             return;
         }
 
-        if (!this.database.entryExists(request.params.entryId)) {
+        if (!this.database.orderExists(request.params.orderId)) {
             response.sendStatus(403);
             return;
         }
 
-        const entry = await this.database.getEntry(request.params.entryId);
-        if (entry.status == status) {
+        const order = await this.database.getOrder(request.params.orderId);
+        if (order.status == status) {
             response.sendStatus(204);
             return;
         }
 
-        this.database.editEntry(request.params.entryId, status);
+        this.database.editOrder(request.params.orderId, status);
         this.peers.broadcast(request.method, request.url, request.body);
         response.sendStatus(204);
     }
 
-    getEntries = async (request: Request, response: Response) => {
+    getorders = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
-        const entries = await this.database.getEntries();
-        response.json({ entries });
+        const orders = await this.database.getorders();
+        response.json({ orders });
     }
 }

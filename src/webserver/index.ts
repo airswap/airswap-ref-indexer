@@ -1,7 +1,7 @@
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
-import { EntryController } from './../controller/EntryController.js';
+import { OrderController } from '../controller/OrderController.js';
 import { HomeController } from './../controller/HomeController.js';
 import { PeersController } from './../controller/PeersController.js';
 
@@ -9,16 +9,16 @@ const router = express.Router();
 
 export class Webserver {
   private port: number
-  private entryController: EntryController;
+  private orderController: OrderController;
   private peersController: PeersController;
   private homeController: HomeController;
 
   constructor(port: number,
-    entryController: EntryController,
+    orderController: OrderController,
     peersController: PeersController,
     homeController: HomeController) {
     this.port = port;
-    this.entryController = entryController;
+    this.orderController = orderController;
     this.peersController = peersController;
     this.homeController = homeController;
   }
@@ -28,10 +28,10 @@ export class Webserver {
     app.use(cors());
     app.use(bodyParser.json());
 
-    router.route("/entries/:entryId?")
-      .get(this.entryController.getEntries)
-      .post(this.entryController.addEntry)
-      .put(this.entryController.editEntry)
+    router.route("/orders/:orderId?")
+      .get(this.orderController.getorders)
+      .post(this.orderController.addOrder)
+      .put(this.orderController.editOrder)
     router.route("/peers/:peerUrl?")
       .get(this.peersController.getPeers)
       .post(this.peersController.addPeers)

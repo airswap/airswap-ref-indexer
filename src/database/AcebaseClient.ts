@@ -1,11 +1,11 @@
 import { AceBase, DataReferencesArray } from 'acebase';
 import crypto from "crypto";
-import { Entry } from '../model/Entry.js';
+import { Order } from '../model/Order.js';
 import { TransactionStatus } from '../model/TransactionStatus.js';
 import { AceBaseLocalSettings } from './../../node_modules/acebase/index.d';
 import { Database } from './Database.js';
 
-const ENTRY_REF = "entries";
+const ENTRY_REF = "orders";
 
 export class AceBaseClient implements Database {
 
@@ -21,40 +21,40 @@ export class AceBaseClient implements Database {
         return this.db.close()
     }
 
-    addEntry(entry: Entry): void {
-        this.db.ref(ENTRY_REF).push(entry);
+    addOrder(order: Order): void {
+        this.db.ref(ENTRY_REF).push(order);
     }
 
-    addAll(entries: Record<string, Entry>): void {
-        Object.keys(entries).forEach(id => {
-            this.addEntry(entries[id]);
+    addAll(orders: Record<string, Order>): void {
+        Object.keys(orders).forEach(id => {
+            this.addOrder(orders[id]);
         });
     }
 
-    async editEntry(id: string, status: TransactionStatus): Promise<void> {
-        const entry = await this.db.query(ENTRY_REF)
+    async editOrder(id: string, status: TransactionStatus): Promise<void> {
+        const order = await this.db.query(ENTRY_REF)
             .filter('id', '==', id)
             .get({ snapshots: false }) as DataReferencesArray;
-        console.log(entry);
-        const tmp = await entry[0].get();
-        const storedEntry = this.datarefToRecord(tmp.val())[id];
-        storedEntry.status = status;
-        entry[0].set(storedEntry);
+        console.log(order);
+        const tmp = await order[0].get();
+        const storedOrder = this.datarefToRecord(tmp.val())[id];
+        storedOrder.status = status;
+        order[0].set(storedOrder);
         return Promise.resolve();
     }
 
-    async getEntry(id: string): Promise<Entry> {
+    async getOrder(id: string): Promise<Order> {
         const query = await this.db.query(ENTRY_REF)
             .filter('id', '==', id)
             .get();
-        const serializedEntry = query.values()?.next()?.value?.val();
-        if (!serializedEntry) {
+        const serializedOrder = query.values()?.next()?.value?.val();
+        if (!serializedOrder) {
             return Promise.resolve(null);
         }
-        return Promise.resolve(this.datarefToRecord(serializedEntry)[id]);
+        return Promise.resolve(this.datarefToRecord(serializedOrder)[id]);
     }
 
-    async getEntries(): Promise<Record<string, Entry>> {
+    async getorders(): Promise<Record<string, Order>> {
         const data = await this.db.query(ENTRY_REF).get();
         let mapped = {};
         data.forEach(d => {
@@ -64,34 +64,34 @@ export class AceBaseClient implements Database {
         return Promise.resolve(mapped);
     }
 
-    private datarefToRecord(data): Record<string, Entry> {
-        const mapped: Record<string, Entry> = {};
-        mapped[data.id] = new Entry(data.by, data.from, data.to, +data.nb, +data.price, data.status, data.id);
+    private datarefToRecord(data): Record<string, Order> {
+        const mapped: Record<string, Order> = {};
+        mapped[data.id] = new Order(data.by, data.from, data.to, +data.nb, +data.price, data.status, data.id);
         return mapped;
     }
 
-    async entryExists(id: string): Promise<boolean> {
+    async orderExists(id: string): Promise<boolean> {
         const query = await this.db.query(ENTRY_REF)
             .filter('id', '==', id)
             .get();
         return query.length == 1;
     }
 
-    generateId(entry: Entry) {
-        const lightenEntry = this.extractData(entry);
-        const stringObject = JSON.stringify(lightenEntry);
+    generateId(order: Order) {
+        const lightenOrder = this.extractData(order);
+        const stringObject = JSON.stringify(lightenOrder);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
         return hashed.digest("hex");
     }
 
-    private extractData(entry: Entry) {
-        const lightenEntry = new Entry(
-            entry.by,
-            entry.from,
-            entry.to,
-            entry.nb,
-            entry.price
+    private extractData(order: Order) {
+        const lightenOrder = new Order(
+            order.by,
+            order.from,
+            order.to,
+            order.nb,
+            order.price
         );
-        return lightenEntry;
+        return lightenOrder;
     }
 }

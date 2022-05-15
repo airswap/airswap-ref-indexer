@@ -15,11 +15,11 @@ export class HomeController {
 
     get = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
-        const entries = await this.database.getEntries();
+        const orders = await this.database.getorders();
         response.json({
             peers: this.peers.getPeers(),
             registry: this.registry,
-            database: entries,
+            database: orders,
         });
     }
 }

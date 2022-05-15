@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from "axios";
-import { Entry } from '../../model/Entry';
-import { TransactionStatus } from './../../model/TransactionStatus';
-import { EntryClient } from './../EntryClient';
+import { Order } from '../../model/Order';
+import { TransactionStatus } from '../../model/TransactionStatus';
+import { OrderClient } from '../OrderClient';
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
@@ -15,35 +15,35 @@ function axios200Response(data: object): AxiosResponse<any> {
     }
 };
 
-describe("Entry client", () => {
-    it("add entry", async () => {
-        const entry = new Entry("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
+describe("Order client", () => {
+    it("add order", async () => {
+        const order = new Order("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
 
         mockedAxios.post.mockImplementation((url: string, data: any) => {
-            expect(url).toBe("my_url/entries/")
-            expect(data).toEqual(entry)
+            expect(url).toBe("my_url/orders/")
+            expect(data).toEqual(order)
             return Promise.resolve(axios200Response({}));
         });
-        const response = await new EntryClient().addEntry("my_url", entry)
+        const response = await new OrderClient().addOrder("my_url", order)
         expect(response).toBeDefined();
     });
 
-    it("get entries", async () => {
+    it("get orders", async () => {
         mockedAxios.get.mockImplementation((url: string) => {
-            expect(url).toBe("my_url/entries/")
+            expect(url).toBe("my_url/orders/")
             return Promise.resolve(axios200Response({}));
         });
-        const response = await new EntryClient().getEntries("my_url");
+        const response = await new OrderClient().getorders("my_url");
         expect(response).toBeDefined();
     });
 
-    it("edit entry", async () => {
+    it("edit order", async () => {
         mockedAxios.put.mockImplementation((url: string, data: any) => {
-            expect(url).toBe("my_url/entries/entry_id")
+            expect(url).toBe("my_url/orders/order_id")
             expect(data).toEqual({ status: "DONE" })
             return Promise.resolve(axios200Response({}));
         });
-        const response = await new EntryClient().editEntry("my_url", "entry_id", TransactionStatus.DONE);
+        const response = await new OrderClient().editOrder("my_url", "order_id", TransactionStatus.DONE);
         expect(response).toBeDefined();
     });
 });  

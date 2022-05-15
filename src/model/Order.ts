@@ -1,6 +1,6 @@
 import { TransactionStatus } from './TransactionStatus.js';
 
-export class Entry {
+export class Order {
     id: string;
     by: string;
     from: string;

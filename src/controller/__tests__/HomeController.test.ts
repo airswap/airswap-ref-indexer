@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Database } from '../../database/Database';
-import { Entry } from './../../model/Entry';
+import { Order } from './../../model/Order';
 import { TransactionStatus } from './../../model/TransactionStatus';
 import { Peers } from './../../peer/Peers';
 import { HomeController } from './../HomeController';
@@ -9,11 +9,11 @@ describe("Home controller", () => {
     let fakeDb: Partial<Database>;
     let fakePeers: Partial<Peers>;
     let registryAddress = "registry";
-    const entry = new Entry("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
+    const order = new Order("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
 
     beforeEach(() => {
         fakeDb = {
-            getEntries: jest.fn(() => Promise.resolve( ({ "aze": entry })) as Promise<Record<string, Entry>>),
+            getorders: jest.fn(() => Promise.resolve( ({ "aze": order })) as Promise<Record<string, Order>>),
         };
         fakePeers = {
             getPeers: jest.fn(() => [])

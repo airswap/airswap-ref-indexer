@@ -1,26 +1,26 @@
 import { Request, Response } from 'express';
 import { Database } from '../../database/Database';
-import { Entry } from '../../model/Entry';
+import { Order } from '../../model/Order';
 import { TransactionStatus } from '../../model/TransactionStatus';
 import { Peers } from '../../peer/Peers';
-import { EntryController } from './../EntryController';
-describe("Entry controller", () => {
+import { OrderController } from '../OrderController';
+describe("Order controller", () => {
 
     let fakeDb: Partial<Database>;
     let fakePeers: Partial<Peers>;
 
-    function forgeEntry() {
-        return new Entry("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
+    function forgeOrder() {
+        return new Order("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
     }
 
     beforeEach(() => {
         fakeDb = {
-            getEntries: jest.fn(() => Promise.resolve(({ "aze": forgeEntry() })) as Promise<Record<string, Entry>>),
-            addEntry: jest.fn((a) => { console.log("TU", a) }),
-            getEntry: jest.fn(),
-            entryExists: jest.fn(),
+            getorders: jest.fn(() => Promise.resolve(({ "aze": forgeOrder() })) as Promise<Record<string, Order>>),
+            addOrder: jest.fn((a) => { console.log("TU", a) }),
+            getOrder: jest.fn(),
+            orderExists: jest.fn(),
             generateId: jest.fn(),
-            editEntry: jest.fn()
+            editOrder: jest.fn()
         };
         fakePeers = {
             getPeers: jest.fn(() => []),
@@ -29,13 +29,13 @@ describe("Entry controller", () => {
     })
 
     describe("When debug mode enabled", () => {
-        describe("Edit Entry", () => {
+        describe("Edit Order", () => {
             test("Missing id", async () => {
                 const mockRequest = {
                     body: { status: TransactionStatus.DONE },
                     params: {},
                     method: "PUT",
-                    url: "/entries"
+                    url: "/orders"
                 } as Request;
 
                 const mockResponse = {
@@ -43,10 +43,10 @@ describe("Entry controller", () => {
                     sendStatus: jest.fn(),
                 } as Partial<Response>;
 
-                await new EntryController(fakePeers as Peers, fakeDb as Database, true).editEntry(mockRequest, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database, true).editOrder(mockRequest, mockResponse as Response);
 
                 expect(mockResponse.sendStatus).toHaveBeenCalledWith(400);
-                expect(fakeDb.editEntry).toHaveBeenCalledTimes(0);
+                expect(fakeDb.editOrder).toHaveBeenCalledTimes(0);
                 expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
             });
 
@@ -54,9 +54,9 @@ describe("Entry controller", () => {
             test("Missing status", async () => {
                 const mockRequest = {
                     body: {},
-                    params: { entryId: "a" } as Record<string, any>,
+                    params: { orderId: "a" } as Record<string, any>,
                     method: "PUT",
-                    url: "/entries/a"
+                    url: "/orders/a"
                 } as Request;
 
                 const mockResponse = {
@@ -64,19 +64,19 @@ describe("Entry controller", () => {
                     sendStatus: jest.fn(),
                 } as Partial<Response>;
 
-                await new EntryController(fakePeers as Peers, fakeDb as Database, true).editEntry(mockRequest, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database, true).editOrder(mockRequest, mockResponse as Response);
 
                 expect(mockResponse.sendStatus).toHaveBeenCalledWith(400);
-                expect(fakeDb.editEntry).toHaveBeenCalledTimes(0);
+                expect(fakeDb.editOrder).toHaveBeenCalledTimes(0);
                 expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
             });
 
             test("Given status does not exists", async () => {
                 const mockRequest = {
                     body: { status: "bla" },
-                    params: { entryId: "a" } as Record<string, any>,
+                    params: { orderId: "a" } as Record<string, any>,
                     method: "PUT",
-                    url: "/entries/a"
+                    url: "/orders/a"
                 } as Request;
 
                 const mockResponse = {
@@ -85,21 +85,21 @@ describe("Entry controller", () => {
                 } as Partial<Response>;
 
                 //@ts-ignore
-                fakeDb.entryExists.mockImplementation(() => false);
+                fakeDb.orderExists.mockImplementation(() => false);
 
-                await new EntryController(fakePeers as Peers, fakeDb as Database, true).editEntry(mockRequest, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database, true).editOrder(mockRequest, mockResponse as Response);
 
                 expect(mockResponse.sendStatus).toHaveBeenCalledWith(403);
-                expect(fakeDb.editEntry).toHaveBeenCalledTimes(0);
+                expect(fakeDb.editOrder).toHaveBeenCalledTimes(0);
                 expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
             });
 
-            test("Entry does not exists", async () => {
+            test("Order does not exists", async () => {
                 const mockRequest = {
                     body: { status: TransactionStatus.DONE },
-                    params: { entryId: "a" } as Record<string, any>,
+                    params: { orderId: "a" } as Record<string, any>,
                     method: "PUT",
-                    url: "/entries/a"
+                    url: "/orders/a"
                 } as Request;
 
                 const mockResponse = {
@@ -108,22 +108,22 @@ describe("Entry controller", () => {
                 } as Partial<Response>;
 
                 //@ts-ignore
-                fakeDb.entryExists.mockImplementation(() => false);
+                fakeDb.orderExists.mockImplementation(() => false);
 
-                await new EntryController(fakePeers as Peers, fakeDb as Database, true).editEntry(mockRequest, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database, true).editOrder(mockRequest, mockResponse as Response);
 
                 expect(mockResponse.sendStatus).toHaveBeenCalledWith(403);
-                expect(fakeDb.editEntry).toHaveBeenCalledTimes(0);
+                expect(fakeDb.editOrder).toHaveBeenCalledTimes(0);
                 expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
             });
 
-            test("Entry already up to date", async () => {
-                const entry = new Entry("by", "from", "to", 3, 4, TransactionStatus.DONE);
+            test("Order already up to date", async () => {
+                const order = new Order("by", "from", "to", 3, 4, TransactionStatus.DONE);
                 const mockRequest = {
                     body: { status: TransactionStatus.DONE },
-                    params: { entryId: "a" } as Record<string, any>,
+                    params: { orderId: "a" } as Record<string, any>,
                     method: "PUT",
-                    url: "/entries/a"
+                    url: "/orders/a"
                 } as Request;
 
                 const mockResponse = {
@@ -132,25 +132,25 @@ describe("Entry controller", () => {
                 } as Partial<Response>;
 
                 //@ts-ignore
-                fakeDb.entryExists.mockImplementation(() => true);
+                fakeDb.orderExists.mockImplementation(() => true);
                 //@ts-ignore
-                fakeDb.getEntry.mockImplementation(() => entry);
+                fakeDb.getOrder.mockImplementation(() => order);
 
-                await new EntryController(fakePeers as Peers, fakeDb as Database, true).editEntry(mockRequest, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database, true).editOrder(mockRequest, mockResponse as Response);
 
                 expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
-                expect(fakeDb.entryExists).toHaveBeenCalledWith("a");
-                expect(fakeDb.getEntry).toHaveBeenCalledWith("a");
+                expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
+                expect(fakeDb.getOrder).toHaveBeenCalledWith("a");
                 expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
             });
 
-            test("Edit entry", async () => {
-                const entry = new Entry("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
+            test("Edit order", async () => {
+                const order = new Order("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
                 const mockRequest = {
                     body: { status: TransactionStatus.DONE },
-                    params: { entryId: "a" } as Record<string, any>,
+                    params: { orderId: "a" } as Record<string, any>,
                     method: "PUT",
-                    url: "/entries/a"
+                    url: "/orders/a"
                 } as Request;
 
                 const mockResponse = {
@@ -159,26 +159,26 @@ describe("Entry controller", () => {
                 } as Partial<Response>;
 
                 //@ts-ignore
-                fakeDb.entryExists.mockImplementation(() => true);
+                fakeDb.orderExists.mockImplementation(() => true);
                 //@ts-ignore
-                fakeDb.getEntry.mockImplementation(() => entry);
+                fakeDb.getOrder.mockImplementation(() => order);
 
-                await new EntryController(fakePeers as Peers, fakeDb as Database, true).editEntry(mockRequest, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database, true).editOrder(mockRequest, mockResponse as Response);
 
                 expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
-                expect(fakeDb.entryExists).toHaveBeenCalledWith("a");
-                expect(fakeDb.getEntry).toHaveBeenCalledWith("a");
-                expect(fakeDb.editEntry).toHaveBeenCalledWith("a", TransactionStatus.DONE);
-                expect(fakePeers.broadcast).toHaveBeenCalledWith("PUT", "/entries/a", { "status": "DONE" });
+                expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
+                expect(fakeDb.getOrder).toHaveBeenCalledWith("a");
+                expect(fakeDb.editOrder).toHaveBeenCalledWith("a", TransactionStatus.DONE);
+                expect(fakePeers.broadcast).toHaveBeenCalledWith("PUT", "/orders/a", { "status": "DONE" });
             });
         });
 
-        test("get entries", async () => {
+        test("get orders", async () => {
             const mockRequest = {
                 body: undefined,
                 params: {},
                 method: "GET",
-                url: "/entries"
+                url: "/orders"
             } as Request;
 
             const mockResponse = {
@@ -187,7 +187,7 @@ describe("Entry controller", () => {
 
             const expected =
             {
-                entries: {
+                orders: {
                     aze: {
                         by: "by",
                         from: "from",
@@ -199,19 +199,19 @@ describe("Entry controller", () => {
                 }
             };
 
-            await new EntryController(fakePeers as Peers, fakeDb as Database).getEntries(mockRequest, mockResponse as Response);
+            await new OrderController(fakePeers as Peers, fakeDb as Database).getorders(mockRequest, mockResponse as Response);
 
             expect(mockResponse.json).toHaveBeenCalledWith(expected);
         });
 
-        describe("Add Entry", () => {
-            test("Add entry nominal & broadcast", async () => {
-                const entry = forgeEntry();
+        describe("Add Order", () => {
+            test("Add order nominal & broadcast", async () => {
+                const order = forgeOrder();
                 const mockRequest = {
-                    body: entry,
+                    body: order,
                     params: {},
                     method: "POST",
-                    url: "/entries"
+                    url: "/orders"
                 } as Request;
 
                 const mockResponse = {
@@ -222,29 +222,29 @@ describe("Entry controller", () => {
                 //@ts-ignore
                 fakeDb.generateId.mockImplementation(() => "a");
                 //@ts-ignore
-                fakeDb.entryExists.mockImplementation(() => false);
+                fakeDb.orderExists.mockImplementation(() => false);
 
-                const expected = forgeEntry();
+                const expected = forgeOrder();
                 expected.id = "a";
 
-                await new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequest, mockResponse as Response);
 
-                expect(fakeDb.generateId).toHaveBeenCalledWith(entry);
-                expect(fakeDb.entryExists).toHaveBeenCalledWith("a");
-                expect(fakeDb.addEntry).toHaveBeenCalledWith(expected);
-                expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/entries", expected);
+                expect(fakeDb.generateId).toHaveBeenCalledWith(order);
+                expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
+                expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
+                expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/orders", expected);
                 expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
             });
 
-            test("Add entry without specified status & broadcast", async () => {
-                const entry = forgeEntry();
-                entry.status = undefined;
+            test("Add order without specified status & broadcast", async () => {
+                const order = forgeOrder();
+                order.status = undefined;
 
                 const mockRequest = {
-                    body: entry,
+                    body: order,
                     params: {},
                     method: "POST",
-                    url: "/entries"
+                    url: "/orders"
                 } as Request;
 
                 const mockResponse = {
@@ -255,27 +255,27 @@ describe("Entry controller", () => {
                 //@ts-ignore
                 fakeDb.generateId.mockImplementation(() => "a");
                 //@ts-ignore
-                fakeDb.entryExists.mockImplementation(() => false);
+                fakeDb.orderExists.mockImplementation(() => false);
 
-                const expected = forgeEntry();
+                const expected = forgeOrder();
                 expected.id = "a";
 
-                await new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequest, mockResponse as Response);
 
-                expect(fakeDb.generateId).toHaveBeenCalledWith(entry);
-                expect(fakeDb.entryExists).toHaveBeenCalledWith("a");
-                expect(fakeDb.addEntry).toHaveBeenCalledWith(expected);
-                expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/entries", expected);
+                expect(fakeDb.generateId).toHaveBeenCalledWith(order);
+                expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
+                expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
+                expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/orders", expected);
                 expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
             });
 
             test("Add: already added", async () => {
-                const entry = forgeEntry();
+                const order = forgeOrder();
                 const mockRequest = {
-                    body: entry,
+                    body: order,
                     params: {},
                     method: "POST",
-                    url: "/entries"
+                    url: "/orders"
                 } as Request;
 
                 const mockResponse = {
@@ -286,26 +286,26 @@ describe("Entry controller", () => {
                 //@ts-ignore
                 fakeDb.generateId.mockImplementation(() => "a");
                 //@ts-ignore
-                fakeDb.entryExists.mockImplementation(() => true);
+                fakeDb.orderExists.mockImplementation(() => true);
 
-                const expected = entry;
+                const expected = order;
                 expected.id = "a";
 
-                await new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequest, mockResponse as Response);
 
                 expect(fakeDb.generateId).toHaveBeenCalledWith(expected);
-                expect(fakeDb.entryExists).toHaveBeenCalledWith("a");
-                expect(fakeDb.addEntry).toHaveBeenCalledTimes(0);
+                expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
+                expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
                 expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
                 expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
             });
 
-            test("Missing entry", async () => {
+            test("Missing order", async () => {
                 const mockRequest = {
                     body: {},
                     params: {},
                     method: "POST",
-                    url: "/entries"
+                    url: "/orders"
                 } as Request;
 
                 const mockResponse = {
@@ -313,10 +313,10 @@ describe("Entry controller", () => {
                     sendStatus: jest.fn(),
                 } as Partial<Response>;
 
-                await new EntryController(fakePeers as Peers, fakeDb as Database).addEntry(mockRequest, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequest, mockResponse as Response);
 
-                expect(fakeDb.entryExists).toHaveBeenCalledTimes(0);
-                expect(fakeDb.addEntry).toHaveBeenCalledTimes(0);
+                expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
+                expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
                 expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
                 expect(mockResponse.sendStatus).toHaveBeenCalledWith(400);
             });
@@ -325,25 +325,25 @@ describe("Entry controller", () => {
 
     describe("When debug mode is disabled", () => {
 
-        test("Edit entry", async () => {
-            const entry = new Entry("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
+        test("Edit order", async () => {
+            const order = new Order("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
             const mockRequest = {
                 body: { status: TransactionStatus.DONE },
-                params: { entryId: "a" } as Record<string, any>,
+                params: { orderId: "a" } as Record<string, any>,
                 method: "PUT",
-                url: "/entries/a"
+                url: "/orders/a"
             } as Request;
 
             const mockResponse = {
                 sendStatus: jest.fn(),
             } as Partial<Response>;
 
-            await new EntryController(fakePeers as Peers, fakeDb as Database).editEntry(mockRequest, mockResponse as Response);
+            await new OrderController(fakePeers as Peers, fakeDb as Database).editOrder(mockRequest, mockResponse as Response);
 
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(404);
-            expect(fakeDb.entryExists).toHaveBeenCalledTimes(0);
-            expect(fakeDb.getEntry).toHaveBeenCalledTimes(0);
-            expect(fakeDb.editEntry).toHaveBeenCalledTimes(0);
+            expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
+            expect(fakeDb.getOrder).toHaveBeenCalledTimes(0);
+            expect(fakeDb.editOrder).toHaveBeenCalledTimes(0);
             expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
         });
     });

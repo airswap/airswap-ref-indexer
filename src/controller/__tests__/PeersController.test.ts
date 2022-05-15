@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Peers } from './../../peer/Peers';
 import { PeersController } from './../PeersController';
-describe("Entry controller", () => {
+describe("Order controller", () => {
     let fakePeers: Partial<Peers>;
 
     beforeEach(() => {
