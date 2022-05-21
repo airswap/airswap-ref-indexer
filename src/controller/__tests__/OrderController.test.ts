@@ -505,6 +505,36 @@ describe("Order controller", () => {
                 expect(mockResponse.sendStatus).toHaveBeenCalledWith(400);
             });
 
+            test("Add order invalid date", async () => {
+                const orderDateNotInRange = {
+                    from: "from",
+                    fromToken: "fromToken",
+                    toToken: "toToken",
+                    amountFromToken: 1,
+                    amountToToken: 2,
+                    expirationDate: new Date().getTime()+(1000*3600*24*90),
+                };
+                const mockRequestOrderDateNotInRange = {
+                    body: orderDateNotInRange,
+                    params: {},
+                    method: "POST",
+                    url: "/orders"
+                } as Request;                
+
+                const mockResponse = {
+                    json: jest.fn(),
+                    sendStatus: jest.fn(),
+                } as Partial<Response>;
+
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderDateNotInRange, mockResponse as Response);
+
+
+                expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
+                expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
+                expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
+                expect(mockResponse.sendStatus).toHaveBeenCalledWith(400);
+            });
+
             test("Add: already added", async () => {
                 const order = forgeOrder();
                 const mockRequest = {

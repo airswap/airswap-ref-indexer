@@ -4,6 +4,8 @@ import { stringToTransactionStatus, TransactionStatus } from '../model/Transacti
 import { Peers } from "../peer/Peers.js";
 import { Order } from './../model/Order';
 
+const validationDurationInWeek = 1;
+
 export class OrderController {
 
     private peers: Peers;
@@ -102,9 +104,9 @@ export class OrderController {
     }
 }
 
-function isComplete(order: Order): boolean {
-    return isStringValid(order.from) && isStringValid(order.fromToken) && isStringValid(order.toToken) &&
-        isNumberValid(order.amountFromToken) && isNumberValid(order.amountToToken) && order.expirationDate != undefined
+function isComplete(requestOrder: any): boolean {
+    return isStringValid(requestOrder.from) && isStringValid(requestOrder.fromToken) && isStringValid(requestOrder.toToken) &&
+        isNumberValid(requestOrder.amountFromToken) && isNumberValid(requestOrder.amountToToken) && isDateInRange(requestOrder.expirationDate)
 }
 
 function isStringValid(str: string) {
@@ -113,4 +115,11 @@ function isStringValid(str: string) {
 
 function isNumberValid(nb: number) {
     return typeof +nb === "number" && !isNaN(+nb) && +nb > 0
+}
+
+function isDateInRange(date: number) {
+    let maxDate = new Date();
+    maxDate.setDate(maxDate.getDate() + validationDurationInWeek * 7);
+    console.log("maxDate", maxDate, date)
+    return date <  maxDate.getTime();
 }
