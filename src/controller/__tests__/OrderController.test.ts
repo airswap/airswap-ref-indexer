@@ -283,7 +283,7 @@ describe("Order controller", () => {
 
         describe("Add Order", () => {
             test("Add order nominal & broadcast", async () => {
-                const order = forgeOrder(TransactionStatus.IN_PROGRESS);
+                const order = forgeOrder(TransactionStatus.DONE);
                 const mockRequest = {
                     body: order,
                     params: {},

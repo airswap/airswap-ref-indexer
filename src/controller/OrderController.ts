@@ -1,8 +1,8 @@
-import { Order } from './../model/Order';
 import { Request, Response } from "express";
 import { Database } from "../database/Database.js";
 import { stringToTransactionStatus, TransactionStatus } from '../model/TransactionStatus.js';
 import { Peers } from "../peer/Peers.js";
+import { Order } from './../model/Order';
 
 export class OrderController {
 
@@ -18,15 +18,15 @@ export class OrderController {
 
     addOrder = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
-        const order = request.body;
 
-        if (!order || Object.keys(order).length == 0 || !isComplete(order)) {
+        if (!request.body || Object.keys(request.body).length == 0 || !isComplete(request.body)) {
             response.sendStatus(400);
             return;
         }
 
+        const order = request.body as Order;
+        order.status = TransactionStatus.IN_PROGRESS;
         const id = this.database.generateId(order);
-
         const orderExists = await this.database.orderExists(id);
         if (orderExists) {
             response.sendStatus(204);
@@ -104,7 +104,7 @@ export class OrderController {
 
 function isComplete(order: Order): boolean {
     return isStringValid(order.from) && isStringValid(order.fromToken) && isStringValid(order.toToken) &&
-    isNumberValid(order.amountFromToken) && isNumberValid(order.amountToToken) && order.expirationDate != undefined
+        isNumberValid(order.amountFromToken) && isNumberValid(order.amountToToken) && order.expirationDate != undefined
 }
 
 function isStringValid(str: string) {
