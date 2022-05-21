@@ -13,6 +13,31 @@ describe("ace base implementation", () => {
         await db.close();
     });
 
+    test('get order by filter', async () => {
+        const order1 = new Order("from", "fromToken", "toToken", 1, 2, new Date(1653138423537), TransactionStatus.IN_PROGRESS, "id1")
+        const order2 = new Order("from", "blip", "another", 10, 20, new Date(1653138423537), TransactionStatus.IN_PROGRESS, "id2")
+        const order3 = new Order("from", "fromToken", "toToken", 100, 2, new Date(1653138423537), TransactionStatus.IN_PROGRESS, "id3")
+        await db.addOrder(order1);
+        await db.addOrder(order2);
+        await db.addOrder(order3);
+
+        const ordersFromToken = await db.getOrderBy("fromToken");
+        expect(ordersFromToken).toEqual({ "id1": order1, "id3": order3 });
+        const anotherToken = await db.getOrderBy(undefined, "another");
+        expect(anotherToken).toEqual({ "id2": order2 });
+        const minAmountFromToken = await db.getOrderBy(undefined, undefined, 2);
+        expect(minAmountFromToken).toEqual({ "id2": order2, "id3": order3 });
+        const maxAmountFromToken = await db.getOrderBy(undefined, undefined, undefined, 21);
+        expect(maxAmountFromToken).toEqual({ "id1": order1, "id2": order2 });
+        const minAmountToToken = await db.getOrderBy(undefined, undefined, undefined, undefined, 20);
+        expect(minAmountToToken).toEqual({ "id2": order2 });
+        const maxAmountToToken = await db.getOrderBy(undefined, undefined, undefined, undefined, undefined, 15);
+        expect(maxAmountToToken).toEqual({ "id1": order1, "id3": order3 });
+
+        const specificOne = await db.getOrderBy("fromToken", "toToken", 0, 5, 1, 3);
+        expect(specificOne).toEqual({ "id1": order1 });
+    });
+
     test("Should add & get order", async () => {
         const order = forgeOrder();
 
@@ -33,7 +58,7 @@ describe("ace base implementation", () => {
     });
 
     test("Should edit order", async () => {
-        const expected = new Order("from", "fromToken", "toToken", 1, 2, new Date(), TransactionStatus.DONE, "id");
+        const expected = new Order("from", "fromToken", "toToken", 1, 2, new Date(1653138423537), TransactionStatus.DONE, "id");
         const order = forgeOrder();
         await db.addOrder(order);
 
@@ -89,5 +114,5 @@ describe("ace base implementation", () => {
 });
 
 function forgeOrder() {
-    return new Order("from", "fromToken", "toToken", 1, 2, new Date(), TransactionStatus.IN_PROGRESS, "id");
+    return new Order("from", "fromToken", "toToken", 1, 2, new Date(1653138423537), TransactionStatus.IN_PROGRESS, "id");
 }

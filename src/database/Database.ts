@@ -1,11 +1,11 @@
 import { Order } from './../model/Order.js';
 import { TransactionStatus } from './../model/TransactionStatus.js';
 export interface Database {
-    addOrder(order: Order): void;
+    addOrder(order: Order): Promise<void>;
 
-    addAll(orders: Record<string, Order>): void;
+    addAll(orders: Record<string, Order>):  Promise<void>;
 
-    editOrder(id: string, status: TransactionStatus): void;
+    editOrder(id: string, status: TransactionStatus):  Promise<void>;
 
     getOrder(id: string): Promise<Order>;
     

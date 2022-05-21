@@ -12,11 +12,12 @@ export class AceBaseClient implements Database {
     private db: AceBase;
 
     constructor(databaseName: string) {
-        const options = { logLevel: 'verbose', storage: { path: '.' } } as AceBaseLocalSettings; // optional settings
+        const options = { storage: { path: '.' } } as AceBaseLocalSettings; // optional settings
         this.db = new AceBase(databaseName, options);  // Creates or opens a database with name "mydb"
         this.db.ready(() => { this.db.ref(ENTRY_REF).remove() });
     }
-    async getOrderBy(fromToken: string, toToken: string, minFromToken: number, maxFromToken: number, minToToken: number, maxToToken: number): Promise<Record<string, Order>> {
+    async getOrderBy(fromToken: string = undefined, toToken: string = undefined, minFromToken: number = undefined, maxFromToken: number = undefined,
+        minToToken: number = undefined, maxToToken: number = undefined): Promise<Record<string, Order>> {
         const query = await this.db.query(ENTRY_REF);
 
         if (fromToken != undefined) {
@@ -39,7 +40,7 @@ export class AceBaseClient implements Database {
         }
 
         const data = await query.get();
-        console.log(data)
+
         let mapped = {};
         data.forEach(d => {
             const mapp = this.datarefToRecord(d.val());
@@ -52,21 +53,22 @@ export class AceBaseClient implements Database {
         return this.db.close()
     }
 
-    addOrder(order: Order): void {
-        this.db.ref(ENTRY_REF).push(order);
+    async addOrder(order: Order): Promise<void> {
+        await this.db.ref(ENTRY_REF).push(order);
+        return Promise.resolve();
     }
 
-    addAll(orders: Record<string, Order>): void {
-        Object.keys(orders).forEach(id => {
-            this.addOrder(orders[id]);
-        });
+    async addAll(orders: Record<string, Order>): Promise<void> {
+        await Promise.all(Object.keys(orders).map(async id => {
+            await this.addOrder(orders[id]);
+        }));
+        return Promise.resolve();
     }
 
     async editOrder(id: string, status: TransactionStatus): Promise<void> {
         const order = await this.db.query(ENTRY_REF)
             .filter('id', '==', id)
             .get({ snapshots: false }) as DataReferencesArray;
-        console.log(order);
         const tmp = await order[0].get();
         const storedOrder = this.datarefToRecord(tmp.val())[id];
         storedOrder.status = status;

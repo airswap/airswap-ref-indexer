@@ -4,6 +4,7 @@ import { Order } from '../../model/Order';
 import { Peers } from '../../peer/Peers';
 import { OrderController } from '../OrderController';
 import { TransactionStatus } from './../../model/TransactionStatus';
+
 describe("Order controller", () => {
 
     let fakeDb: Partial<Database>;
@@ -12,11 +13,12 @@ describe("Order controller", () => {
     beforeEach(() => {
         fakeDb = {
             getOrders: jest.fn(() => Promise.resolve(({ "aze": forgeOrder(TransactionStatus.IN_PROGRESS) })) as Promise<Record<string, Order>>),
-            addOrder: jest.fn((a) => { console.log("TU", a) }),
-            getOrder: jest.fn(),
-            orderExists: jest.fn(),
+            getOrder: jest.fn(() => Promise.resolve(forgeOrder(TransactionStatus.IN_PROGRESS)) as Promise<Order>),
+            getOrderBy: jest.fn(() => Promise.resolve(({ "aze": forgeOrder(TransactionStatus.IN_PROGRESS) })) as Promise<Record<string, Order>>),
+            addOrder: jest.fn(() => Promise.resolve()),
+            orderExists:  jest.fn(() => Promise.resolve(true)),
             generateId: jest.fn(),
-            editOrder: jest.fn()
+            editOrder:  jest.fn(() => Promise.resolve()),
         };
         fakePeers = {
             getPeers: jest.fn(() => []),
@@ -169,22 +171,58 @@ describe("Order controller", () => {
             });
         });
 
-        test("get orders", async () => {
-            const mockRequest = {
-                body: undefined,
-                params: {},
-                method: "GET",
-                url: "/orders"
-            } as Request;
+        describe('Get orders', () => {
+            test("get all", async () => {
+                const mockRequest = {
+                    body: undefined,
+                    params: {},
+                    query: {},
+                    method: "GET",
+                    url: "/orders"
+                } as Request;
 
-            const mockResponse = {
-                json: jest.fn()
-            } as Partial<Response>;
+                const mockResponse = {
+                    json: jest.fn()
+                } as Partial<Response>;
 
-            const expected =
-            {
-                orders: {
-                    aze: {
+                const expected =
+                {
+                    orders: {
+                        aze: {
+                            from: "from",
+                            fromToken: "fromToken",
+                            toToken: "toToken",
+                            amountFromToken: 1,
+                            amountToToken: 2,
+                            expirationDate: new Date(1653138423537),
+                            status: "IN_PROGRESS",
+                        },
+                    }
+                };
+
+                await new OrderController(fakePeers as Peers, fakeDb as Database).getOrders(mockRequest, mockResponse as Response);
+
+                expect(fakeDb.getOrders).toHaveBeenCalled();
+                expect(mockResponse.json).toHaveBeenCalledWith(expected);
+            });
+
+            test("get by id", async () => {
+                const mockRequest = {
+                    body: undefined,
+                    params: { orderId: "aze" },
+                    query: {},
+                    method: "GET",
+                    url: "/orders"
+                } as unknown as Request;
+
+                const mockResponse = {
+                    json: jest.fn()
+                } as Partial<Response>;
+
+                const expected =
+                {
+                    orders:
+                    {
                         from: "from",
                         fromToken: "fromToken",
                         toToken: "toToken",
@@ -192,13 +230,55 @@ describe("Order controller", () => {
                         amountToToken: 2,
                         expirationDate: new Date(1653138423537),
                         status: "IN_PROGRESS",
+                    }
+                };
+
+                await new OrderController(fakePeers as Peers, fakeDb as Database).getOrders(mockRequest, mockResponse as Response);
+
+                expect(fakeDb.getOrder).toHaveBeenCalledWith("aze");
+                expect(mockResponse.json).toHaveBeenCalledWith(expected);
+            });
+
+            test("get by filters", async () => {
+                const mockRequest = {
+                    body: undefined,
+                    params: { orderId: undefined },
+                    query: {
+                        minAmountToToken: 200,
+                        maxAmountToToken: 200,
+                        minAmountFromToken: 2,
+                        maxAmountFromToken: 20,
+                        fromToken: "eth",
+                        toToken: "dai"
                     },
-                }
-            };
+                    method: "GET",
+                    url: "/orders"
+                } as unknown as Request;
 
-            await new OrderController(fakePeers as Peers, fakeDb as Database).getOrders(mockRequest, mockResponse as Response);
+                const mockResponse = {
+                    json: jest.fn()
+                } as Partial<Response>;
 
-            expect(mockResponse.json).toHaveBeenCalledWith(expected);
+                const expected =
+                {
+                    orders: {
+                        aze: {
+                            from: "from",
+                            fromToken: "fromToken",
+                            toToken: "toToken",
+                            amountFromToken: 1,
+                            amountToToken: 2,
+                            expirationDate: new Date(1653138423537),
+                            status: "IN_PROGRESS",
+                        }
+                    }
+                };
+
+                await new OrderController(fakePeers as Peers, fakeDb as Database).getOrders(mockRequest, mockResponse as Response);
+
+                expect(fakeDb.getOrderBy).toHaveBeenCalledWith("eth", "dai", 2, 20, 200, 200);
+                expect(mockResponse.json).toHaveBeenCalledWith(expected);
+            });
         });
 
         describe("Add Order", () => {

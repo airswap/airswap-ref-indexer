@@ -11,7 +11,6 @@ export class InMemoryDatabase implements Database {
   }
 
   getOrderBy(fromToken: string, toToken: string, minFromToken: number, maxFromToken: number, minToToken: number, maxToToken: number): Promise<Record<string, Order>> {
-    console.log({ fromToken, toToken, minFromToken, maxFromToken, minToToken, maxToToken })
     const orders = {};
     Object.values(this.database).filter((order: Order) => {
       let isFound = true;
@@ -32,14 +31,17 @@ export class InMemoryDatabase implements Database {
 
   addOrder = (order: Order) => {
     this.database[order.id] = order;
+    return Promise.resolve();
   }
 
   addAll = (orders: Record<string, Order>) => {
     this.database = { ...orders };
+    return Promise.resolve();
   }
 
   editOrder = (id: string, status: TransactionStatus) => {
     this.database[id]!.status = status;
+    return Promise.resolve();
   }
 
   getOrder(id: string): Promise<Order> {
