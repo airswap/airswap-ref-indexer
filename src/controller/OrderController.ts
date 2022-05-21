@@ -1,3 +1,4 @@
+import { Order } from './../model/Order';
 import { Request, Response } from "express";
 import { Database } from "../database/Database.js";
 import { stringToTransactionStatus, TransactionStatus } from '../model/TransactionStatus.js';
@@ -19,7 +20,7 @@ export class OrderController {
         console.log("R<---", request.method, request.url, request.body);
         const order = request.body;
 
-        if (!order || Object.keys(order).length == 0) {
+        if (!order || Object.keys(order).length == 0 || !isComplete(order)) {
             response.sendStatus(400);
             return;
         }
@@ -99,4 +100,17 @@ export class OrderController {
         }
         response.json({ orders });
     }
+}
+
+function isComplete(order: Order): boolean {
+    return isStringValid(order.from) && isStringValid(order.fromToken) && isStringValid(order.toToken) &&
+    isNumberValid(order.amountFromToken) && isNumberValid(order.amountToToken) && order.expirationDate != undefined
+}
+
+function isStringValid(str: string) {
+    return typeof str === "string" && str.trim().length !== 0
+}
+
+function isNumberValid(nb: number) {
+    return typeof +nb === "number" && !isNaN(+nb) && +nb > 0
 }

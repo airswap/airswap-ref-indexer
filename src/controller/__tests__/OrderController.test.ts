@@ -16,9 +16,9 @@ describe("Order controller", () => {
             getOrder: jest.fn(() => Promise.resolve(forgeOrder(TransactionStatus.IN_PROGRESS)) as Promise<Order>),
             getOrderBy: jest.fn(() => Promise.resolve(({ "aze": forgeOrder(TransactionStatus.IN_PROGRESS) })) as Promise<Record<string, Order>>),
             addOrder: jest.fn(() => Promise.resolve()),
-            orderExists:  jest.fn(() => Promise.resolve(true)),
+            orderExists: jest.fn(() => Promise.resolve(true)),
             generateId: jest.fn(),
-            editOrder:  jest.fn(() => Promise.resolve()),
+            editOrder: jest.fn(() => Promise.resolve()),
         };
         fakePeers = {
             getPeers: jest.fn(() => []),
@@ -343,6 +343,166 @@ describe("Order controller", () => {
                 expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
                 expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/orders", expected);
                 expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
+            });
+
+            test("Add order missing data", async () => {
+                const orderMissingFromToken = {
+                    from: "from",
+                    // fromToken: "fromToken",
+                    toToken: "toToken",
+                    amountFromToken: 1,
+                    amountToToken: 2,
+                    expirationDate: 1653138423537,
+                };
+
+                const orderMissingFrom = {
+                    // from: "from",
+                    fromToken: "fromToken",
+                    toToken: "toToken",
+                    amountFromToken: 1,
+                    amountToToken: 2,
+                    expirationDate: 1653138423537,
+                };
+
+                const orderMissingToToken = {
+                    from: "from",
+                    fromToken: "fromToken",
+                    // toToken: "toToken",
+                    amountFromToken: 1,
+                    amountToToken: 2,
+                    expirationDate: 1653138423537,
+                };
+
+                const orderMissingAmountFromToken = {
+                    from: "from",
+                    fromToken: "fromToken",
+                    toToken: "toToken",
+                    // amountFromToken: 1,
+                    amountToToken: 2,
+                    expirationDate: 1653138423537,
+                };
+
+                const orderMissingAmountToToken = {
+                    from: "from",
+                    fromToken: "fromToken",
+                    toToken: "toToken",
+                    amountFromToken: 1,
+                    // amountToToken: 2,
+                    expirationDate: 1653138423537,
+                };
+
+                const orderMissingExpirationDate = {
+                    from: "from",
+                    fromToken: "fromToken",
+                    toToken: "toToken",
+                    amountFromToken: 1,
+                    amountToToken: 2,
+                    // expirationDate: 1653138423537,
+                };
+
+                const mockRequestOrderMissingFromToken = {
+                    body: orderMissingFromToken,
+                    params: {},
+                    method: "POST",
+                    url: "/orders"
+                } as Request;
+
+                const mockRequestOrderMissingFrom = {
+                    body: orderMissingFrom,
+                    params: {},
+                    method: "POST",
+                    url: "/orders"
+                } as Request;
+                
+                const mockRequestOrderMissingToToken = {
+                    body: orderMissingToToken,
+                    params: {},
+                    method: "POST",
+                    url: "/orders"
+                } as Request;
+                
+                const mockRequestOrderMissingAmountFromToken = {
+                    body: orderMissingAmountFromToken,
+                    params: {},
+                    method: "POST",
+                    url: "/orders"
+                } as Request;                
+                
+                const mockRequestOrderMissingAmountToToken = {
+                    body: orderMissingAmountToToken,
+                    params: {},
+                    method: "POST",
+                    url: "/orders"
+                } as Request;                
+                const mockRequestOrderMissingExpirationDate = {
+                    body: orderMissingExpirationDate,
+                    params: {},
+                    method: "POST",
+                    url: "/orders"
+                } as Request;
+
+                const mockResponse = {
+                    json: jest.fn(),
+                    sendStatus: jest.fn(),
+                } as Partial<Response>;
+
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderMissingFrom, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderMissingFromToken, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderMissingToToken, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderMissingAmountFromToken, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderMissingAmountToToken, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderMissingExpirationDate, mockResponse as Response);
+
+                expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
+                expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
+                expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
+                expect(mockResponse.sendStatus).toHaveBeenCalledWith(400);
+            });
+
+            test("Add order invalid data", async () => {
+                const orderBadValueAmountFromToken = {
+                    from: "from",
+                    fromToken: "fromToken",
+                    toToken: "toToken",
+                    amountFromToken: "a",
+                    amountToToken: 2,
+                    expirationDate: 1653138423537,
+                };
+                const mockRequestOrderBadValueAmountFromToken = {
+                    body: orderBadValueAmountFromToken,
+                    params: {},
+                    method: "POST",
+                    url: "/orders"
+                } as Request;                
+                
+                const orderBadValueAmountToToken = {
+                    from: "from",
+                    fromToken: "fromToken",
+                    toToken: "toToken",
+                    amountFromToken: 1,
+                    amountToToken: "b",
+                    expirationDate: 1653138423537,
+                };
+                const mockRequestOrderBadValueAmountToToken = {
+                    body: orderBadValueAmountToToken,
+                    params: {},
+                    method: "POST",
+                    url: "/orders"
+                } as Request;
+
+                const mockResponse = {
+                    json: jest.fn(),
+                    sendStatus: jest.fn(),
+                } as Partial<Response>;
+
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderBadValueAmountFromToken, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderBadValueAmountToToken, mockResponse as Response);
+
+
+                expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
+                expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
+                expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
+                expect(mockResponse.sendStatus).toHaveBeenCalledWith(400);
             });
 
             test("Add: already added", async () => {
