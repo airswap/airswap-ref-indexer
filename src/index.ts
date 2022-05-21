@@ -1,3 +1,4 @@
+import { AceBaseClient } from './database/AcebaseClient.js';
 import "dotenv/config";
 import publicIp from "public-ip";
 import { BroadcastClient } from './client/BroadcastClient.js';
@@ -7,7 +8,7 @@ import { RegistryClient } from './client/RegistryClient.js';
 import { HomeController } from './controller/HomeController.js';
 import { OrderController } from './controller/OrderController.js';
 import { PeersController } from './controller/PeersController.js';
-import { InMemoryDatabase } from './database/InMemoryDatabase';
+import { InMemoryDatabase } from './database/InMemoryDatabase.js';
 import { getLocalIp } from "./ip_helper.js";
 import { Peers } from "./peer/Peers.js";
 import { Webserver } from "./webserver/index.js";
@@ -27,7 +28,7 @@ const orderClient = new OrderClient();
 const peersClient = new PeersClient();
 const broadcastClient = new BroadcastClient();
 const registryClient = new RegistryClient(REGISTRY);
-const database = new InMemoryDatabase();//new AceBaseClient("mydb");
+const database = new AceBaseClient("mydb"); //new InMemoryDatabase()
 const peers = new Peers(database, host, peersClient, broadcastClient);
 const homeController = new HomeController(peers, database, REGISTRY);
 const orderController = new OrderController(peers, database, debugMode);

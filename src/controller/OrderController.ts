@@ -79,20 +79,23 @@ export class OrderController {
         console.log("R<---", request.method, request.url, request.body);
         let orders = undefined;
         if (request.params.orderId) {
+            console.log("single")
             orders = await this.database.getOrder(request.params.orderId);
         }
-        else if (Object.keys(request.params).length >= 1 && request.params.orderId === undefined) {
-            orders = await this.database.getOrderBy(
-                request.params.fromToken,
-                request.params.toToken,
-                request.params.minFromToken ? +request.params.minFromToken : undefined,
-                request.params.maxFromToken ? +request.params.maxFromToken : undefined,
-                request.params.minToToken ? +request.params.minToToken : undefined,
-                request.params.maxToToken ? +request.params.maxToToken : undefined,
-            );
+        else if (Object.keys(request.query).length === 0) {
+            console.log("All entries")
+            orders = await this.database.getOrders();
         }
         else {
-            orders = await this.database.getOrders();
+            console.log("some entries", Object.keys(request.query))
+            orders = await this.database.getOrderBy(
+                request.query.fromToken as string,
+                request.query.toToken as string,
+                request.query.minAmountFromToken ? +request.query.minAmountFromToken : undefined,
+                request.query.maxAmountFromToken ? +request.query.maxAmountFromToken : undefined,
+                request.query.minAmountToToken ? +request.query.minAmountToToken : undefined,
+                request.query.maxAmountToToken ? +request.query.maxAmountToToken : undefined,
+            );
         }
         response.json({ orders });
     }

@@ -16,8 +16,36 @@ export class AceBaseClient implements Database {
         this.db = new AceBase(databaseName, options);  // Creates or opens a database with name "mydb"
         this.db.ready(() => { this.db.ref(ENTRY_REF).remove() });
     }
-    getOrderBy(fromToken: string, toToken: string, minFromToken: number, maxFromToken: number, minToToken: number, maxToToken: number): Promise<Record<string, Order>> {
-        throw new Error('Method not implemented.');
+    async getOrderBy(fromToken: string, toToken: string, minFromToken: number, maxFromToken: number, minToToken: number, maxToToken: number): Promise<Record<string, Order>> {
+        const query = await this.db.query(ENTRY_REF);
+
+        if (fromToken != undefined) {
+            query.filter('fromToken', '==', fromToken);
+        }
+        if (toToken != undefined) {
+            query.filter('toToken', '==', toToken);
+        }
+        if (minFromToken != undefined) {
+            query.filter('amountFromToken', '>=', minFromToken);
+        }
+        if (maxFromToken != undefined) {
+            query.filter('amountFromToken', '<=', maxFromToken);
+        }
+        if (minToToken != undefined) {
+            query.filter('amountToToken', '>=', minToToken);
+        }
+        if (maxToToken != undefined) {
+            query.filter('amountToToken', '<=', maxToToken);
+        }
+
+        const data = await query.get();
+        console.log(data)
+        let mapped = {};
+        data.forEach(d => {
+            const mapp = this.datarefToRecord(d.val());
+            mapped = { ...mapped, ...mapp };
+        });
+        return Promise.resolve(mapped);
     }
 
     close(): Promise<void> {
@@ -69,7 +97,7 @@ export class AceBaseClient implements Database {
 
     private datarefToRecord(data): Record<string, Order> {
         const mapped: Record<string, Order> = {};
-        mapped[data.id] = new Order(            
+        mapped[data.id] = new Order(
             data.from,
             data.fromToken,
             data.toToken,

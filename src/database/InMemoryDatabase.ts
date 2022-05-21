@@ -11,15 +11,17 @@ export class InMemoryDatabase implements Database {
   }
 
   getOrderBy(fromToken: string, toToken: string, minFromToken: number, maxFromToken: number, minToToken: number, maxToToken: number): Promise<Record<string, Order>> {
+    console.log({ fromToken, toToken, minFromToken, maxFromToken, minToToken, maxToToken })
     const orders = {};
     Object.values(this.database).filter((order: Order) => {
       let isFound = true;
       if (fromToken != undefined) { isFound = isFound && fromToken === order.fromToken }
       if (toToken != undefined) { isFound = isFound && toToken === order.toToken }
-      if (minFromToken != undefined) { isFound = isFound && minFromToken >= order.amountFromToken }
-      if (maxFromToken != undefined) { isFound = isFound && maxFromToken <= order.amountFromToken }
-      if (minToToken != undefined) { isFound = isFound && minToToken >= order.amountToToken }
-      if (maxToToken != undefined) { isFound = isFound && maxFromToken <= order.amountToToken }
+      if (minFromToken != undefined) { isFound = isFound && order.amountFromToken >= minFromToken }
+      if (maxFromToken != undefined) { isFound = isFound && order.amountFromToken <= maxFromToken }
+      if (minToToken != undefined) { isFound = isFound && order.amountToToken >= minToToken }
+      if (maxToToken != undefined) { isFound = isFound && order.amountToToken <= maxToToken }
+      return isFound;
     }).forEach((order) => {
       const orderId = order['id'];
       orders[`${orderId}`] = order;
