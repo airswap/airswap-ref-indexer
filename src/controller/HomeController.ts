@@ -15,7 +15,7 @@ export class HomeController {
 
     get = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
-        const orders = await this.database.getorders();
+        const orders = await this.database.getOrders();
         response.json({
             peers: this.peers.getPeers(),
             registry: this.registry,

@@ -16,6 +16,9 @@ export class AceBaseClient implements Database {
         this.db = new AceBase(databaseName, options);  // Creates or opens a database with name "mydb"
         this.db.ready(() => { this.db.ref(ENTRY_REF).remove() });
     }
+    getOrderBy(fromToken: string, toToken: string, minFromToken: number, maxFromToken: number, minToToken: number, maxToToken: number): Promise<Record<string, Order>> {
+        throw new Error('Method not implemented.');
+    }
 
     close(): Promise<void> {
         return this.db.close()
@@ -54,7 +57,7 @@ export class AceBaseClient implements Database {
         return Promise.resolve(this.datarefToRecord(serializedOrder)[id]);
     }
 
-    async getorders(): Promise<Record<string, Order>> {
+    async getOrders(): Promise<Record<string, Order>> {
         const data = await this.db.query(ENTRY_REF).get();
         let mapped = {};
         data.forEach(d => {
@@ -66,7 +69,16 @@ export class AceBaseClient implements Database {
 
     private datarefToRecord(data): Record<string, Order> {
         const mapped: Record<string, Order> = {};
-        mapped[data.id] = new Order(data.by, data.from, data.to, +data.nb, +data.price, data.status, data.id);
+        mapped[data.id] = new Order(            
+            data.from,
+            data.fromToken,
+            data.toToken,
+            +data.amountFromToken,
+            +data.amountToToken,
+            data.expirationDate,
+            data.status,
+            data.id,
+        );
         return mapped;
     }
 
@@ -86,11 +98,12 @@ export class AceBaseClient implements Database {
 
     private extractData(order: Order) {
         const lightenOrder = new Order(
-            order.by,
             order.from,
-            order.to,
-            order.nb,
-            order.price
+            order.fromToken,
+            order.toToken,
+            order.amountFromToken,
+            order.amountToToken,
+            order.expirationDate
         );
         return lightenOrder;
     }

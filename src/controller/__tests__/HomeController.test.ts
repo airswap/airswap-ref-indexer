@@ -9,11 +9,11 @@ describe("Home controller", () => {
     let fakeDb: Partial<Database>;
     let fakePeers: Partial<Peers>;
     let registryAddress = "registry";
-    const order = new Order("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
+    const order = forgeOrder();
 
     beforeEach(() => {
         fakeDb = {
-            getorders: jest.fn(() => Promise.resolve( ({ "aze": order })) as Promise<Record<string, Order>>),
+            getOrders: jest.fn(() => Promise.resolve( ({ "aze": order })) as Promise<Record<string, Order>>),
         };
         fakePeers = {
             getPeers: jest.fn(() => [])
@@ -36,12 +36,13 @@ describe("Home controller", () => {
         {
             database: {
                 aze: {
-                    by: "by",
                     from: "from",
-                    nb: 3,
-                    price: 4,
+                    fromToken: "fromToken",
+                    toToken: "toToken",
+                    amountFromToken: 1,
+                    amountToToken: 2,
+                    expirationDate: new Date(1653138423537),
                     status: "IN_PROGRESS",
-                    to: "to",
                 },
             },
             peers: [],
@@ -53,3 +54,7 @@ describe("Home controller", () => {
         expect(mockResponse.json).toHaveBeenCalledWith(expected);
     });
 });
+
+function forgeOrder() {
+    return new Order("from", "fromToken", "toToken", 1, 2, new Date(1653138423537), TransactionStatus.IN_PROGRESS);
+}

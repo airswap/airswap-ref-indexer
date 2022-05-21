@@ -17,7 +17,7 @@ function axios200Response(data: object): AxiosResponse<any> {
 
 describe("Order client", () => {
     it("add order", async () => {
-        const order = new Order("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
+        const order = forgeOrder(TransactionStatus.IN_PROGRESS);
 
         mockedAxios.post.mockImplementation((url: string, data: any) => {
             expect(url).toBe("my_url/orders/")
@@ -47,3 +47,7 @@ describe("Order client", () => {
         expect(response).toBeDefined();
     });
 });  
+
+function forgeOrder(transactionStatus?: TransactionStatus) {
+    return new Order("from", "fromToken", "toToken", 1, 2, new Date(1653138423537), transactionStatus);
+}

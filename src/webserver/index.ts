@@ -29,9 +29,9 @@ export class Webserver {
     app.use(bodyParser.json());
 
     router.route("/orders/:orderId?")
-      .get(this.orderController.getorders)
+      .get(this.orderController.getOrders)
       .post(this.orderController.addOrder)
-      .put(this.orderController.editOrder)
+      .put(this.orderController.editOrder) // only available when debug mode is enabled to simulate mined event
     router.route("/peers/:peerUrl?")
       .get(this.peersController.getPeers)
       .post(this.peersController.addPeers)

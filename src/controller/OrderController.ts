@@ -75,9 +75,25 @@ export class OrderController {
         response.sendStatus(204);
     }
 
-    getorders = async (request: Request, response: Response) => {
+    getOrders = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
-        const orders = await this.database.getorders();
+        let orders = undefined;
+        if (request.params.orderId) {
+            orders = await this.database.getOrder(request.params.orderId);
+        }
+        else if (Object.keys(request.params).length >= 1 && request.params.orderId === undefined) {
+            orders = await this.database.getOrderBy(
+                request.params.fromToken,
+                request.params.toToken,
+                request.params.minFromToken ? +request.params.minFromToken : undefined,
+                request.params.maxFromToken ? +request.params.maxFromToken : undefined,
+                request.params.minToToken ? +request.params.minToToken : undefined,
+                request.params.maxToToken ? +request.params.maxToToken : undefined,
+            );
+        }
+        else {
+            orders = await this.database.getOrders();
+        }
         response.json({ orders });
     }
 }

@@ -1,21 +1,17 @@
 import { Request, Response } from 'express';
 import { Database } from '../../database/Database';
 import { Order } from '../../model/Order';
-import { TransactionStatus } from '../../model/TransactionStatus';
 import { Peers } from '../../peer/Peers';
 import { OrderController } from '../OrderController';
+import { TransactionStatus } from './../../model/TransactionStatus';
 describe("Order controller", () => {
 
     let fakeDb: Partial<Database>;
     let fakePeers: Partial<Peers>;
 
-    function forgeOrder() {
-        return new Order("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
-    }
-
     beforeEach(() => {
         fakeDb = {
-            getorders: jest.fn(() => Promise.resolve(({ "aze": forgeOrder() })) as Promise<Record<string, Order>>),
+            getOrders: jest.fn(() => Promise.resolve(({ "aze": forgeOrder(TransactionStatus.IN_PROGRESS) })) as Promise<Record<string, Order>>),
             addOrder: jest.fn((a) => { console.log("TU", a) }),
             getOrder: jest.fn(),
             orderExists: jest.fn(),
@@ -118,7 +114,7 @@ describe("Order controller", () => {
             });
 
             test("Order already up to date", async () => {
-                const order = new Order("by", "from", "to", 3, 4, TransactionStatus.DONE);
+                const order = forgeOrder(TransactionStatus.DONE);
                 const mockRequest = {
                     body: { status: TransactionStatus.DONE },
                     params: { orderId: "a" } as Record<string, any>,
@@ -145,7 +141,7 @@ describe("Order controller", () => {
             });
 
             test("Edit order", async () => {
-                const order = new Order("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
+                const order = forgeOrder(TransactionStatus.IN_PROGRESS);
                 const mockRequest = {
                     body: { status: TransactionStatus.DONE },
                     params: { orderId: "a" } as Record<string, any>,
@@ -189,24 +185,25 @@ describe("Order controller", () => {
             {
                 orders: {
                     aze: {
-                        by: "by",
                         from: "from",
-                        nb: 3,
-                        price: 4,
+                        fromToken: "fromToken",
+                        toToken: "toToken",
+                        amountFromToken: 1,
+                        amountToToken: 2,
+                        expirationDate: new Date(1653138423537),
                         status: "IN_PROGRESS",
-                        to: "to",
                     },
                 }
             };
 
-            await new OrderController(fakePeers as Peers, fakeDb as Database).getorders(mockRequest, mockResponse as Response);
+            await new OrderController(fakePeers as Peers, fakeDb as Database).getOrders(mockRequest, mockResponse as Response);
 
             expect(mockResponse.json).toHaveBeenCalledWith(expected);
         });
 
         describe("Add Order", () => {
             test("Add order nominal & broadcast", async () => {
-                const order = forgeOrder();
+                const order = forgeOrder(TransactionStatus.IN_PROGRESS);
                 const mockRequest = {
                     body: order,
                     params: {},
@@ -224,7 +221,7 @@ describe("Order controller", () => {
                 //@ts-ignore
                 fakeDb.orderExists.mockImplementation(() => false);
 
-                const expected = forgeOrder();
+                const expected = forgeOrder(TransactionStatus.IN_PROGRESS);
                 expected.id = "a";
 
                 await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequest, mockResponse as Response);
@@ -238,7 +235,6 @@ describe("Order controller", () => {
 
             test("Add order without specified status & broadcast", async () => {
                 const order = forgeOrder();
-                order.status = undefined;
 
                 const mockRequest = {
                     body: order,
@@ -257,7 +253,7 @@ describe("Order controller", () => {
                 //@ts-ignore
                 fakeDb.orderExists.mockImplementation(() => false);
 
-                const expected = forgeOrder();
+                const expected = forgeOrder(TransactionStatus.IN_PROGRESS);
                 expected.id = "a";
 
                 await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequest, mockResponse as Response);
@@ -326,7 +322,6 @@ describe("Order controller", () => {
     describe("When debug mode is disabled", () => {
 
         test("Edit order", async () => {
-            const order = new Order("by", "from", "to", 3, 4, TransactionStatus.IN_PROGRESS);
             const mockRequest = {
                 body: { status: TransactionStatus.DONE },
                 params: { orderId: "a" } as Record<string, any>,
@@ -348,3 +343,7 @@ describe("Order controller", () => {
         });
     });
 });
+
+function forgeOrder(transactionStatus?: TransactionStatus) {
+    return new Order("from", "fromToken", "toToken", 1, 2, new Date(1653138423537), transactionStatus);
+}

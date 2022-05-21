@@ -9,7 +9,9 @@ export interface Database {
 
     getOrder(id: string): Promise<Order>;
     
-    getorders(): Promise<Record<string, Order>>;
+    getOrders(): Promise<Record<string, Order>>;
+        
+    getOrderBy(fromToken: string, toToken: string, minFromToken: number, maxFromToken: number, minToToken: number, maxToToken: number): Promise<Record<string, Order>>;
 
     orderExists(id: string): Promise<boolean>;
 
