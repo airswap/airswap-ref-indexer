@@ -31,15 +31,12 @@ export class OrderController {
         const id = this.database.generateId(order);
         const orderExists = await this.database.orderExists(id);
         if (orderExists) {
+            console.log("already exists")
             response.sendStatus(204);
             return;
         }
 
         order.id = id;
-        if (!order.status) {
-            order.status = TransactionStatus.IN_PROGRESS;
-        }
-
         this.database.addOrder(order);
         this.peers.broadcast(request.method, request.url, request.body);
         response.sendStatus(204);
