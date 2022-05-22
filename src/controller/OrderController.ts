@@ -79,15 +79,12 @@ export class OrderController {
         console.log("R<---", request.method, request.url, request.body);
         let orders = undefined;
         if (request.params.orderId) {
-            console.log("single")
             orders = await this.database.getOrder(request.params.orderId);
         }
         else if (Object.keys(request.query).length === 0) {
-            console.log("All entries")
             orders = await this.database.getOrders();
         }
         else {
-            console.log("some entries", Object.keys(request.query))
             orders = await this.database.getOrderBy(
                 request.query.fromToken as string,
                 request.query.toToken as string,
@@ -117,6 +114,5 @@ function isNumberValid(nb: number) {
 function isDateInRange(date: number) {
     let maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + validationDurationInWeek * 7);
-    console.log("maxDate", maxDate, date)
     return date <  maxDate.getTime();
 }

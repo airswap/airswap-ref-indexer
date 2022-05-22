@@ -8,6 +8,7 @@ import { HomeController } from './controller/HomeController.js';
 import { OrderController } from './controller/OrderController.js';
 import { PeersController } from './controller/PeersController.js';
 import { AceBaseClient } from './database/AcebaseClient.js';
+import { InMemoryDatabase } from './database/InMemoryDatabase.js';
 import { getLocalIp } from "./ip_helper.js";
 import { Peers } from "./peer/Peers.js";
 import { Webserver } from "./webserver/index.js";
@@ -27,7 +28,7 @@ const orderClient = new OrderClient();
 const peersClient = new PeersClient();
 const broadcastClient = new BroadcastClient();
 const registryClient = new RegistryClient(REGISTRY);
-const database = new AceBaseClient("mydb"); //new InMemoryDatabase()
+const database = getDatabase();
 const peers = new Peers(database, host, peersClient, broadcastClient);
 const homeController = new HomeController(peers, database, REGISTRY);
 const orderController = new OrderController(peers, database, debugMode);
@@ -92,4 +93,16 @@ async function gracefulShutdown() {
   await database.close();
   await peers.broadcastDisconnectionToOtherPeer();
   process.exit(0);
+}
+
+function getDatabase() {
+  const deleteDbOnStart = process.env.DELETE_DB_ON_START == "1";
+  const databseType = process.env.DATABASE_TYPE;
+  if (databseType === "ACEBASE") {
+    return new AceBaseClient("airswapDb", deleteDbOnStart);
+  } else if (databseType === "IN_MEMORY") {
+    return new InMemoryDatabase();
+  }
+  console.error("Unknown database, check env file !")
+  process.exit(5);
 }

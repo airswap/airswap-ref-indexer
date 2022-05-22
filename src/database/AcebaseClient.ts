@@ -11,11 +11,22 @@ export class AceBaseClient implements Database {
 
     private db: AceBase;
 
-    constructor(databaseName: string) {
-        const options = { storage: { path: '.' } } as AceBaseLocalSettings; // optional settings
-        this.db = new AceBase(databaseName, options);  // Creates or opens a database with name "mydb"
-        this.db.ready(() => { this.db.ref(ENTRY_REF).remove() });
+    constructor(databaseName: string, deleteOnStart = false) {
+        const options = { storage: { path: '.' } } as AceBaseLocalSettings;
+        this.db = new AceBase(databaseName, options);
+        this.db.ready(() => {
+            if (deleteOnStart) {
+                this.erase();
+            }
+        });
+        this.db.indexes.create(`${ENTRY_REF}`, 'id');
+        this.db.indexes.create(`${ENTRY_REF}`, 'from');
+        this.db.indexes.create(`${ENTRY_REF}`, 'fromToken');
+        this.db.indexes.create(`${ENTRY_REF}`, 'toToken');
+        this.db.indexes.create(`${ENTRY_REF}`, 'amountFromToken');
+        this.db.indexes.create(`${ENTRY_REF}`, 'amountToToken');
     }
+
     async getOrderBy(fromToken: string = undefined, toToken: string = undefined, minFromToken: number = undefined, maxFromToken: number = undefined,
         minToToken: number = undefined, maxToToken: number = undefined): Promise<Record<string, Order>> {
         const query = await this.db.query(ENTRY_REF);
@@ -39,8 +50,7 @@ export class AceBaseClient implements Database {
             query.filter('amountToToken', '<=', maxToToken);
         }
 
-        const data = await query.get();
-
+        const data = await query.take(100).get();
         let mapped = {};
         data.forEach(d => {
             const mapp = this.datarefToRecord(d.val());
@@ -97,6 +107,10 @@ export class AceBaseClient implements Database {
         return Promise.resolve(mapped);
     }
 
+    async erase() {
+        return await this.db.ref(ENTRY_REF).remove();
+    }
+
     private datarefToRecord(data): Record<string, Order> {
         const mapped: Record<string, Order> = {};
         mapped[data.id] = new Order(
@@ -113,10 +127,8 @@ export class AceBaseClient implements Database {
     }
 
     async orderExists(id: string): Promise<boolean> {
-        const query = await this.db.query(ENTRY_REF)
-            .filter('id', '==', id)
-            .get();
-        return query.length == 1;
+        return await this.db.query(ENTRY_REF)
+            .filter('id', '==', id).exists();
     }
 
     generateId(order: Order) {

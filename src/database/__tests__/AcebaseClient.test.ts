@@ -3,13 +3,17 @@ import { Order } from './../../model/Order';
 import { TransactionStatus } from './../../model/TransactionStatus';
 
 describe("ace base implementation", () => {
-    let db = new AceBaseClient("dbtest");
+    let db;
 
-    beforeEach(() => {
-        db = new AceBaseClient("dbtest");
+    beforeAll(() => {
+        db = new AceBaseClient("dbtest", true);
     });
 
-    afterEach(async () => {
+    beforeEach(() => {
+        db.erase();
+    });
+
+    afterAll(async () => {
         await db.close();
     });
 
