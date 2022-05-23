@@ -57,9 +57,22 @@ export class InMemoryDatabase implements Database {
   }
 
   generateId(order: Order) {
-    const stringObject = JSON.stringify(order);
+    const lightenOrder = this.extractData(order);
+    const stringObject = JSON.stringify(lightenOrder);
     const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
     return hashed.digest("hex");
+  }
+
+  private extractData(order: Order) {
+    const lightenOrder = new Order(
+      order.from,
+      order.fromToken,
+      order.toToken,
+      order.amountFromToken,
+      order.amountToToken,
+      order.expirationDate
+    );
+    return lightenOrder;
   }
 
   close() { }
