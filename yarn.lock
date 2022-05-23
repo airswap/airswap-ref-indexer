@@ -716,13 +716,6 @@
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-2.0.1.tgz#20f18294f797f2209b5f65c8e3b5c8e8261d127c"
   integrity sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==
 
-"@types/ws@^8.5.3":
-  version "8.5.3"
-  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-8.5.3.tgz#7d25a1ffbecd3c4f2d35068d0b283c037003274d"
-  integrity sha512-6YOoWjruKj1uLf3INHH7D3qTXwFfEsg1kf3c0uDdSBJwfa/llkwIjrAGV7j7mVgGNbzTQ3HiHKKDXl6bJPD97w==
-  dependencies:
-    "@types/node" "*"
-
 "@types/yargs-parser@*":
   version "21.0.0"
   resolved "https://registry.yarnpkg.com/@types/yargs-parser/-/yargs-parser-21.0.0.tgz#0c60e537fa790f5f9472ed2776c2b71ec117351b"
@@ -747,19 +740,6 @@ accepts@~1.3.8:
   dependencies:
     mime-types "~2.1.34"
     negotiator "0.6.3"
-
-acebase-core@^1.15.0:
-  version "1.15.0"
-  resolved "https://registry.yarnpkg.com/acebase-core/-/acebase-core-1.15.0.tgz#2fc9d9eec62e0e932af70cc0aecda05dd4c88683"
-  integrity sha512-+ZlBjhFnsEfNsbPUCtZPE9CIQ/x+/Z5w80hwmgo6TyxQuGWEUN9m5qHY+YBQO3TuhSnlIODzYjgXGnLqwiIY/g==
-
-acebase@^1.18.0:
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/acebase/-/acebase-1.18.0.tgz#b654cc57da33a13f6a42795c231ae34fceccbbd2"
-  integrity sha512-AC3QPXjVzMR1vj353AqxICbDtmNa47ChhVVEYr/lWJOn/+EZv3PFnr0u6jX+QS8IjnqC36XmnoPAgoOd/r/1bg==
-  dependencies:
-    acebase-core "^1.15.0"
-    unidecode "^0.1.8"
 
 acorn-globals@^6.0.0:
   version "6.0.0"
@@ -3210,11 +3190,6 @@ typescript@^4.6.3:
   version "4.6.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.6.3.tgz#eefeafa6afdd31d725584c67a0eaba80f6fc6c6c"
   integrity sha512-yNIatDa5iaofVozS/uQJEl3JRWLKKGJKh6Yaiv0GLGSuhpFJe7P3SbHZ8/yjAHRQwKRoA6YZqlfjXWmVzoVSMw==
-
-unidecode@^0.1.8:
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/unidecode/-/unidecode-0.1.8.tgz#efbb301538bc45246a9ac8c559d72f015305053e"
-  integrity sha1-77swFTi8RSRqmsjFWdcvAVMFBT4=
 
 universalify@^0.1.2:
   version "0.1.2"
