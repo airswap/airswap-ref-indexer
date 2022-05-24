@@ -2,7 +2,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
 import { OrderController } from '../controller/OrderController.js';
-import { HomeController } from './../controller/HomeController.js';
+import { RootController } from './../controller/RootController.js';
 import { PeersController } from './../controller/PeersController.js';
 
 const router = express.Router();
@@ -11,16 +11,16 @@ export class Webserver {
   private port: number
   private orderController: OrderController;
   private peersController: PeersController;
-  private homeController: HomeController;
+  private rootController: RootController;
 
   constructor(port: number,
     orderController: OrderController,
     peersController: PeersController,
-    homeController: HomeController) {
+    rootController: RootController) {
     this.port = port;
     this.orderController = orderController;
     this.peersController = peersController;
-    this.homeController = homeController;
+    this.rootController = rootController;
   }
 
   run() {
@@ -37,7 +37,7 @@ export class Webserver {
       .post(this.peersController.addPeers)
       .delete(this.peersController.removePeer)
     router.route("/")
-      .get(this.homeController.get)
+      .get(this.rootController.get)
 
     app.use(router);
 

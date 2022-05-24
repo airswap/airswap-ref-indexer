@@ -4,7 +4,7 @@ import { BroadcastClient } from './client/BroadcastClient.js';
 import { OrderClient } from './client/OrderClient.js';
 import { PeersClient } from './client/PeersClient.js';
 import { RegistryClient } from './client/RegistryClient.js';
-import { HomeController } from './controller/HomeController.js';
+import { RootController } from './controller/RootController.js';
 import { OrderController } from './controller/OrderController.js';
 import { PeersController } from './controller/PeersController.js';
 import { InMemoryDatabase } from './database/InMemoryDatabase.js';
@@ -29,14 +29,14 @@ const broadcastClient = new BroadcastClient();
 const registryClient = new RegistryClient(REGISTRY);
 const database = new InMemoryDatabase();
 const peers = new Peers(database, host, peersClient, broadcastClient);
-const homeController = new HomeController(peers, database, REGISTRY);
+const rootController = new RootController(peers, database, REGISTRY);
 const orderController = new OrderController(peers, database, debugMode);
 const peersController = new PeersController(peers);
 
 // Network register & synchronization 
 const { data: peersFromRegistry } = await registryClient.getPeersFromRegistry();
 await requestDataFromOtherPeer();
-new Webserver(+EXPRESS_PORT, orderController, peersController, homeController).run();
+new Webserver(+EXPRESS_PORT, orderController, peersController, rootController).run();
 registerInNetwork();
 
 // Shutdown signals
