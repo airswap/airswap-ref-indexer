@@ -1,23 +1,19 @@
-import { TransactionStatus } from './TransactionStatus.js';
-
 export class Order {
     id: string;
-    from: string;
-    fromToken: string;
-    toToken: string;
-    amountFromToken: number;
-    amountToToken: number;
-    expirationDate: Date;
-    status?: TransactionStatus;
+    signerWallet: string;
+    signerToken: string;
+    senderToken: string;
+    senderAmount: number;
+    signerAmount: number;
+    expiry: Date;
 
-    constructor(from: string, fromToken: string, toToken: string, amountFromToken: number, amountToToken: number, expirationDate: Date, status?: TransactionStatus, id?: string) {
+    constructor(signerWallet: string, signerToken: string, senderToken: string, senderAmount: number, signerAmount: number, expiry: Date, id?: string) {
         this.id = id;
-        this.from = from;
-        this.fromToken = fromToken;
-        this.toToken = toToken;
-        this.amountFromToken = amountFromToken;
-        this.amountToToken = amountToToken;
-        this.expirationDate = expirationDate;
-        this.status = status;
+        this.signerWallet = signerWallet;
+        this.signerToken = signerToken;
+        this.senderToken = senderToken;
+        this.senderAmount = senderAmount;
+        this.signerAmount = signerAmount;
+        this.expiry = expiry;
     }
 }

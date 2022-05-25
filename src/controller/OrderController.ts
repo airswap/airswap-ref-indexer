@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { Database } from "../database/Database.js";
-import { stringToTransactionStatus, TransactionStatus } from '../model/TransactionStatus.js';
 import { Peers } from "../peer/Peers.js";
 import { Order } from './../model/Order';
 
@@ -27,7 +26,6 @@ export class OrderController {
         }
 
         const order = request.body as Order;
-        order.status = TransactionStatus.IN_PROGRESS;
         const id = this.database.generateId(order);
         const orderExists = await this.database.orderExists(id);
         if (orderExists) {
@@ -42,35 +40,23 @@ export class OrderController {
         response.sendStatus(204);
     }
 
-    editOrder = async (request: Request, response: Response) => {
+    deleteOrder = async (request: Request, response: Response) => {
         if (!this.isDebugMode) {
             response.sendStatus(404);
             return;
         }
         console.log("R<---", request.method, request.url, request.body);
-        if (!request.params.orderId || !request.body.status) {
+        if (!request.params.orderId) {
             response.sendStatus(400);
             return;
         }
 
-        const status = stringToTransactionStatus(request.body.status)
-        if (status === TransactionStatus.UNKNOWN) {
-            response.sendStatus(403);
-            return;
-        }
-
         if (!this.database.orderExists(request.params.orderId)) {
-            response.sendStatus(403);
+            response.sendStatus(404);
             return;
         }
 
-        const order = await this.database.getOrder(request.params.orderId);
-        if (order.status == status) {
-            response.sendStatus(204);
-            return;
-        }
-
-        this.database.editOrder(request.params.orderId, status);
+        this.database.deleteOrder(request.params.orderId);
         this.peers.broadcast(request.method, request.url, request.body);
         response.sendStatus(204);
     }
@@ -86,12 +72,12 @@ export class OrderController {
         }
         else {
             orders = await this.database.getOrderBy(
-                request.query.fromToken as string,
-                request.query.toToken as string,
-                request.query.minAmountFromToken ? +request.query.minAmountFromToken : undefined,
-                request.query.maxAmountFromToken ? +request.query.maxAmountFromToken : undefined,
-                request.query.minAmountToToken ? +request.query.minAmountToToken : undefined,
-                request.query.maxAmountToToken ? +request.query.maxAmountToToken : undefined,
+                request.query.signerToken as string,
+                request.query.senderToken as string,
+                request.query.minSignerAmount ? +request.query.minSignerAmount : undefined,
+                request.query.maxSignerAmount ? +request.query.maxSignerAmount : undefined,
+                request.query.minSenderAmount ? +request.query.minSenderAmount : undefined,
+                request.query.maxSenderAmount ? +request.query.maxSenderAmount : undefined,
             );
         }
         response.json({ orders });
@@ -99,8 +85,8 @@ export class OrderController {
 }
 
 function isComplete(requestOrder: any): boolean {
-    return isStringValid(requestOrder.from) && isStringValid(requestOrder.fromToken) && isStringValid(requestOrder.toToken) &&
-        isNumberValid(requestOrder.amountFromToken) && isNumberValid(requestOrder.amountToToken) && isDateInRange(requestOrder.expirationDate)
+    return isStringValid(requestOrder.signerWallet) && isStringValid(requestOrder.signerToken) && isStringValid(requestOrder.senderToken) &&
+        isNumberValid(requestOrder.senderAmount) && isNumberValid(requestOrder.signerAmount) && isDateInRange(requestOrder.expiry)
 }
 
 function isStringValid(str: string) {
@@ -114,5 +100,5 @@ function isNumberValid(nb: number) {
 function isDateInRange(date: number) {
     let maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + validationDurationInWeek * 7);
-    return date <  maxDate.getTime();
+    return date < maxDate.getTime();
 }

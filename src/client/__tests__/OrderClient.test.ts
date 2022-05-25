@@ -1,6 +1,5 @@
 import axios, { AxiosResponse } from "axios";
 import { Order } from '../../model/Order';
-import { TransactionStatus } from '../../model/TransactionStatus';
 import { OrderClient } from '../OrderClient';
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -17,7 +16,7 @@ function axios200Response(data: object): AxiosResponse<any> {
 
 describe("Order client", () => {
     it("add order", async () => {
-        const order = forgeOrder(TransactionStatus.IN_PROGRESS);
+        const order = forgeOrder();
 
         mockedAxios.post.mockImplementation((url: string, data: any) => {
             expect(url).toBe("my_url/orders/")
@@ -33,21 +32,21 @@ describe("Order client", () => {
             expect(url).toBe("my_url/orders/")
             return Promise.resolve(axios200Response({}));
         });
-        const response = await new OrderClient().getorders("my_url");
+        const response = await new OrderClient().getOrders("my_url");
         expect(response).toBeDefined();
     });
 
-    it("edit order", async () => {
-        mockedAxios.put.mockImplementation((url: string, data: any) => {
+    it("delete order", async () => {
+        mockedAxios.delete.mockImplementation((url: string, data: any) => {
             expect(url).toBe("my_url/orders/order_id")
-            expect(data).toEqual({ status: "DONE" })
+            expect(data).toBeUndefined();
             return Promise.resolve(axios200Response({}));
         });
-        const response = await new OrderClient().editOrder("my_url", "order_id", TransactionStatus.DONE);
+        const response = await new OrderClient().delete("my_url", "order_id");
         expect(response).toBeDefined();
     });
 });  
 
-function forgeOrder(transactionStatus?: TransactionStatus) {
-    return new Order("from", "fromToken", "toToken", 1, 2, new Date(1653138423537), transactionStatus);
+function forgeOrder() {
+    return new Order("from", "signerToken", "senderToken", 1, 2, new Date(1653138423537));
 }

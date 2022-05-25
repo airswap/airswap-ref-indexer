@@ -52,7 +52,7 @@ async function requestDataFromOtherPeer() {
     peers.addPeers(peersFromRegistry.peers);
     const peerUrl = "http://" + peers.getConnectablePeers()[0];
     console.log("Configure client");
-    const { data } = await orderClient.getorders(peerUrl);
+    const { data } = await orderClient.getOrders(peerUrl);
     database.addAll(data.orders);
     console.log("Asked all queries to", peerUrl);
   } else {

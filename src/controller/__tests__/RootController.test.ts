@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { Database } from '../../database/Database';
 import { Order } from './../../model/Order';
-import { TransactionStatus } from './../../model/TransactionStatus';
 import { Peers } from './../../peer/Peers';
 import { RootController } from './../RootController';
 describe("Home controller", () => {
@@ -36,13 +35,12 @@ describe("Home controller", () => {
         {
             database: {
                 aze: {
-                    from: "from",
-                    fromToken: "fromToken",
-                    toToken: "toToken",
-                    amountFromToken: 1,
-                    amountToToken: 2,
-                    expirationDate: new Date(1653138423537),
-                    status: "IN_PROGRESS",
+                    signerWallet: "signerWallet",
+                    signerToken: "signerToken",
+                    senderToken: "senderToken",
+                    senderAmount: 1,
+                    signerAmount: 2,
+                    expiry: new Date(1653138423537),
                 },
             },
             peers: [],
@@ -56,5 +54,5 @@ describe("Home controller", () => {
 });
 
 function forgeOrder() {
-    return new Order("from", "fromToken", "toToken", 1, 2, new Date(1653138423537), TransactionStatus.IN_PROGRESS);
+    return new Order("signerWallet", "signerToken", "senderToken", 1, 2, new Date(1653138423537));
 }

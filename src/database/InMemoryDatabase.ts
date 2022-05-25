@@ -1,6 +1,5 @@
 import crypto from "crypto";
 import { Order } from '../model/Order.js';
-import { TransactionStatus } from '../model/TransactionStatus.js';
 import { Database } from './Database.js';
 
 export class InMemoryDatabase implements Database {
@@ -10,16 +9,16 @@ export class InMemoryDatabase implements Database {
     this.database = {};
   }
 
-  getOrderBy(fromToken: string, toToken: string, minFromToken: number, maxFromToken: number, minToToken: number, maxToToken: number): Promise<Record<string, Order>> {
+  getOrderBy(signerToken?: string, senderToken?: string, minSignerAmount?: number, maxSignerAmount?: number, minSenderAmount?: number, maxSenderAmount?): Promise<Record<string, Order>> {
     const orders = {};
     Object.values(this.database).filter((order: Order) => {
       let isFound = true;
-      if (fromToken != undefined) { isFound = isFound && fromToken === order.fromToken }
-      if (toToken != undefined) { isFound = isFound && toToken === order.toToken }
-      if (minFromToken != undefined) { isFound = isFound && order.amountFromToken >= minFromToken }
-      if (maxFromToken != undefined) { isFound = isFound && order.amountFromToken <= maxFromToken }
-      if (minToToken != undefined) { isFound = isFound && order.amountToToken >= minToToken }
-      if (maxToToken != undefined) { isFound = isFound && order.amountToToken <= maxToToken }
+      if (signerToken != undefined) { isFound = isFound && signerToken === order.signerToken }
+      if (senderToken != undefined) { isFound = isFound && senderToken === order.senderToken }
+      if (minSenderAmount != undefined) { isFound = isFound && order.senderAmount >= minSenderAmount }
+      if (maxSenderAmount != undefined) { isFound = isFound && order.senderAmount <= maxSenderAmount }
+      if (minSignerAmount != undefined) { isFound = isFound && order.signerAmount >= minSignerAmount }
+      if (maxSignerAmount != undefined) { isFound = isFound && order.signerAmount <= maxSignerAmount }
       return isFound;
     }).forEach((order) => {
       const orderId = order['id'];
@@ -39,8 +38,8 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  editOrder = (id: string, status: TransactionStatus) => {
-    this.database[id]!.status = status;
+  deleteOrder = (id: string) => {
+    this.database[id] = undefined;
     return Promise.resolve();
   }
 
@@ -65,12 +64,12 @@ export class InMemoryDatabase implements Database {
 
   private extractData(order: Order) {
     const lightenOrder = new Order(
-      order.from,
-      order.fromToken,
-      order.toToken,
-      order.amountFromToken,
-      order.amountToToken,
-      order.expirationDate
+      order.signerWallet,
+      order.signerToken,
+      order.senderToken,
+      order.senderAmount,
+      order.signerAmount,
+      order.expiry
     );
     return lightenOrder;
   }

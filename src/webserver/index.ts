@@ -31,7 +31,7 @@ export class Webserver {
     router.route("/orders/:orderId?")
       .get(this.orderController.getOrders)
       .post(this.orderController.addOrder)
-      .put(this.orderController.editOrder) // only available when debug mode is enabled to simulate mined event
+      .delete(this.orderController.deleteOrder) // only available when debug mode is enabled
     router.route("/peers/:peerUrl?")
       .get(this.peersController.getPeers)
       .post(this.peersController.addPeers)
