@@ -1,7 +1,7 @@
+import { Order } from '@airswap/typescript';
 import { Request, Response } from 'express';
 import { Database } from '../../database/Database';
-import { Order } from './../../model/Order';
-import { TransactionStatus } from './../../model/TransactionStatus';
+import { OtcOrder } from './../../model/OtcOrder';
 import { Peers } from './../../peer/Peers';
 import { RootController } from './../RootController';
 describe("Home controller", () => {
@@ -9,11 +9,11 @@ describe("Home controller", () => {
     let fakeDb: Partial<Database>;
     let fakePeers: Partial<Peers>;
     let registryAddress = "registry";
-    const order = forgeOrder();
+    const OtcOrder = forgeOtcOrder(1653854738949, 1653854738959);
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve( ({ "aze": order })) as Promise<Record<string, Order>>),
+            getOrders: jest.fn(() => Promise.resolve(({ "aze": OtcOrder })) as Promise<Record<string, OtcOrder>>),
         };
         fakePeers = {
             getPeers: jest.fn(() => [])
@@ -36,13 +36,21 @@ describe("Home controller", () => {
         {
             database: {
                 aze: {
-                    from: "from",
-                    fromToken: "fromToken",
-                    toToken: "toToken",
-                    amountFromToken: 1,
-                    amountToToken: 2,
-                    expirationDate: new Date(1653138423537),
-                    status: "IN_PROGRESS",
+                    addedOn: 1653854738949,
+                    id: "id",
+                    order: {
+                        expiry: "1653854738959",
+                        nonce: "nonce",
+                        r: "r",
+                        s: "s",
+                        senderAmount: "10",
+                        senderToken: "ETH",
+                        signerAmount: "5",
+                        signerToken: "dai",
+                        signerWallet: "signerWallet",
+                        v: "v",
+
+                    },
                 },
             },
             peers: [],
@@ -55,6 +63,21 @@ describe("Home controller", () => {
     });
 });
 
-function forgeOrder() {
-    return new Order("from", "fromToken", "toToken", 1, 2, new Date(1653138423537), TransactionStatus.IN_PROGRESS);
+function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
+    return new OtcOrder(forgeOrder(`${expiryDate}`), expectedAddedDate, "id");
+}
+
+function forgeOrder(expiryDate: string): Order {
+    return {
+        nonce: "nonce",
+        expiry: expiryDate,
+        signerWallet: "signerWallet",
+        signerToken: "dai",
+        signerAmount: "5",
+        senderToken: "ETH",
+        senderAmount: "10",
+        v: "v",
+        r: "r",
+        s: "s"
+    };
 }

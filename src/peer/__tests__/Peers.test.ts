@@ -106,7 +106,7 @@ describe("Peers", () => {
             expect(peer.containsUnknownPeers(['a_url'])).toBe(true);
         });
 
-        test("return false if peers is the sameout of order", () => {
+        test("return false if peers is the sameout of OtcOrder", () => {
             const peer = new Peers(fakeDb as Database, "localhost", fakePeersClient as PeersClient, fakeBroadcastClient as BroadcastClient);
             peer.addPeers(['another', 'a_url']);
             expect(peer.containsUnknownPeers(['a_url', 'another'])).toBe(false);

@@ -1,19 +1,19 @@
-import { Order } from './../model/Order.js';
-import { TransactionStatus } from './../model/TransactionStatus.js';
+import { OtcOrder } from '../model/OtcOrder.js';
+
 export interface Database {
-    addOrder(order: Order): Promise<void>;
+    addOrder(OtcOrder: OtcOrder): Promise<void>;
 
-    addAll(orders: Record<string, Order>):  Promise<void>;
+    addAll(orders: Record<string, OtcOrder>):  Promise<void>;
 
-    editOrder(id: string, status: TransactionStatus):  Promise<void>;
+    deleteOrder(id: String):  Promise<void>;
 
-    getOrder(id: string): Promise<Order>;
+    getOrder(id: string): Promise<Record<string, OtcOrder>>;
     
-    getOrders(): Promise<Record<string, Order>>;
+    getOrders(): Promise<Record<string, OtcOrder>>;
         
-    getOrderBy(fromToken: string, toToken: string, minFromToken: number, maxFromToken: number, minToToken: number, maxToToken: number): Promise<Record<string, Order>>;
+    getOrderBy(signerToken?: string, senderToken?: string, minSignerAmount?: number, maxSignerAmount?: number, minSenderAmount?: number, maxSenderAmount?: number): Promise<Record<string, OtcOrder>>;
 
     orderExists(id: string): Promise<boolean>;
 
-    generateId(order: Order): string;
+    generateId(OtcOrder: OtcOrder): string;
 }
