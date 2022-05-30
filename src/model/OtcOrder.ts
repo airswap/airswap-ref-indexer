@@ -6,9 +6,9 @@ export class OtcOrder {
     order: Order;
     addedOn: number;
 
-    constructor(unsignedOrder: Order, addedOn: number, id?: string) {
+    constructor(order: Order, addedOn: number, id?: string) {
         this.id = id;
-        this.order = unsignedOrder;
+        this.order = order;
         this.addedOn = addedOn;
     }
 }
