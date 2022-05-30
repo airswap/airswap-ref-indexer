@@ -23,7 +23,8 @@ export class OrderController {
     addOrder = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
 
-        if (!request.body || Object.keys(request.body).length == 0 || !isValidOrder(request.body.order) || !isDateInRange(request.body.order?.expiry)) {
+        if (!request.body || Object.keys(request.body).length == 0 || !isValidOrder(request.body.order) 
+        || !amountAreValid(request.body.order) || !isDateInRange(request.body.order?.expiry)) {
             response.sendStatus(400);
             return;
         }
@@ -90,4 +91,12 @@ function isDateInRange(date: number) {
     let maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + validationDurationInWeek * 7);
     return date < maxDate.getTime();
+}
+
+function amountAreValid(order: any) {
+    return isNumeric(order.senderAmount) && isNumeric(order.signerAmount)  
+}
+
+function isNumeric(value: string) {
+    return value !== undefined && value !== null && value.trim() !== "" && !isNaN(+value) && +value > 0
 }

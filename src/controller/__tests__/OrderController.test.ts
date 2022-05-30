@@ -266,94 +266,9 @@ describe("Order controller", () => {
             });
 
             test("Add order missing data", async () => {
-                const orderMissingFromToken = {
-                    signerWallet: "signerWallet",
-                    // signerToken: "signerToken",
-                    senderToken: "senderToken",
-                    senderAmount: 1,
-                    signerAmount: 2,
-                    expiry: 1653138423537,
-                };
+                const orderMissingexpiry = forgeOtcOrder();
+                orderMissingexpiry.order.expiry = undefined;
 
-                const orderMissingFrom = {
-                    // signerWallet: "signerWallet",
-                    signerToken: "signerToken",
-                    senderToken: "senderToken",
-                    senderAmount: 1,
-                    signerAmount: 2,
-                    expiry: 1653138423537,
-                };
-
-                const orderMissingToToken = {
-                    signerWallet: "signerWallet",
-                    signerToken: "signerToken",
-                    // senderToken: "senderToken",
-                    senderAmount: 1,
-                    signerAmount: 2,
-                    expiry: 1653138423537,
-                };
-
-                const orderMissingAmountFromToken = {
-                    signerWallet: "signerWallet",
-                    signerToken: "signerToken",
-                    senderToken: "senderToken",
-                    // senderAmount: 1,
-                    signerAmount: 2,
-                    expiry: 1653138423537,
-                };
-
-                const orderMissingAmountToToken = {
-                    signerWallet: "signerWallet",
-                    signerToken: "signerToken",
-                    senderToken: "senderToken",
-                    senderAmount: 1,
-                    // signerAmount: 2,
-                    expiry: 1653138423537,
-                };
-
-                const orderMissingexpiry = {
-                    signerWallet: "signerWallet",
-                    signerToken: "signerToken",
-                    senderToken: "senderToken",
-                    senderAmount: 1,
-                    signerAmount: 2,
-                    // expiry: 1653138423537,
-                };
-
-                const mockRequestOrderMissingFromToken = {
-                    body: orderMissingFromToken,
-                    params: {},
-                    method: "POST",
-                    url: "/orders"
-                } as Request;
-
-                const mockRequestOrderMissingFrom = {
-                    body: orderMissingFrom,
-                    params: {},
-                    method: "POST",
-                    url: "/orders"
-                } as Request;
-
-                const mockRequestOrderMissingToToken = {
-                    body: orderMissingToToken,
-                    params: {},
-                    method: "POST",
-                    url: "/orders"
-                } as Request;
-
-                const mockRequestOrderMissingAmountFromToken = {
-                    body: orderMissingAmountFromToken,
-                    params: {},
-                    method: "POST",
-                    url: "/orders"
-                } as Request;
-
-                const mockRequestOrderMissingAmountToToken = {
-                    body: orderMissingAmountToToken,
-                    params: {},
-                    method: "POST",
-                    url: "/orders"
-                } as Request;
                 const mockRequestOrderMissingexpiry = {
                     body: orderMissingexpiry,
                     params: {},
@@ -366,11 +281,6 @@ describe("Order controller", () => {
                     sendStatus: jest.fn(),
                 } as Partial<Response>;
 
-                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderMissingFrom, mockResponse as Response);
-                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderMissingFromToken, mockResponse as Response);
-                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderMissingToToken, mockResponse as Response);
-                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderMissingAmountFromToken, mockResponse as Response);
-                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderMissingAmountToToken, mockResponse as Response);
                 await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderMissingexpiry, mockResponse as Response);
 
                 expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
@@ -380,31 +290,21 @@ describe("Order controller", () => {
             });
 
             test("Add order invalid data", async () => {
-                const orderBadValueAmountFromToken = {
-                    signerWallet: "signerWallet",
-                    signerToken: "signerToken",
-                    senderToken: "senderToken",
-                    senderAmount: "a",
-                    signerAmount: 2,
-                    expiry: 1653138423537,
-                };
-                const mockRequestOrderBadValueAmountFromToken = {
-                    body: orderBadValueAmountFromToken,
+                const orderBadValueSenderAmount = forgeOtcOrder();
+                orderBadValueSenderAmount.order.senderAmount = "a";
+
+                const mockRequestOrderBadValueSenderAmount = {
+                    body: orderBadValueSenderAmount,
                     params: {},
                     method: "POST",
                     url: "/orders"
                 } as Request;
 
-                const orderBadValueAmountToToken = {
-                    signerWallet: "signerWallet",
-                    signerToken: "signerToken",
-                    senderToken: "senderToken",
-                    senderAmount: 1,
-                    signerAmount: "b",
-                    expiry: 1653138423537,
-                };
-                const mockRequestOrderBadValueAmountToToken = {
-                    body: orderBadValueAmountToToken,
+                const orderBadValueSignerAmount = forgeOtcOrder();
+                orderBadValueSignerAmount.order.signerAmount = "a";
+
+                const mockRequestOrderBadValueSignerAmount = {
+                    body: orderBadValueSignerAmount,
                     params: {},
                     method: "POST",
                     url: "/orders"
@@ -415,8 +315,8 @@ describe("Order controller", () => {
                     sendStatus: jest.fn(),
                 } as Partial<Response>;
 
-                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderBadValueAmountFromToken, mockResponse as Response);
-                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderBadValueAmountToToken, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderBadValueSenderAmount, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderBadValueSignerAmount, mockResponse as Response);
 
 
                 expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
@@ -426,15 +326,10 @@ describe("Order controller", () => {
             });
 
             test("Add order invalid date", async () => {
-                const orderDateNotInRange = {
-                    signerWallet: "signerWallet",
-                    signerToken: "signerToken",
-                    senderToken: "senderToken",
-                    senderAmount: 1,
-                    signerAmount: 2,
-                    expiry: new Date().getTime() + (1000 * 3600 * 24 * 90),
-                };
-                const mockRequestOrderDateNotInRange = {
+                const orderDateNotInRange = forgeOtcOrder();
+                orderDateNotInRange.order.expiry = `${new Date().getTime()}${1000 * 3600 * 24 * 100}`;
+
+                const mockRequestOrderExpiryNotInRange = {
                     body: orderDateNotInRange,
                     params: {},
                     method: "POST",
@@ -446,7 +341,7 @@ describe("Order controller", () => {
                     sendStatus: jest.fn(),
                 } as Partial<Response>;
 
-                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderDateNotInRange, mockResponse as Response);
+                await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequestOrderExpiryNotInRange, mockResponse as Response);
 
 
                 expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
