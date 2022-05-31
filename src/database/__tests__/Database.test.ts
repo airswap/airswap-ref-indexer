@@ -1,8 +1,8 @@
 import { Order } from '@airswap/typescript';
-import { AceBaseClient } from "../AcebaseClient";
 import { OtcOrder } from '../../model/OtcOrder';
-import { InMemoryDatabase } from '../InMemoryDatabase';
+import { AceBaseClient } from "../AcebaseClient";
 import { Database } from '../Database';
+import { InMemoryDatabase } from '../InMemoryDatabase';
 
 describe("Database implementations", () => {
     let inMemoryDatabase: InMemoryDatabase;
@@ -106,9 +106,9 @@ describe("Database implementations", () => {
             s: "s"
         } as unknown as Order;
 
-        const otcOrder1 = new OtcOrder(order1, 1653138423537, "id1");
-        const otcOrder2 = new OtcOrder(order2, 1653138423537, "id2");
-        const otcOrder3 = new OtcOrder(order3, 1653138423537, "id3");
+        const otcOrder1 = new OtcOrder(order1, "1653138423537", "id1");
+        const otcOrder2 = new OtcOrder(order2, "1653138423537", "id2");
+        const otcOrder3 = new OtcOrder(order3, "1653138423537", "id3");
         await db.addOrder(otcOrder1);
         await db.addOrder(otcOrder2);
         await db.addOrder(otcOrder3);
@@ -196,7 +196,7 @@ describe("Database implementations", () => {
 
         const orderExists = await db.getOrder("id");
 
-        expect(orderExists).toEqual({id: otcOrder});
+        expect(orderExists).toEqual({ id: otcOrder });
         return Promise.resolve();
     }
 
@@ -211,7 +211,7 @@ describe("Database implementations", () => {
     }
 
     async function hashObject(db: Database) {
-        const otcOrder = new OtcOrder(forgeOrder("1653138423547"), new Date(1653138423537).getTime(), "id");
+        const otcOrder = new OtcOrder(forgeOrder("1653138423547"), `${new Date(1653138423537).getTime()}`, "id");
 
         const id = db.generateId(otcOrder);
 
@@ -221,7 +221,7 @@ describe("Database implementations", () => {
 });
 
 function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
-    return new OtcOrder(forgeOrder(`${expiryDate}`), expectedAddedDate, "id");
+    return new OtcOrder(forgeOrder(`${expiryDate}`), `${expectedAddedDate}`, "id");
 }
 
 function forgeOrder(expiryDate: string): Order {

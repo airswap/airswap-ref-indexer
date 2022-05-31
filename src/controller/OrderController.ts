@@ -1,11 +1,11 @@
 
+import { Order } from '@airswap/typescript';
 import { isValidOrder } from '@airswap/utils';
 import { Request, Response } from "express";
 import { Database } from "../database/Database.js";
-import { Peers } from "../peer/Peers.js";
 import { mapAnyToOrder } from '../mapper/mapAnyToOrder.js';
 import { OtcOrder } from '../model/OtcOrder.js';
-import { Order } from '@airswap/typescript';
+import { Peers } from "../peer/Peers.js";
 
 const validationDurationInWeek = 1;
 
@@ -35,7 +35,8 @@ export class OrderController {
             return;
         }
 
-        const id = this.database.generateId(new OtcOrder(order, request.body.addedOn));
+        const otcOrder = new OtcOrder(order, request.body.addedOn || `${new Date().getTime()}`);
+        const id = this.database.generateId(otcOrder);
         const orderExists = await this.database.orderExists(id);
         if (orderExists) {
             console.log("already exists")
@@ -43,7 +44,7 @@ export class OrderController {
             return;
         }
 
-        const otcOrder = new OtcOrder(order, request.body.addedOn || `${new Date().getTime()}`, id);
+        otcOrder.id = id;
         this.database.addOrder(otcOrder);
         this.peers.broadcast(request.method, request.url, request.body);
         response.sendStatus(204);

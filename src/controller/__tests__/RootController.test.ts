@@ -36,7 +36,7 @@ describe("Home controller", () => {
         {
             database: {
                 aze: {
-                    addedOn: 1653854738949,
+                    addedOn: "1653854738949",
                     id: "id",
                     order: {
                         expiry: "1653854738959",
@@ -64,7 +64,7 @@ describe("Home controller", () => {
 });
 
 function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
-    return new OtcOrder(forgeOrder(`${expiryDate}`), expectedAddedDate, "id");
+    return new OtcOrder(forgeOrder(`${expiryDate}`), `${expectedAddedDate}`, "id");
 }
 
 function forgeOrder(expiryDate: string): Order {

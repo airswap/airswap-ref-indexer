@@ -49,7 +49,7 @@ describe("OtcOrder client", () => {
 });  
 
 function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
-    return new OtcOrder(forgeOrder(`${expiryDate}`), expectedAddedDate, "id");
+    return new OtcOrder(forgeOrder(`${expiryDate}`), `${expectedAddedDate}`, "id");
 }
 
 function forgeOrder(expiryDate: string): Order {

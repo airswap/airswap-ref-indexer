@@ -239,7 +239,7 @@ describe("Order controller", () => {
         describe("Add Order", () => {
             test("Add order nominal & broadcast", async () => {
                 const order = forgeOrder("1653900784696");
-                const expectedForgeId = new OtcOrder(forgeOrder(`1653900784696`), undefined, undefined);
+                const expectedForgeId = new OtcOrder(forgeOrder(`1653900784696`), "1653900784706", undefined);
                 const expected = forgeOtcOrder("1653900784706", "1653900784696");
                 expected.id = "a";
                 const mockRequest = {
@@ -255,13 +255,16 @@ describe("Order controller", () => {
                 } as Partial<Response>;
 
                 //@ts-ignore
-                fakeDb.generateId.mockImplementation(() => "a");
+                fakeDb.generateId.mockImplementation((order) => {
+                    expect(order).toEqual(expectedForgeId); // https://github.com/facebook/jest/issues/7950
+                    return "a";
+                });
                 //@ts-ignore
                 fakeDb.orderExists.mockImplementation(() => false);
 
                 await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequest, mockResponse as Response);
 
-                expect(fakeDb.generateId).toHaveBeenCalledWith(expectedForgeId);
+                expect(fakeDb.generateId).toHaveBeenCalledTimes(1);
                 expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
                 expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
                 expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/orders", {order});
@@ -432,7 +435,7 @@ describe("Order controller", () => {
     });
 });
 
-function forgeOtcOrder(expectedAddedDate: any, expiryDate: string) {
+function forgeOtcOrder(expectedAddedDate: string, expiryDate: string) {
     return new OtcOrder(forgeOrder(expiryDate), expectedAddedDate, "id");
 }
 
