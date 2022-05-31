@@ -5,6 +5,7 @@ import { Database } from "../database/Database.js";
 import { Peers } from "../peer/Peers.js";
 import { mapAnyToOrder } from '../mapper/mapAnyToOrder.js';
 import { OtcOrder } from '../model/OtcOrder.js';
+import { Order } from '@airswap/typescript';
 
 const validationDurationInWeek = 1;
 
@@ -23,13 +24,17 @@ export class OrderController {
     addOrder = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
 
-        if (!request.body || Object.keys(request.body).length == 0 || !isValidOrder(request.body.order) 
-        || !amountAreValid(request.body.order) || !isDateInRange(request.body.order?.expiry)) {
+        if (!request.body || Object.keys(request.body).length == 0 || !isValidOrder(request.body.order)) {
             response.sendStatus(400);
             return;
         }
 
         const order = mapAnyToOrder(request.body.order);
+        if (!amountAreValid(order) || !isDateInRange(order.expiry)) {
+            response.sendStatus(400);
+            return;
+        }
+
         const id = this.database.generateId(new OtcOrder(order, request.body.addedOn));
         const orderExists = await this.database.orderExists(id);
         if (orderExists) {
@@ -37,6 +42,7 @@ export class OrderController {
             response.sendStatus(204);
             return;
         }
+        
         const otcOrder = new OtcOrder(order, request.body.addedOn, id);
         this.database.addOrder(otcOrder);
         this.peers.broadcast(request.method, request.url, request.body);
@@ -87,14 +93,18 @@ export class OrderController {
     }
 }
 
-function isDateInRange(date: number) {
+function isDateInRange(date: string) {
+    if (!isNumeric(date)) {
+        return false;
+    }
+
     let maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + validationDurationInWeek * 7);
-    return date < maxDate.getTime();
+    return +date < maxDate.getTime();
 }
 
-function amountAreValid(order: any) {
-    return isNumeric(order.senderAmount) && isNumeric(order.signerAmount)  
+function amountAreValid(order: Order) {
+    return isNumeric(order.senderAmount) && isNumeric(order.signerAmount)
 }
 
 function isNumeric(value: string) {
