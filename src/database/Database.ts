@@ -15,5 +15,5 @@ export interface Database {
 
     orderExists(id: string): Promise<boolean>;
 
-    generateId(OtcOrder: OtcOrder): string;
+    generateId(otcOrder: OtcOrder): string;
 }

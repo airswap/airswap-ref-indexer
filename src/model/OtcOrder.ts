@@ -1,6 +1,5 @@
 import { Order } from '@airswap/typescript';
 
-
 export class OtcOrder {
     id: string;
     order: Order;

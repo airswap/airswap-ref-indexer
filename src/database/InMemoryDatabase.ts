@@ -58,8 +58,8 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve(Object.keys(this.database).indexOf(id) != -1);
   }
 
-  generateId(OtcOrder: OtcOrder) {
-    const lightenOrder = OtcOrder.order;
+  generateId(otcOrder: OtcOrder) {
+    const lightenOrder = otcOrder.order;
     const stringObject = JSON.stringify(lightenOrder);
     const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
     return hashed.digest("hex");
