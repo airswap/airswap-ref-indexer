@@ -30,7 +30,7 @@ export class OrderController {
         }
 
         const order = mapAnyToOrder(request.body.order);
-        if (!amountAreValid(order) || !isDateInRange(order.expiry)) {
+        if (!areAmountValids(order) || !isDateInRange(order.expiry)) {
             response.sendStatus(400);
             return;
         }
@@ -104,7 +104,7 @@ function isDateInRange(date: string) {
     return +date < maxDate.getTime();
 }
 
-function amountAreValid(order: Order) {
+function areAmountValids(order: Order) {
     return isNumeric(order.senderAmount) && isNumeric(order.signerAmount)
 }
 
