@@ -5,6 +5,10 @@ import { OtcOrder } from '../../model/OtcOrder';
 import { Peers } from '../../peer/Peers';
 import { OrderController } from '../OrderController';
 
+jest
+    .useFakeTimers()
+    .setSystemTime(new Date(1653900784706));
+
 describe("Order controller", () => {
 
     let fakeDb: Partial<Database>;
@@ -12,9 +16,9 @@ describe("Order controller", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve(({ "aze": forgeOtcOrder(1653900784696, 1653900784706) })) as Promise<Record<string, OtcOrder>>),
-            getOrder: jest.fn(() => Promise.resolve({ "aze": forgeOtcOrder(1653900784696, 1653900784706) })),
-            getOrderBy: jest.fn(() => Promise.resolve(({ "aze": forgeOtcOrder(1653900784696, 1653900784706) })) as Promise<Record<string, OtcOrder>>),
+            getOrders: jest.fn(() => Promise.resolve(({ "aze": forgeOtcOrder("1653900784696", "1653900784706") })) as Promise<Record<string, OtcOrder>>),
+            getOrder: jest.fn(() => Promise.resolve({ "aze": forgeOtcOrder("1653900784696", "1653900784706") })),
+            getOrderBy: jest.fn(() => Promise.resolve(({ "aze": forgeOtcOrder("1653900784696", "1653900784706") })) as Promise<Record<string, OtcOrder>>),
             addOrder: jest.fn(() => Promise.resolve()),
             orderExists: jest.fn(() => Promise.resolve(true)),
             generateId: jest.fn(),
@@ -73,7 +77,7 @@ describe("Order controller", () => {
             });
 
             test("Delete order", async () => {
-                const order = forgeOtcOrder();
+                const order = forgeOtcOrder("1653900784696", "1653900784706");
                 const mockRequest = {
                     body: {},
                     params: { orderId: "a" } as Record<string, any>,
@@ -118,7 +122,7 @@ describe("Order controller", () => {
                 {
                     orders: {
                         aze: {
-                            addedOn: 1653900784696,
+                            addedOn: "1653900784696",
                             id: "id",
                             order: {
                                 expiry: "1653900784706",
@@ -159,7 +163,7 @@ describe("Order controller", () => {
                 {
                     orders: {
                         aze: {
-                            addedOn: 1653900784696,
+                            addedOn: "1653900784696",
                             id: "id",
                             order: {
                                 expiry: "1653900784706",
@@ -207,7 +211,7 @@ describe("Order controller", () => {
                 {
                     orders: {
                         aze: {
-                            addedOn: 1653900784696,
+                            addedOn: "1653900784696",
                             id: "id",
                             order: {
                                 expiry: "1653900784706",
@@ -234,13 +238,12 @@ describe("Order controller", () => {
 
         describe("Add Order", () => {
             test("Add order nominal & broadcast", async () => {
-                const expectedForgeId = forgeOtcOrder(1653900784696, 1653900784706);
-                expectedForgeId.id = undefined;
-                const expected = forgeOtcOrder(1653900784696, 1653900784706);
+                const order = forgeOrder("1653900784696");
+                const expectedForgeId = new OtcOrder(forgeOrder(`1653900784696`), undefined, undefined);
+                const expected = forgeOtcOrder("1653900784706", "1653900784696");
                 expected.id = "a";
-                const order = forgeOtcOrder(1653900784696, 1653900784706);                
                 const mockRequest = {
-                    body: order,
+                    body: { order },
                     params: {},
                     method: "POST",
                     url: "/orders"
@@ -261,16 +264,16 @@ describe("Order controller", () => {
                 expect(fakeDb.generateId).toHaveBeenCalledWith(expectedForgeId);
                 expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
                 expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
-                expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/orders", order);
+                expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/orders", {order});
                 expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
             });
 
             test("Add order missing data", async () => {
-                const orderMissingexpiry = forgeOtcOrder();
-                orderMissingexpiry.order.expiry = undefined;
+                const orderMissingExpiry = forgeOtcOrder("1653900784696", "1653900784706");
+                orderMissingExpiry.order.expiry = undefined;
 
                 const mockRequestOrderMissingexpiry = {
-                    body: orderMissingexpiry,
+                    body: orderMissingExpiry,
                     params: {},
                     method: "POST",
                     url: "/orders"
@@ -290,7 +293,7 @@ describe("Order controller", () => {
             });
 
             test("Add order invalid data", async () => {
-                const orderBadValueSenderAmount = forgeOtcOrder();
+                const orderBadValueSenderAmount = forgeOtcOrder("1653900784696", "1653900784706");
                 orderBadValueSenderAmount.order.senderAmount = "a";
 
                 const mockRequestOrderBadValueSenderAmount = {
@@ -300,7 +303,7 @@ describe("Order controller", () => {
                     url: "/orders"
                 } as Request;
 
-                const orderBadValueSignerAmount = forgeOtcOrder();
+                const orderBadValueSignerAmount = forgeOtcOrder("1653900784696", "1653900784706");
                 orderBadValueSignerAmount.order.signerAmount = "a";
 
                 const mockRequestOrderBadValueSignerAmount = {
@@ -326,7 +329,7 @@ describe("Order controller", () => {
             });
 
             test("Add order invalid date", async () => {
-                const orderDateNotInRange = forgeOtcOrder();
+                const orderDateNotInRange = forgeOtcOrder("1653900784696", "1653900784706");
                 orderDateNotInRange.order.expiry = `${new Date().getTime()}${1000 * 3600 * 24 * 100}`;
 
                 const mockRequestOrderExpiryNotInRange = {
@@ -351,7 +354,7 @@ describe("Order controller", () => {
             });
 
             test("Add: already added", async () => {
-                const order = forgeOtcOrder(1653900784696, 1653900784706);
+                const order = forgeOtcOrder("1653900784696", "1653900784706");
                 const mockRequest = {
                     body: order,
                     params: {},
@@ -429,8 +432,8 @@ describe("Order controller", () => {
     });
 });
 
-function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
-    return new OtcOrder(forgeOrder(`${expiryDate}`), expectedAddedDate, "id");
+function forgeOtcOrder(expectedAddedDate: any, expiryDate: string) {
+    return new OtcOrder(forgeOrder(expiryDate), expectedAddedDate, "id");
 }
 
 function forgeOrder(expiryDate: string): Order {

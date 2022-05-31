@@ -42,8 +42,8 @@ export class OrderController {
             response.sendStatus(204);
             return;
         }
-        
-        const otcOrder = new OtcOrder(order, request.body.addedOn, id);
+
+        const otcOrder = new OtcOrder(order, request.body.addedOn || `${new Date().getTime()}`, id);
         this.database.addOrder(otcOrder);
         this.peers.broadcast(request.method, request.url, request.body);
         response.sendStatus(204);
