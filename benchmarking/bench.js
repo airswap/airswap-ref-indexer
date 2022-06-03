@@ -2,7 +2,7 @@ import axios from "axios";
 
 async function bench() {
     let lastDate = new Date().getTime();
-    for (let index = 1; index < 5000; index++) {
+    for (let index = 1; index < 100; index++) {
         if (index % 100 === 0) {
             const now = new Date().getTime();
             const elapsed = now - lastDate;

@@ -109,5 +109,5 @@ function areAmountValids(order: Order) {
 }
 
 function isNumeric(value: string) {
-    return value !== undefined && value !== null && value.trim() !== "" && !isNaN(+value) && +value > 0
+    return value !== undefined && value !== null && `${value}`.trim() !== "" && !isNaN(+value) && +value > 0
 }
