@@ -65,7 +65,6 @@ export class AceBaseClient implements Database {
     async addOrder(otcOrder: OtcOrder): Promise<void> {
         let toAdd = { ...otcOrder, ...otcOrder.order};
         delete toAdd.order;
-        console.log(toAdd)
         await this.db.ref(ENTRY_REF).push(toAdd);
         return Promise.resolve();
     }
