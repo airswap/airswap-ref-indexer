@@ -49,18 +49,21 @@ describe("OtcOrder client", () => {
 });  
 
 function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
-    return new OtcOrder(forgeOrder(`${expiryDate}`), `${expectedAddedDate}`, "id");
+    return new OtcOrder(forgeOrder(expiryDate), expectedAddedDate, "id");
 }
 
-function forgeOrder(expiryDate: string): Order {
+function forgeOrder(expiryDate: number): Order {
     return {
         nonce: "nonce",
+        //@ts-ignore
         expiry: expiryDate,
         signerWallet: "signerWallet",
         signerToken: "dai",
-        signerAmount: "5",
+        //@ts-ignore
+        signerAmount: 5,
         senderToken: "ETH",
-        senderAmount: "10",
+        //@ts-ignore
+        senderAmount: 10,
         v: "v",
         r: "r",
         s: "s"

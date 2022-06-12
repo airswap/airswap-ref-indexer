@@ -1,14 +1,22 @@
 import { Order } from '@airswap/typescript';
+import { toNumber } from '../converter/index.js';
 
 export function mapAnyToOrder(data: any): Order {
+    if (!data || typeof data != 'object') {
+        return undefined;
+    }
+
     return {
         nonce: data.nonce,
-        expiry: data.expiry,
+        //@ts-ignore
+        expiry: toNumber(data.expiry),
         signerWallet: data.signerWallet,
         signerToken: data.signerToken,
-        signerAmount: data.signerAmount,
+        //@ts-ignore
+        signerAmount: toNumber(data.signerAmount),
         senderToken: data.senderToken,
-        senderAmount: data.senderAmount,
+        //@ts-ignore
+        senderAmount: toNumber(data.senderAmount),
         r: data.r,
         s: data.s,
         v: data.v

@@ -1,3 +1,4 @@
+import { OrderResponse } from './../../model/OrderResponse';
 import { Order } from '@airswap/typescript';
 import { Request, Response } from 'express';
 import { Database } from '../../database/Database';
@@ -13,7 +14,7 @@ describe("Home controller", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve(({ "aze": OtcOrder })) as Promise<Record<string, OtcOrder>>),
+            getOrders: jest.fn(() => Promise.resolve((new OrderResponse({ "aze": OtcOrder }, 1))) as Promise<OrderResponse>),
         };
         fakePeers = {
             getPeers: jest.fn(() => [])
@@ -35,23 +36,26 @@ describe("Home controller", () => {
         const expected =
         {
             database: {
-                aze: {
-                    addedOn: "1653854738949",
-                    id: "id",
-                    order: {
-                        expiry: "1653854738959",
-                        nonce: "nonce",
-                        r: "r",
-                        s: "s",
-                        senderAmount: "10",
-                        senderToken: "ETH",
-                        signerAmount: "5",
-                        signerToken: "dai",
-                        signerWallet: "signerWallet",
-                        v: "v",
+                orders: {
+                    aze: {
+                        addedOn: 1653854738949,
+                        id: "id",
+                        order: {
+                            expiry: 1653854738959,
+                            nonce: "nonce",
+                            r: "r",
+                            s: "s",
+                            senderAmount: 10,
+                            senderToken: "ETH",
+                            signerAmount: 5,
+                            signerToken: "dai",
+                            signerWallet: "signerWallet",
+                            v: "v",
 
+                        },
                     },
                 },
+                totalPages: 1
             },
             peers: [],
             registry: "registry",
@@ -64,18 +68,21 @@ describe("Home controller", () => {
 });
 
 function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
-    return new OtcOrder(forgeOrder(`${expiryDate}`), `${expectedAddedDate}`, "id");
+    return new OtcOrder(forgeOrder(expiryDate), expectedAddedDate, "id");
 }
 
-function forgeOrder(expiryDate: string): Order {
+function forgeOrder(expiryDate: number): Order {
     return {
         nonce: "nonce",
+        //@ts-ignore
         expiry: expiryDate,
         signerWallet: "signerWallet",
         signerToken: "dai",
-        signerAmount: "5",
+        //@ts-ignore
+        signerAmount: 5,
         senderToken: "ETH",
-        senderAmount: "10",
+        //@ts-ignore
+        senderAmount: 10,
         v: "v",
         r: "r",
         s: "s"

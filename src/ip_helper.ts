@@ -9,9 +9,7 @@ export function getLocalIp() {
       if (net === undefined) {
         continue;
       }
-      // 'IPv4' is in Node <= 17, from 18 it's a number 4 or 6
-      const familyV4Value = typeof net.family === 'string' ? 'IPv4' : 4;
-      if (net.family === familyV4Value && !net.internal) {
+      if (net.family === "IPv4" && !net.internal) {
         if (!results[name]) {
           results[name] = [];
         }

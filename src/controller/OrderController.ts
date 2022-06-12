@@ -1,11 +1,13 @@
-
+import { OrderResponse } from './../model/OrderResponse';
 import { Order } from '@airswap/typescript';
 import { isValidOrder } from '@airswap/utils';
 import { Request, Response } from "express";
+import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
 import { Database } from "../database/Database.js";
 import { mapAnyToOrder } from '../mapper/mapAnyToOrder.js';
 import { OtcOrder } from '../model/OtcOrder.js';
 import { Peers } from "../peer/Peers.js";
+import { isDateInRange, isNumeric } from '../validator/index.js';
 
 const validationDurationInWeek = 1;
 
@@ -30,12 +32,13 @@ export class OrderController {
         }
 
         const order = mapAnyToOrder(request.body.order);
-        if (!areAmountValids(order) || !isDateInRange(order.expiry)) {
+        if (!areNumberFieldsValid(order) || !isDateInRange(order.expiry, validationDurationInWeek)) {
             response.sendStatus(400);
             return;
         }
 
-        const otcOrder = new OtcOrder(order, request.body.addedOn || `${new Date().getTime()}`);
+        //@ts-ignore
+        const otcOrder = new OtcOrder(order, +request.body.addedOn || new Date().getTime());
         const id = this.database.generateId(otcOrder);
         const orderExists = await this.database.orderExists(id);
         if (orderExists) {
@@ -73,41 +76,25 @@ export class OrderController {
 
     getOrders = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
-        let orders = undefined;
+        let orders: OrderResponse = undefined;
         if (request.params.orderId) {
             orders = await this.database.getOrder(request.params.orderId);
         }
-        else if (Object.keys(request.query).length === 0) {
+        else if (Object.keys(request.query).filter(key => key !== "filters").length === 0) {
             orders = await this.database.getOrders();
         }
         else {
-            orders = await this.database.getOrderBy(
-                request.query.signerToken as string,
-                request.query.senderToken as string,
-                request.query.minSignerAmount ? +request.query.minSignerAmount : undefined,
-                request.query.maxSignerAmount ? +request.query.maxSignerAmount : undefined,
-                request.query.minSenderAmount ? +request.query.minSenderAmount : undefined,
-                request.query.maxSenderAmount ? +request.query.maxSenderAmount : undefined,
-            );
+            orders = await this.database.getOrderBy(mapAnyToRequestFilter(request.query));
         }
-        response.json({ orders });
+        let result = { ...orders, filters: undefined };
+        if (request.query.filters) {
+            const filters = await this.database.getFilters();
+            result.filters = filters;
+        }
+        response.json(result);
     }
 }
 
-function isDateInRange(date: string) {
-    if (!isNumeric(date)) {
-        return false;
-    }
-
-    let maxDate = new Date();
-    maxDate.setDate(maxDate.getDate() + validationDurationInWeek * 7);
-    return +date < maxDate.getTime();
-}
-
-function areAmountValids(order: Order) {
-    return isNumeric(order.senderAmount) && isNumeric(order.signerAmount)
-}
-
-function isNumeric(value: string) {
-    return value !== undefined && value !== null && `${value}`.trim() !== "" && !isNaN(+value) && +value > 0
+function areNumberFieldsValid(order: Order) {
+    return isNumeric(order.senderAmount) && isNumeric(order.signerAmount) && isNumeric(order.expiry)
 }
