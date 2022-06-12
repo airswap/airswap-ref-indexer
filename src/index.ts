@@ -7,6 +7,7 @@ import { RegistryClient } from './client/RegistryClient.js';
 import { RootController } from './controller/RootController.js';
 import { OrderController } from './controller/OrderController.js';
 import { PeersController } from './controller/PeersController.js';
+import { AceBaseClient } from './database/AcebaseClient.js';
 import { InMemoryDatabase } from './database/InMemoryDatabase.js';
 import { getLocalIp } from "./ip_helper.js";
 import { Peers } from "./peer/Peers.js";
@@ -27,7 +28,7 @@ const orderClient = new OrderClient();
 const peersClient = new PeersClient();
 const broadcastClient = new BroadcastClient();
 const registryClient = new RegistryClient(REGISTRY);
-const database = new InMemoryDatabase();
+const database = getDatabase();
 const peers = new Peers(database, host, peersClient, broadcastClient);
 const rootController = new RootController(peers, database, REGISTRY);
 const orderController = new OrderController(peers, database, debugMode);
@@ -52,7 +53,7 @@ async function requestDataFromOtherPeer() {
     peers.addPeers(peersFromRegistry.peers);
     const peerUrl = "http://" + peers.getConnectablePeers()[0];
     console.log("Configure client");
-    const { data } = await orderClient.getorders(peerUrl);
+    const { data } = await orderClient.getOrders(peerUrl);
     database.addAll(data.orders);
     console.log("Asked all queries to", peerUrl);
   } else {
@@ -92,4 +93,16 @@ async function gracefulShutdown() {
   await database.close();
   await peers.broadcastDisconnectionToOtherPeer();
   process.exit(0);
+}
+
+function getDatabase() {
+  const deleteDbOnStart = process.env.DELETE_DB_ON_START == "1";
+  const databseType = process.env.DATABASE_TYPE;
+  if (databseType === "ACEBASE") {
+    return new AceBaseClient("airswapDb", deleteDbOnStart);
+  } else if (databseType === "IN_MEMORY") {
+    return new InMemoryDatabase();
+  }
+  console.error("Unknown database, check env file !")
+  process.exit(5);
 }

@@ -1,8 +1,11 @@
+
+import { Order } from '@airswap/typescript';
+import { isValidOrder } from '@airswap/utils';
 import { Request, Response } from "express";
 import { Database } from "../database/Database.js";
-import { stringToTransactionStatus, TransactionStatus } from '../model/TransactionStatus.js';
+import { mapAnyToOrder } from '../mapper/mapAnyToOrder.js';
+import { OtcOrder } from '../model/OtcOrder.js';
 import { Peers } from "../peer/Peers.js";
-import { Order } from './../model/Order';
 
 const validationDurationInWeek = 1;
 
@@ -21,14 +24,19 @@ export class OrderController {
     addOrder = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
 
-        if (!request.body || Object.keys(request.body).length == 0 || !isComplete(request.body)) {
+        if (!request.body || Object.keys(request.body).length == 0 || !isValidOrder(request.body.order)) {
             response.sendStatus(400);
             return;
         }
 
-        const order = request.body as Order;
-        order.status = TransactionStatus.IN_PROGRESS;
-        const id = this.database.generateId(order);
+        const order = mapAnyToOrder(request.body.order);
+        if (!areAmountValids(order) || !isDateInRange(order.expiry)) {
+            response.sendStatus(400);
+            return;
+        }
+
+        const otcOrder = new OtcOrder(order, request.body.addedOn || `${new Date().getTime()}`);
+        const id = this.database.generateId(otcOrder);
         const orderExists = await this.database.orderExists(id);
         if (orderExists) {
             console.log("already exists")
@@ -36,41 +44,29 @@ export class OrderController {
             return;
         }
 
-        order.id = id;
-        this.database.addOrder(order);
+        otcOrder.id = id;
+        this.database.addOrder(otcOrder);
         this.peers.broadcast(request.method, request.url, request.body);
         response.sendStatus(204);
     }
 
-    editOrder = async (request: Request, response: Response) => {
+    deleteOrder = async (request: Request, response: Response) => {
         if (!this.isDebugMode) {
             response.sendStatus(404);
             return;
         }
         console.log("R<---", request.method, request.url, request.body);
-        if (!request.params.orderId || !request.body.status) {
+        if (!request.params.orderId) {
             response.sendStatus(400);
             return;
         }
 
-        const status = stringToTransactionStatus(request.body.status)
-        if (status === TransactionStatus.UNKNOWN) {
-            response.sendStatus(403);
-            return;
-        }
-
         if (!this.database.orderExists(request.params.orderId)) {
-            response.sendStatus(403);
+            response.sendStatus(404);
             return;
         }
 
-        const order = await this.database.getOrder(request.params.orderId);
-        if (order.status == status) {
-            response.sendStatus(204);
-            return;
-        }
-
-        this.database.editOrder(request.params.orderId, status);
+        this.database.deleteOrder(request.params.orderId);
         this.peers.broadcast(request.method, request.url, request.body);
         response.sendStatus(204);
     }
@@ -86,33 +82,32 @@ export class OrderController {
         }
         else {
             orders = await this.database.getOrderBy(
-                request.query.fromToken as string,
-                request.query.toToken as string,
-                request.query.minAmountFromToken ? +request.query.minAmountFromToken : undefined,
-                request.query.maxAmountFromToken ? +request.query.maxAmountFromToken : undefined,
-                request.query.minAmountToToken ? +request.query.minAmountToToken : undefined,
-                request.query.maxAmountToToken ? +request.query.maxAmountToToken : undefined,
+                request.query.signerToken as string,
+                request.query.senderToken as string,
+                request.query.minSignerAmount ? +request.query.minSignerAmount : undefined,
+                request.query.maxSignerAmount ? +request.query.maxSignerAmount : undefined,
+                request.query.minSenderAmount ? +request.query.minSenderAmount : undefined,
+                request.query.maxSenderAmount ? +request.query.maxSenderAmount : undefined,
             );
         }
         response.json({ orders });
     }
 }
 
-function isComplete(requestOrder: any): boolean {
-    return isStringValid(requestOrder.from) && isStringValid(requestOrder.fromToken) && isStringValid(requestOrder.toToken) &&
-        isNumberValid(requestOrder.amountFromToken) && isNumberValid(requestOrder.amountToToken) && isDateInRange(requestOrder.expirationDate)
-}
+function isDateInRange(date: string) {
+    if (!isNumeric(date)) {
+        return false;
+    }
 
-function isStringValid(str: string) {
-    return typeof str === "string" && str.trim().length !== 0
-}
-
-function isNumberValid(nb: number) {
-    return typeof +nb === "number" && !isNaN(+nb) && +nb > 0
-}
-
-function isDateInRange(date: number) {
     let maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + validationDurationInWeek * 7);
-    return date <  maxDate.getTime();
+    return +date < maxDate.getTime();
+}
+
+function areAmountValids(order: Order) {
+    return isNumeric(order.senderAmount) && isNumeric(order.signerAmount)
+}
+
+function isNumeric(value: string) {
+    return value !== undefined && value !== null && `${value}`.trim() !== "" && !isNaN(+value) && +value > 0
 }
