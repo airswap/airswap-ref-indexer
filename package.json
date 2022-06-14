@@ -1,4 +1,8 @@
 {
+  "version": "1.0.0-alpha",
+  "engines" : { 
+    "node" : ">=14.19.0"
+  },
   "scripts": {
     "start": "node ./dist/index.js",
     "registry": "node ./dist/registry.js",
