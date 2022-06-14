@@ -64,7 +64,7 @@ export class InMemoryDatabase implements Database {
         orders[`${orderId}`] = OtcOrder;
       });
 
-    return Promise.resolve(new OrderResponse(orders, totalResultsCount / elementPerPage));
+    return Promise.resolve(new OrderResponse(orders,  Math.ceil(totalResultsCount / elementPerPage)));
   }
 
   addOrder(otcOrder: OtcOrder) {
@@ -84,15 +84,15 @@ export class InMemoryDatabase implements Database {
   }
 
   deleteOrder(id: string) {
-    delete this.database[id]; 
+    delete this.database[id];
     return Promise.resolve();
   }
 
   getOrder(id: string): Promise<OrderResponse> {
     const result = {};
     result[id] = this.database[id];
-    if(this.database[id]){
-      return Promise.resolve(new OrderResponse( result, 1));
+    if (this.database[id]) {
+      return Promise.resolve(new OrderResponse(result, 1));
     }
     return Promise.resolve(new OrderResponse(null, 0));
   }
@@ -100,7 +100,7 @@ export class InMemoryDatabase implements Database {
   async getOrders(): Promise<OrderResponse> {
     const size = Object.keys(this.database).length;
     console.log(size);
-    return Promise.resolve(new OrderResponse(this.database, size == 0 ? 0 :Math.ceil(Object.keys(this.database).length / elementPerPage)));
+    return Promise.resolve(new OrderResponse(this.database, size == 0 ? 0 : Math.ceil(Object.keys(this.database).length / elementPerPage)));
   }
 
   getFilters(): Promise<Filters> {

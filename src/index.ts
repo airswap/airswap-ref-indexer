@@ -54,7 +54,7 @@ async function requestDataFromOtherPeer() {
     const peerUrl = "http://" + peers.getConnectablePeers()[0];
     console.log("Configure client");
     const { data } = await orderClient.getOrders(peerUrl);
-    database.addAll(data.orders);
+    database.addAll(data.database.orders);
     console.log("Asked all queries to", peerUrl);
   } else {
     console.log("/!\\ FIRST NODE AVAILABLE !");
