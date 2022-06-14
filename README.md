@@ -27,6 +27,7 @@ Edit the file with the correct values. If you are running the registry on the sa
 
 Then
 >$ yarn && yarn compile
+
 >$ yarn registry
 
 Finally in antoher terminal
