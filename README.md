@@ -27,10 +27,10 @@ Edit the file with the correct values. If you are running the registry on the sa
 
 Then
 >$ yarn && yarn compile
-$ yarn registry
+>$ yarn registry
 
 Finally in antoher terminal
-> yarn start
+> $ yarn start
 
 # Benchmarking node or create fake data:
 > $ node benchmarking/bench.js
