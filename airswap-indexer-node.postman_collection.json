@@ -123,6 +123,24 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{node_url}}/orders",
+							"protocol": "http",
+							"host": [
+								"{{node_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},

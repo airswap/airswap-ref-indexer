@@ -121,8 +121,8 @@ export class AceBaseClient implements Database {
     }
 
     async getOrders(): Promise<OrderResponse> {
-        const data = await this.db.query(ENTRY_REF).get();
-        const totalResults = await this.db.query(ENTRY_REF).count();
+        const data = await this.db.query(ENTRY_REF).take(1000000).get(); // bypass default limitation 
+        const totalResults = await this.db.query(ENTRY_REF).take(1000000).count();
         let mapped = {};
         data.forEach(d => {
             const mapp = this.datarefToRecord(d.val());
