@@ -8,12 +8,8 @@ export class RequestFilter {
     maxSignerAmount?: number;
     minSenderAmount?: number;
     maxSenderAmount?: number;
-    // @todo: use it
     page?: number;
     sortField?: SortField;
     sortOrder?: SortOrder;
     maxAddedDate?: number;
 }
-
-
-

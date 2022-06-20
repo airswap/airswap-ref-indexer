@@ -9,7 +9,9 @@ export function getLocalIp() {
       if (net === undefined) {
         continue;
       }
-      if (net.family === "IPv4" && !net.internal) {
+      // 'IPv4' is in Node <= 17, from 18 it's a number 4 or 6
+      const familyV4Value = typeof net.family === 'string' ? 'IPv4' : 4;
+      if (net.family === familyV4Value && !net.internal) {
         if (!results[name]) {
           results[name] = [];
         }
@@ -17,9 +19,11 @@ export function getLocalIp() {
       }
     }
   }
-  const localIp = process.env.LOCAL_INTERFACES?.split(",")?.map((name) => {
-    return results[name];
-  })
-  .filter(inet => inet != undefined);
+
+  const localIp = process.env.LOCAL_INTERFACES
+    ?.split(",")
+    ?.map((name) => results[name])
+    .filter(inet => inet != undefined);
+
   return localIp[0];
 }

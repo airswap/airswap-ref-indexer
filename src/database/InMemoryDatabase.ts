@@ -99,7 +99,6 @@ export class InMemoryDatabase implements Database {
 
   async getOrders(): Promise<OrderResponse> {
     const size = Object.keys(this.database).length;
-    console.log(size);
     return Promise.resolve(new OrderResponse(this.database, size == 0 ? 0 : Math.ceil(Object.keys(this.database).length / elementPerPage)));
   }
 

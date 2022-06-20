@@ -15,7 +15,7 @@ Compile
 > $ yarn compile
 
 Start the regsitry
-> $  yarn registry
+> $ yarn registry
 
 Start the node
 > $ yarn start
@@ -26,9 +26,9 @@ Start the node
 Edit the file with the correct values. If you are running the registry on the same machine <ip> should be replaced by localhost.
 
 Then
->$ yarn && yarn compile
+> $ yarn && yarn compile
 
->$ yarn registry
+> $ yarn registry
 
 Finally in antoher terminal
 > $ yarn start
