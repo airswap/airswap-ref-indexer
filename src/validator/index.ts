@@ -9,6 +9,5 @@ export function isDateInRange(date: string, validationDurationInWeek: number) {
 
     let maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + validationDurationInWeek * 7);
-    console.log(date, maxDate)
     return +date < maxDate.getTime();
 }
