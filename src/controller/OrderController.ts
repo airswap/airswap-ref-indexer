@@ -37,8 +37,8 @@ export class OrderController {
             return;
         }
 
-        //@ts-ignore
-        const otcOrder = new OtcOrder(order, +request.body.addedOn || new Date().getTime());
+        const addedTimestamp = isNumeric(request.body.addedOn) ? +request.body.addedOn : new Date().getTime();
+        const otcOrder = new OtcOrder(order, addedTimestamp);
         const id = this.database.generateId(otcOrder);
         const orderExists = await this.database.orderExists(id);
         if (orderExists) {
