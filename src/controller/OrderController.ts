@@ -4,7 +4,7 @@ import { isValidOrder } from '@airswap/utils';
 import { Request, Response } from "express";
 import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
 import { Database } from "../database/Database.js";
-import { mapAnyToOrder } from '../mapper/mapAnyToOrder.js';
+import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
 import { OtcOrder } from '../model/OtcOrder.js';
 import { Peers } from "../peer/Peers.js";
 import { isDateInRange, isNumeric } from '../validator/index.js';
@@ -26,17 +26,17 @@ export class OrderController {
     addOrder = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
 
-        if (!request.body || Object.keys(request.body).length == 0 || !isValidOrder(request.body.order)) {
+        if (!request.body
+            || Object.keys(request.body).length == 0
+            || !isValidOrder(request.body)
+            || !areNumberFieldsValid(request.body)
+            || !isDateInRange(request.body?.expiry, validationDurationInWeek)
+        ) {
             response.sendStatus(400);
             return;
         }
 
-        const order = mapAnyToOrder(request.body.order);
-        if (!areNumberFieldsValid(order) || !isDateInRange(order.expiry, validationDurationInWeek)) {
-            response.sendStatus(400);
-            return;
-        }
-
+        const order = mapAnyToDbOrder(request.body);
         const addedTimestamp = isNumeric(request.body.addedOn) ? +request.body.addedOn : new Date().getTime();
         const otcOrder = new OtcOrder(order, addedTimestamp);
         const id = this.database.generateId(otcOrder);

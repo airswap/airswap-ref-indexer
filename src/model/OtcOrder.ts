@@ -1,13 +1,13 @@
-import { Order } from '@airswap/typescript';
+import { DbOrder } from 'model/DbOrder.js';
 
 export class OtcOrder {
     id: string;
-    order: Order;
+    order: DbOrder;
     addedOn: number;
 
-    constructor(order: Order, addedOn: number, id?: string) {
+    constructor(dbOrder: DbOrder, addedOn: number, id?: string) {
         this.id = id;
-        this.order = order;
+        this.order = dbOrder;
         this.addedOn = addedOn;
     }
 }

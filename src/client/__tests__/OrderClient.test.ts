@@ -1,5 +1,5 @@
-import { Order } from '@airswap/typescript';
 import axios, { AxiosResponse } from "axios";
+import { DbOrder } from 'model/DbOrder.js';
 import { OtcOrder } from '../../model/OtcOrder';
 import { OrderClient } from '../OrderClient';
 jest.mock('axios');
@@ -52,17 +52,14 @@ function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = ne
     return new OtcOrder(forgeOrder(expiryDate), expectedAddedDate, "id");
 }
 
-function forgeOrder(expiryDate: number): Order {
+function forgeOrder(expiryDate: number): DbOrder {
     return {
         nonce: "nonce",
-        //@ts-ignore
         expiry: expiryDate,
         signerWallet: "signerWallet",
         signerToken: "dai",
-        //@ts-ignore
         signerAmount: 5,
         senderToken: "ETH",
-        //@ts-ignore
         senderAmount: 10,
         v: "v",
         r: "r",

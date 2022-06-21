@@ -1,10 +1,10 @@
-import { OrderResponse } from './../../model/OrderResponse';
-import { Order } from '@airswap/typescript';
+import { DbOrder } from 'model/DbOrder.js';
 import { OtcOrder } from '../../model/OtcOrder';
 import { AceBaseClient } from "../AcebaseClient";
 import { Database } from '../Database';
 import { SortField } from '../filter/SortField';
 import { InMemoryDatabase } from '../InMemoryDatabase';
+import { OrderResponse } from './../../model/OrderResponse';
 import { SortOrder } from './../filter/SortOrder';
 
 describe("Database implementations", () => {
@@ -88,7 +88,7 @@ describe("Database implementations", () => {
             v: "v",
             r: "r",
             s: "s"
-        } as unknown as Order;
+        } as DbOrder;
         const order2 = {
             nonce: "nonce",
             expiry: 1653138423537,
@@ -100,7 +100,7 @@ describe("Database implementations", () => {
             v: "v",
             r: "r",
             s: "s"
-        } as unknown as Order;
+        } as DbOrder;
         const order3 = {
             nonce: "nonce",
             expiry: 1653138423537,
@@ -112,7 +112,7 @@ describe("Database implementations", () => {
             v: "v",
             r: "r",
             s: "s"
-        } as unknown as Order;
+        } as DbOrder;
 
         const otcOrder1 = new OtcOrder(order1, 1653138423537, "id1");
         const otcOrder2 = new OtcOrder(order2, 1653138423527, "id2");
@@ -274,17 +274,14 @@ function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = ne
     return new OtcOrder(forgeOrder(expiryDate), expectedAddedDate, "id");
 }
 
-function forgeOrder(expiryDate: number): Order {
+function forgeOrder(expiryDate: number): DbOrder {
     return {
         nonce: "nonce",
-        //@ts-ignore
         expiry: expiryDate,
         signerWallet: "signerWallet",
         signerToken: "dai",
-        //@ts-ignore
         signerAmount: 5,
         senderToken: "ETH",
-        //@ts-ignore
         senderAmount: 10,
         v: "v",
         r: "r",

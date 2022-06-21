@@ -1,15 +1,15 @@
-import { mapAnyToOrder } from "../mapAnyToOrder";
+import { mapAnyToDbOrder } from "../mapAnyToOrder";
 
 describe("mapAnyToOrder", () => {
     test("should return undefined", () => {
-        expect(mapAnyToOrder("")).toBeUndefined();
-        expect(mapAnyToOrder(undefined)).toBeUndefined();
-        expect(mapAnyToOrder(null)).toBeUndefined();
-        expect(mapAnyToOrder(1)).toBeUndefined();
+        expect(mapAnyToDbOrder("")).toBeUndefined();
+        expect(mapAnyToDbOrder(undefined)).toBeUndefined();
+        expect(mapAnyToDbOrder(null)).toBeUndefined();
+        expect(mapAnyToDbOrder(1)).toBeUndefined();
     });
 
     test("should map all string values", () => {
-        expect(mapAnyToOrder({
+        expect(mapAnyToDbOrder({
             expiry: "1653900784706",
             nonce: "nonce",
             r: "r",

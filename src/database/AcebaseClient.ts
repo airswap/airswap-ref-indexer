@@ -1,6 +1,6 @@
 import { AceBase } from 'acebase';
 import crypto from "crypto";
-import { mapAnyToOrder } from '../mapper/mapAnyToOrder.js';
+import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
 import { OtcOrder } from '../model/OtcOrder.js';
 import { AceBaseLocalSettings } from './../../node_modules/acebase/index.d';
 import { OrderResponse } from './../model/OrderResponse.js';
@@ -138,7 +138,7 @@ export class AceBaseClient implements Database {
 
     private datarefToRecord(data): Record<string, OtcOrder> {
         const mapped: Record<string, OtcOrder> = {};
-        mapped[data.id] = new OtcOrder(mapAnyToOrder(data), data.addedOn, data.id)
+        mapped[data.id] = new OtcOrder(mapAnyToDbOrder(data), data.addedOn, data.id)
         return mapped;
     }
 

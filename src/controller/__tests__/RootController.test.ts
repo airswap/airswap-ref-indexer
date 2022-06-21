@@ -1,7 +1,7 @@
-import { OrderResponse } from './../../model/OrderResponse';
-import { Order } from '@airswap/typescript';
 import { Request, Response } from 'express';
+import { DbOrder } from 'model/DbOrder.js';
 import { Database } from '../../database/Database';
+import { OrderResponse } from './../../model/OrderResponse';
 import { OtcOrder } from './../../model/OtcOrder';
 import { Peers } from './../../peer/Peers';
 import { RootController } from './../RootController';
@@ -71,17 +71,14 @@ function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = ne
     return new OtcOrder(forgeOrder(expiryDate), expectedAddedDate, "id");
 }
 
-function forgeOrder(expiryDate: number): Order {
+function forgeOrder(expiryDate: number): DbOrder {
     return {
         nonce: "nonce",
-        //@ts-ignore
         expiry: expiryDate,
         signerWallet: "signerWallet",
         signerToken: "dai",
-        //@ts-ignore
         signerAmount: 5,
         senderToken: "ETH",
-        //@ts-ignore
         senderAmount: 10,
         v: "v",
         r: "r",
