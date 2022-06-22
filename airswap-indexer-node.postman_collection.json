@@ -44,7 +44,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"order\": {\r\n        \"nonce\": \"nonce\",\r\n        \"expiry\": 1653807874951,\r\n        \"signerWallet\": \"signerWallet\",\r\n        \"signerToken\": \"signerToken\",\r\n        \"signerAmount\": 3.9,\r\n        \"senderWallet\": \"senderWallet\",\r\n        \"senderToken\": \"senderToken\",\r\n        \"senderAmount\": 19,\r\n        \"r\": \"r\",\r\n        \"s\": \"s\",\r\n        \"v\": \"v\"\r\n    }\r\n}",
+							"raw": "{\r\n    \"nonce\": \"nonce\",\r\n    \"expiry\": 1653807874951,\r\n    \"signerWallet\": \"signerWallet\",\r\n    \"signerToken\": \"signerToken\",\r\n    \"signerAmount\": 3.9,\r\n    \"senderWallet\": \"senderWallet\",\r\n    \"senderToken\": \"senderToken\",\r\n    \"senderAmount\": 19,\r\n    \"r\": \"r\",\r\n    \"s\": \"s\",\r\n    \"v\": \"v\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
