@@ -15,22 +15,20 @@ async function bench() {
         const senderToken = tokens.filter((name) => name !== signerToken)[
             Math.floor(Math.random() * (tokens.length - 1))
         ];
-        
+
         try {
             await axios.post("http://localhost:4001/orders", {
-                order: {
-                    nonce: "nonce",
-                    expiry: 1653807874951,
-                    signerWallet: "signerWallet",
-                    signerToken: signerToken,
-                    signerAmount: index,
-                    senderWallet: "senderWallet",
-                    senderToken: senderToken,
-                    senderAmount: 10,
-                    r: "r",
-                    s: "s",
-                    v: "v",
-                },
+                nonce: "nonce",
+                expiry: 1653807874951,
+                signerWallet: "signerWallet",
+                signerToken: signerToken,
+                signerAmount: index,
+                senderWallet: "senderWallet",
+                senderToken: senderToken,
+                senderAmount: 10,
+                r: "r",
+                s: "s",
+                v: "v",
             });
         } catch (error) {
             console.log(error);
