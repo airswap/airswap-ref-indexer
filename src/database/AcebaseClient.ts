@@ -86,9 +86,7 @@ export class AceBaseClient implements Database {
         let toAdd = { ...otcOrder, ...otcOrder.order };
         delete toAdd.order;
         await this.db.ref(ENTRY_REF).push(toAdd);
-        //@ts-ignore
         this.filters.addSignerToken(otcOrder.order.signerToken, otcOrder.order.signerAmount);
-        //@ts-ignore
         this.filters.addSenderToken(otcOrder.order.senderToken, otcOrder.order.senderAmount);
         return Promise.resolve();
     }

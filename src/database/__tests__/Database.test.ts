@@ -82,7 +82,7 @@ describe("Database implementations", () => {
             expiry: 1653138423537,
             signerWallet: "signerWallet",
             signerToken: "signerToken",
-            signerAmount: 2,
+            signerAmount: 2.1,
             senderToken: "senderToken",
             senderAmount: 1,
             v: "v",
@@ -194,9 +194,7 @@ describe("Database implementations", () => {
         const otcOrder = forgeOtcOrder();
         const anotherOrder = forgeOtcOrder();
         anotherOrder.id = "another_id";
-        //@ts-ignore
         anotherOrder.order.senderAmount = 15;
-        //@ts-ignore
         anotherOrder.order.signerAmount = 50;
 
         await db.addAll({ "id": otcOrder, "another_id": anotherOrder });

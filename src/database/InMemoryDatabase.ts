@@ -23,14 +23,10 @@ export class InMemoryDatabase implements Database {
       const order = otcOrder.order;
       let isFound = true;
       if (requestFilter.signerTokens != undefined) { isFound = isFound && requestFilter.signerTokens.indexOf(order.signerToken) !== -1; }
-      if (requestFilter.senderTokens != undefined) { isFound = isFound && requestFilter.senderTokens.indexOf(order.senderToken) !== -1; }
-      //@ts-ignore
+      if (requestFilter.senderTokens != undefined) { isFound = isFound && requestFilter.senderTokens.indexOf(order.senderToken) !== -1; }     
       if (requestFilter.minSenderAmount != undefined) { isFound = isFound && order.senderAmount >= requestFilter.minSenderAmount; }
-      //@ts-ignore
       if (requestFilter.maxSenderAmount != undefined) { isFound = isFound && order.senderAmount <= requestFilter.maxSenderAmount; }
-      //@ts-ignore
       if (requestFilter.minSignerAmount != undefined) { isFound = isFound && order.signerAmount >= requestFilter.minSignerAmount; }
-      //@ts-ignore
       if (requestFilter.maxSignerAmount != undefined) { isFound = isFound && order.signerAmount <= requestFilter.maxSignerAmount; }
       if (requestFilter.maxAddedDate != undefined) {
         isFound = isFound && +otcOrder.addedOn >= requestFilter.maxAddedDate;
@@ -40,19 +36,15 @@ export class InMemoryDatabase implements Database {
       .sort((a: OtcOrder, b: OtcOrder) => {
         if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
           if (requestFilter.sortOrder == SortOrder.ASC) {
-            //@ts-ignore
             return (a.order.signerAmount) - (b.order.signerAmount)
           } else {
-            //@ts-ignore
             return (b.order.signerAmount) - (a.order.signerAmount)
           }
         }
         if (requestFilter.sortField == SortField.SENDER_AMOUNT) {
           if (requestFilter.sortOrder == SortOrder.ASC) {
-            //@ts-ignore
             return (a.order.senderAmount) - (b.order.senderAmount)
           } else {
-            //@ts-ignore
             return (b.order.senderAmount) - (a.order.senderAmount)
           }
         }
@@ -69,9 +61,7 @@ export class InMemoryDatabase implements Database {
 
   addOrder(otcOrder: OtcOrder) {
     this.database[otcOrder.id] = otcOrder;
-    //@ts-ignore
     this.filters.addSignerToken(otcOrder.order.signerToken, otcOrder.order.signerAmount);
-    //@ts-ignore
     this.filters.addSenderToken(otcOrder.order.senderToken, otcOrder.order.senderAmount);
     return Promise.resolve();
   }
