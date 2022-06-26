@@ -18,8 +18,7 @@ export class InMemoryDatabase implements Database {
     this.filters = new Filters();
   }
 
-  getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse> {
-    const orders = {};
+  getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse> {    
     const totalResults = Object.values(this.database).filter((indexedOrder: IndexedOrder) => {
       const order = indexedOrder.order;
       let isFound = true;
@@ -49,11 +48,15 @@ export class InMemoryDatabase implements Database {
         }
       });
     const totalResultsCount = totalResults.length;
-    totalResults.slice((requestFilter.page - 1) * elementPerPage, requestFilter.page * elementPerPage)
-      .forEach((IndexedOrder) => {
-        const orderHash = IndexedOrder['hash'];
-        orders[`${orderHash}`] = IndexedOrder;
-      });
+    const orders: Record<string, IndexedOrder> = totalResults
+    .slice((requestFilter.page - 1) * elementPerPage, requestFilter.page * elementPerPage)
+    .reduce((total, indexedOrder) => {
+      const orderId = indexedOrder['hash'];
+      return {
+        ...total,
+        [orderId]: indexedOrder
+      };
+    }, {});
 
     return Promise.resolve(new OrderResponse(orders, computePagination(elementPerPage, totalResultsCount, requestFilter.page)));
   }

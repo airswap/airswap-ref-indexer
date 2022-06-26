@@ -3,11 +3,16 @@ export enum SortOrder {
     DESC = "DESC"
 }
 
-export function toSortOrder(key: string): SortOrder {
-    if (key === null || key === undefined || !(typeof key === 'string')) {
+export function toSortOrder(key: string): SortOrder | undefined {
+    if (typeof key !== 'string') {
         return undefined;
     }
-    const upperCaseValue = key.toUpperCase();
-    const match = Object.keys(SortOrder).filter(s => s === upperCaseValue);
-    return match.length === 1 ? match[0] as SortOrder : undefined;
+    if (key.toUpperCase() === SortOrder.ASC) {
+        return SortOrder.ASC;
+    }
+    if (key.toUpperCase() === SortOrder.DESC) {
+        return SortOrder.DESC;
+    }
+    
+    return undefined;
 }
