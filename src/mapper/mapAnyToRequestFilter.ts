@@ -5,10 +5,6 @@ import { toSortOrder } from "../database/filter/SortOrder.js";
 import { isNumeric } from '../validator/index.js';
 
 export function mapAnyToRequestFilter(data: any): RequestFilter {
-    if (!data || typeof data != 'object') {
-        return undefined;
-    }
-
     return {
         signerTokens: toStrings(data.signerTokens),
         senderTokens: toStrings(data.senderTokens),

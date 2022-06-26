@@ -264,7 +264,7 @@ describe("Database implementations", () => {
 
         const orderExists = await db.getOrder("unknownHash");
 
-        expect(orderExists).toEqual(new OrderResponse(null, new Pagination("1", "1")));
+        expect(orderExists).toEqual(new OrderResponse({}, new Pagination("1", "1")));
         return Promise.resolve();
     }
 

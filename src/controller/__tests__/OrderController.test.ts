@@ -252,6 +252,7 @@ describe("Order controller", () => {
 
             test("Add order missing data", async () => {
                 const orderMissingExpiry = forgeIndexedOrder(1653900784696, 1653900784706);
+                // @ts-ignore
                 orderMissingExpiry.order.expiry = undefined;
 
                 const mockRequestOrderMissingexpiry = {
@@ -354,6 +355,7 @@ describe("Order controller", () => {
                 fakeDb.orderExists.mockImplementation(() => true);
 
                 const expected = forgeIndexedOrder(1653900784706, 1653900784696);
+                //@ts-ignore
                 expected.hash = undefined;
 
                 await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequest, mockResponse as Response);

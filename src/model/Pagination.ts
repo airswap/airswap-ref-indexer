@@ -1,8 +1,8 @@
 export class Pagination {
-    first: string = undefined;
-    last: string = undefined;
-    prev: string = undefined;
-    next: string = undefined;
+    first: string | undefined = undefined;
+    last: string | undefined = undefined;
+    prev: string | undefined = undefined;
+    next: string | undefined = undefined;
 
     constructor(first?: string, last?: string, next?: string, prev?: string) {
         this.first = first;

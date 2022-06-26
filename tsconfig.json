@@ -5,7 +5,7 @@
     "esModuleInterop": true,
     "outDir": "dist",
     "target": "es2017",
-    "strict": false,
+    "strict": true,
     "declaration": true,
     "baseUrl": "src",
     "skipLibCheck": true

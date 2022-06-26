@@ -18,7 +18,7 @@ export class InMemoryDatabase implements Database {
     this.filters = new Filters();
   }
 
-  getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse> {    
+  getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse> {
     const totalResults = Object.values(this.database).filter((indexedOrder: IndexedOrder) => {
       const order = indexedOrder.order;
       let isFound = true;
@@ -40,29 +40,28 @@ export class InMemoryDatabase implements Database {
           }
           return b.order.approximatedSignerAmount - a.order.approximatedSignerAmount
         }
-        if (requestFilter.sortField == SortField.SENDER_AMOUNT) {
-          if (requestFilter.sortOrder == SortOrder.ASC) {
-            return a.order.approximatedSenderAmount - b.order.approximatedSenderAmount
-          }
-          return b.order.approximatedSenderAmount - a.order.approximatedSenderAmount
+        if (requestFilter.sortOrder == SortOrder.ASC) {
+          return a.order.approximatedSenderAmount - b.order.approximatedSenderAmount
         }
+        return b.order.approximatedSenderAmount - a.order.approximatedSenderAmount
       });
     const totalResultsCount = totalResults.length;
     const orders: Record<string, IndexedOrder> = totalResults
-    .slice((requestFilter.page - 1) * elementPerPage, requestFilter.page * elementPerPage)
-    .reduce((total, indexedOrder) => {
-      const orderId = indexedOrder['hash'];
-      return {
-        ...total,
-        [orderId]: indexedOrder
-      };
-    }, {});
+      .slice((requestFilter.page - 1) * elementPerPage, requestFilter.page * elementPerPage)
+      .reduce((total, indexedOrder) => {
+        const orderId = indexedOrder['hash'];
+        if (orderId) {
+          return { ...total, [orderId]: indexedOrder };
+        }
+        console.warn("InMemoryDb - Defect Object:", indexedOrder);
+        return { ...total };
+      }, {});
 
     return Promise.resolve(new OrderResponse(orders, computePagination(elementPerPage, totalResultsCount, requestFilter.page)));
   }
 
   addOrder(indexedOrder: IndexedOrder) {
-    this.database[indexedOrder.hash] = indexedOrder;
+    this.database[indexedOrder.hash!] = indexedOrder;
     this.filters.addSignerToken(indexedOrder.order.signerToken, indexedOrder.order.approximatedSignerAmount);
     this.filters.addSenderToken(indexedOrder.order.senderToken, indexedOrder.order.approximatedSenderAmount);
     return Promise.resolve();
@@ -81,12 +80,12 @@ export class InMemoryDatabase implements Database {
   }
 
   getOrder(hash: string): Promise<OrderResponse> {
-    const result = {};
+    const result: Record<string, IndexedOrder> = {};
     result[hash] = this.database[hash];
     if (this.database[hash]) {
       return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1)));
     }
-    return Promise.resolve(new OrderResponse(null, computePagination(elementPerPage, 0)));
+    return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 0)));
   }
 
   async getOrders(): Promise<OrderResponse> {
@@ -104,7 +103,9 @@ export class InMemoryDatabase implements Database {
 
   generateHash(indexedOrder: IndexedOrder) {
     const lightenOrder = { ...indexedOrder.order };
+    //@ts-ignore
     delete lightenOrder.approximatedSenderAmount
+    //@ts-ignore
     delete lightenOrder.approximatedSignerAmount
     const stringObject = JSON.stringify(lightenOrder);
     const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");

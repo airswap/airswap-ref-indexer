@@ -8,7 +8,6 @@ describe("mapAnyToOrder", () => {
         expect(mapAnyToDbOrder(1)).toBeUndefined();
     });
 
-    // @todo to update
     test("should map all string values", () => {
         expect(mapAnyToDbOrder({
             expiry: "1653900784706",

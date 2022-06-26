@@ -1,7 +1,7 @@
 import { DbOrder } from 'model/DbOrder.js';
 
 export class IndexedOrder {
-    hash: string;
+    hash: string | undefined;
     order: DbOrder;
     addedOn: number;
 

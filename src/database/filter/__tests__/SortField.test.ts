@@ -10,7 +10,9 @@ describe("toSortField", () => {
     });
 
     test("should return undefined", () => {
+        //@ts-ignore
         expect(toSortField(null)).toBe(undefined);
+        //@ts-ignore
         expect(toSortField(undefined)).toBe(undefined);
         expect(toSortField("")).toBe(undefined);
         expect(toSortField("aze")).toBe(undefined);

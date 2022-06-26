@@ -1,13 +1,13 @@
-import { OrderResponse } from './../model/OrderResponse';
 import { Order } from '@airswap/typescript';
 import { isValidOrder } from '@airswap/utils';
 import { Request, Response } from "express";
-import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
 import { Database } from "../database/Database.js";
 import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
+import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Peers } from "../peer/Peers.js";
 import { isDateInRange, isNumeric } from '../validator/index.js';
+import { OrderResponse } from './../model/OrderResponse';
 
 const validationDurationInWeek = 1;
 
@@ -76,7 +76,12 @@ export class OrderController {
 
     getOrders = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
-        let orders: OrderResponse = undefined;
+        if (request.query === null || typeof request.query != 'object') {
+            response.sendStatus(400);
+            return;
+        }
+
+        let orders: OrderResponse;
         if (request.params.orderHash) {
             orders = await this.database.getOrder(request.params.orderHash);
         }
@@ -86,7 +91,7 @@ export class OrderController {
         else {
             orders = await this.database.getOrderBy(mapAnyToRequestFilter(request.query));
         }
-        let result = { ...orders, filters: undefined };
+        let result = { ...orders };
         if (request.query.filters) {
             const filters = await this.database.getFilters();
             result.filters = filters;

@@ -5,7 +5,7 @@ import { IndexedOrder } from './IndexedOrder';
 export class OrderResponse {
     orders: Record<string, IndexedOrder>;
     pagination: Pagination;
-    filters: Filters;
+    filters: Filters | undefined;
 
     constructor(orders: Record<string, IndexedOrder>, pagination: Pagination, filters?: Filters) {
         this.orders = orders;

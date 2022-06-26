@@ -1,6 +1,6 @@
 import { networkInterfaces } from "os";
 
-export function getLocalIp() {
+export function getLocalIp(): string | undefined {
   const nets = networkInterfaces() || {};
   const results = Object.create(null);
 
@@ -25,5 +25,5 @@ export function getLocalIp() {
     ?.map((name) => results[name])
     .filter(inet => inet != undefined);
 
-  return localIp[0];
+  return localIp ? localIp[0] : undefined;
 }

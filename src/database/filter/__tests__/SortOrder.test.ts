@@ -10,7 +10,9 @@ describe("toSortOrder", () => {
     });
 
     test("should return undefined", () => {
+        // @ts-ignore 
         expect(toSortOrder(null)).toBe(undefined);
+        // @ts-ignore 
         expect(toSortOrder(undefined)).toBe(undefined);
         expect(toSortOrder("")).toBe(undefined);
         expect(toSortOrder("aze")).toBe(undefined);

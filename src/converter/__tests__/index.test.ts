@@ -9,7 +9,9 @@ describe("converter", () => {
             expect(toNumber("a1")).toBeUndefined();
             expect(toNumber("")).toBeUndefined();
             expect(toNumber(" ")).toBeUndefined();
+            //@ts-ignore
             expect(toNumber(null)).toBeUndefined();
+            //@ts-ignore
             expect(toNumber(undefined)).toBeUndefined();
             //@ts-ignore
             expect(toNumber({})).toBeUndefined();
@@ -28,7 +30,9 @@ describe("converter", () => {
         test("should return undefined", () => {
             expect(toStrings("")).toBeUndefined();
             expect(toStrings(" ")).toBeUndefined();
+            //@ts-ignore
             expect(toStrings(null)).toBeUndefined();
+            //@ts-ignore
             expect(toStrings(undefined)).toBeUndefined();
             //@ts-ignore
             expect(toStrings({})).toBeUndefined();

@@ -8,7 +8,7 @@ export class RequestFilter {
     maxSignerAmount?: number;
     minSenderAmount?: number;
     maxSenderAmount?: number;
-    page?: number;
+    page!: number;
     sortField?: SortField;
     sortOrder?: SortOrder;
     maxAddedDate?: number;

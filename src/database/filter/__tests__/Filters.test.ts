@@ -1,7 +1,7 @@
 import { Filters } from '../Filters';
 describe("Filters", () => {
 
-    let filters;
+    let filters: Filters;
 
     beforeEach(() => {
         filters = new Filters();
