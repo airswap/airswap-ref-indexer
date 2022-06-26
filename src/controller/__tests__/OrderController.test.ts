@@ -7,6 +7,7 @@ import { Peers } from '../../peer/Peers';
 import { OrderController } from '../OrderController';
 import { Filters } from './../../database/filter/Filters';
 import { OrderResponse } from './../../model/OrderResponse';
+import { Pagination } from '../../model/Pagination.js';
 
 jest
     .useFakeTimers()
@@ -19,9 +20,9 @@ describe("Order controller", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, 1))),
-            getOrder: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, 1))),
-            getOrderBy: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, 1))),
+            getOrders: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, new Pagination("1", "1")))),
+            getOrder: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, new Pagination("1", "1")))),
+            getOrderBy: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, new Pagination("1", "1")))),
             getFilters: jest.fn(() => Promise.resolve({ signerToken: { "ETH": { min: 10, max: 10 } }, senderToken: { "dai": { min: 5, max: 5 } } } as unknown as Filters) as Promise<Filters>),
             addOrder: jest.fn(() => Promise.resolve()),
             orderExists: jest.fn(() => Promise.resolve(true)),

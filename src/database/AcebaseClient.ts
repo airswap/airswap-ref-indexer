@@ -1,6 +1,7 @@
+import { computePagination } from '../controller/pagination/index.js';
 import { AceBase } from 'acebase';
 import crypto from "crypto";
-import { mapAnyToDbOrder, mapAnyToOrder } from '../mapper/mapAnyToOrder.js';
+import { mapAnyToOrder } from '../mapper/mapAnyToOrder.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { AceBaseLocalSettings } from './../../node_modules/acebase/index.d';
 import { OrderResponse } from './../model/OrderResponse.js';
@@ -38,7 +39,7 @@ export class AceBaseClient implements Database {
     getFilters(): Promise<Filters> {
         return Promise.resolve(this.filters);
     }
-    
+
     async getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse> {
         const query = await this.db.query(`${ENTRY_REF}`);
 
@@ -75,7 +76,8 @@ export class AceBaseClient implements Database {
             const mapp = this.datarefToRecord(d.val());
             mapped = { ...mapped, ...mapp };
         });
-        return Promise.resolve(new OrderResponse(mapped, Math.ceil(totalResults / elementPerPage)));
+        const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
+        return Promise.resolve(new OrderResponse(mapped, pagination));
     }
 
     close(): Promise<void> {
@@ -111,11 +113,11 @@ export class AceBaseClient implements Database {
             .get();
         const serializedOrder = query.values()?.next()?.value?.val();
         if (!serializedOrder) {
-            return Promise.resolve(new OrderResponse(null, 0));
+            return Promise.resolve(new OrderResponse(null, computePagination(elementPerPage, 0)));
         }
         const result = {};
         result[hash] = this.datarefToRecord(serializedOrder)[hash];
-        return Promise.resolve(new OrderResponse(result, 1));
+        return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1)));
     }
 
     async getOrders(): Promise<OrderResponse> {
@@ -126,7 +128,7 @@ export class AceBaseClient implements Database {
             const mapp = this.datarefToRecord(d.val());
             mapped = { ...mapped, ...mapp };
         });
-        return Promise.resolve(new OrderResponse(mapped, Math.ceil(totalResults / elementPerPage)));
+        return Promise.resolve(new OrderResponse(mapped, computePagination(elementPerPage, totalResults)));
     }
 
     async erase() {
@@ -146,7 +148,7 @@ export class AceBaseClient implements Database {
     }
 
     generateHash(indexedOrder: IndexedOrder) {
-        const lightenOrder = {...indexedOrder.order};
+        const lightenOrder = { ...indexedOrder.order };
         delete lightenOrder.approximatedSenderAmount
         delete lightenOrder.approximatedSignerAmount
         const stringObject = JSON.stringify(lightenOrder);

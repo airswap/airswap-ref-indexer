@@ -1,14 +1,15 @@
+import { Pagination } from './Pagination.js';
 import { Filters } from './../database/filter/Filters';
 import { IndexedOrder } from './IndexedOrder';
 
 export class OrderResponse {
     orders: Record<string, IndexedOrder>;
-    totalPages: number;
+    pagination: Pagination;
     filters: Filters;
 
-    constructor(orders: Record<string, IndexedOrder>, totalPages: number, filters?: Filters) {
+    constructor(orders: Record<string, IndexedOrder>, pagination: Pagination, filters?: Filters) {
         this.orders = orders;
-        this.totalPages = totalPages;
+        this.pagination = pagination;
         this.filters = filters;
     }
 }

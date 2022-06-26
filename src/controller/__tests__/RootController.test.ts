@@ -1,11 +1,10 @@
 import { Request, Response } from 'express';
-import { DbOrder } from 'model/DbOrder.js';
+import { Pagination } from '../../model/Pagination.js';
 import { Database } from '../../database/Database';
+import { forgeIndexedOrder } from '../../Fixtures';
 import { OrderResponse } from './../../model/OrderResponse';
-import { IndexedOrder } from './../../model/IndexedOrder';
 import { Peers } from './../../peer/Peers';
 import { RootController } from './../RootController';
-import { forgeIndexedOrder } from '../../Fixtures';
 describe("Home controller", () => {
 
     let fakeDb: Partial<Database>;
@@ -15,7 +14,7 @@ describe("Home controller", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve((new OrderResponse({ "aze": IndexedOrder }, 1))) as Promise<OrderResponse>),
+            getOrders: jest.fn(() => Promise.resolve((new OrderResponse({ "aze": IndexedOrder }, new Pagination("1", "1")))) as Promise<OrderResponse>),
         };
         fakePeers = {
             getPeers: jest.fn(() => [])
@@ -58,7 +57,7 @@ describe("Home controller", () => {
                         },
                     },
                 },
-                totalPages: 1
+                pagination: { first: "1", last: "1" }
             },
             peers: [],
             registry: "registry",

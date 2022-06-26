@@ -1,12 +1,13 @@
-import { SortOrder } from './../filter/SortOrder';
-import { SortField } from './../filter/SortField';
-import { DbOrder } from 'model/DbOrder';
+import { DbOrder } from './../../model/DbOrder';
 import { forgeDbOrder, forgeIndexedOrder } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
 import { AceBaseClient } from "../AcebaseClient";
 import { Database } from '../Database';
 import { InMemoryDatabase } from '../InMemoryDatabase';
 import { OrderResponse } from './../../model/OrderResponse';
+import { Pagination } from './../../model/Pagination.js';
+import { SortField } from './../filter/SortField';
+import { SortOrder } from './../filter/SortOrder';
 
 describe("Database implementations", () => {
     let inMemoryDatabase: InMemoryDatabase;
@@ -129,37 +130,37 @@ describe("Database implementations", () => {
         await db.addOrder(otcOrder3);
 
         const ordersFromToken = await db.getOrderBy({ page: 1, signerTokens: ["signerToken"] });
-        expect(ordersFromToken).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3 }, 1));
+        expect(ordersFromToken).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3 }, new Pagination("1", "1")));
 
         const anotherToken = await db.getOrderBy({ page: 1, senderTokens: ["another"] });
-        expect(anotherToken).toEqual(new OrderResponse({ "id2": otcOrder2 }, 1));
+        expect(anotherToken).toEqual(new OrderResponse({ "id2": otcOrder2 }, new Pagination("1", "1")));
 
         const minSignerAmountFromToken = await db.getOrderBy({ page: 1, minSignerAmount: 15 });
-        expect(minSignerAmountFromToken).toEqual(new OrderResponse({ "id2": otcOrder2 }, 1));
+        expect(minSignerAmountFromToken).toEqual(new OrderResponse({ "id2": otcOrder2 }, new Pagination("1", "1")));
 
         const maxSignerAmountFromToken = await db.getOrderBy({ page: 1, maxSignerAmount: 5 });
-        expect(maxSignerAmountFromToken).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3 }, 1));
+        expect(maxSignerAmountFromToken).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3 }, new Pagination("1", "1")));
 
         const minSenderAmount = await db.getOrderBy({ page: 1, minSenderAmount: 20 });
-        expect(minSenderAmount).toEqual(new OrderResponse({ "id3": otcOrder3 }, 1));
+        expect(minSenderAmount).toEqual(new OrderResponse({ "id3": otcOrder3 }, new Pagination("1", "1")));
 
         const maxSenderAmount = await db.getOrderBy({ page: 1, maxSenderAmount: 15 });
-        expect(maxSenderAmount).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, 1));
+        expect(maxSenderAmount).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, new Pagination("1", "1")));
 
         const senderAmountAsc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.ASC });
-        expect(senderAmountAsc).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2, "id3": otcOrder3 }, 1));
+        expect(senderAmountAsc).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2, "id3": otcOrder3 }, new Pagination("1", "1")));
 
         const senderAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.DESC });
-        expect(senderAmountDesc).toEqual(new OrderResponse({ "id3": otcOrder3, "id2": otcOrder2, "id1": otcOrder1 }, 1));
+        expect(senderAmountDesc).toEqual(new OrderResponse({ "id3": otcOrder3, "id2": otcOrder2, "id1": otcOrder1 }, new Pagination("1", "1")));
 
         const signerAmountAsc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.ASC });
-        expect(signerAmountAsc).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3, "id2": otcOrder2 }, 1));
+        expect(signerAmountAsc).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3, "id2": otcOrder2 }, new Pagination("1", "1")));
 
         const signerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC });
-        expect(signerAmountDesc).toEqual(new OrderResponse({ "id2": otcOrder2, "id3": otcOrder3, "id1": otcOrder1 }, 1));
+        expect(signerAmountDesc).toEqual(new OrderResponse({ "id2": otcOrder2, "id3": otcOrder3, "id1": otcOrder1 }, new Pagination("1", "1")));
 
         const maxAddedOn = await db.getOrderBy({ page: 1, maxAddedDate: 1653138423527 });
-        expect(maxAddedOn).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, 1));
+        expect(maxAddedOn).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, new Pagination("1", "1")));
 
         const specificOne = await db.getOrderBy({
             page: 1,
@@ -170,7 +171,7 @@ describe("Database implementations", () => {
             minSenderAmount: 1,
             maxSenderAmount: 3,
         });
-        expect(specificOne).toEqual(new OrderResponse({ "id1": otcOrder1 }, 1));
+        expect(specificOne).toEqual(new OrderResponse({ "id1": otcOrder1 }, new Pagination("1", "1")));
 
         return Promise.resolve();
     }
@@ -181,7 +182,7 @@ describe("Database implementations", () => {
         await db.addOrder(indexedOrder);
         const orders = await db.getOrders();
 
-        expect(orders).toEqual(new OrderResponse({ hash: indexedOrder }, 1));
+        expect(orders).toEqual(new OrderResponse({ hash: indexedOrder }, new Pagination("1", "1")));
         return Promise.resolve();
     }
 
@@ -193,7 +194,7 @@ describe("Database implementations", () => {
         await db.addAll({ "hash": indexedOrder, "another_hash": anotherOrder });
         const orders = await db.getOrders();
 
-        expect(orders).toEqual(new OrderResponse({ "hash": indexedOrder, "another_hash": anotherOrder }, 1));
+        expect(orders).toEqual(new OrderResponse({ "hash": indexedOrder, "another_hash": anotherOrder }, new Pagination("1", "1")));
         return Promise.resolve();
     }
 
@@ -223,7 +224,7 @@ describe("Database implementations", () => {
         await db.deleteOrder("hash");
         const orders = await db.getOrders();
 
-        expect(orders).toEqual(new OrderResponse({}, 0));
+        expect(orders).toEqual(new OrderResponse({}, new Pagination("1", "1")));
         return Promise.resolve();
     }
 
@@ -253,7 +254,7 @@ describe("Database implementations", () => {
 
         const orderExists = await db.getOrder("hash");
 
-        expect(orderExists).toEqual(new OrderResponse({ hash: indexedOrder }, 1));
+        expect(orderExists).toEqual(new OrderResponse({ hash: indexedOrder }, new Pagination("1", "1")));
         return Promise.resolve();
     }
 
@@ -263,7 +264,7 @@ describe("Database implementations", () => {
 
         const orderExists = await db.getOrder("unknownHash");
 
-        expect(orderExists).toEqual(new OrderResponse(null, 0));
+        expect(orderExists).toEqual(new OrderResponse(null, new Pagination("1", "1")));
         return Promise.resolve();
     }
 

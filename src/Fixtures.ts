@@ -1,8 +1,9 @@
 import { Order } from '@airswap/typescript';
-import { OrderResponse } from './model/OrderResponse';
+import { DbOrder } from './model/DbOrder.js';
+import { Pagination } from './model/Pagination.js';
 import { Filters } from './database/filter/Filters';
-import { DbOrder } from 'model/DbOrder.js';
 import { IndexedOrder } from './model/IndexedOrder';
+import { OrderResponse } from './model/OrderResponse';
 
 export function forgeIndexedOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
     return new IndexedOrder(forgeDbOrder(expiryDate), expectedAddedDate, "hash");
@@ -48,5 +49,5 @@ export function forgeOrderResponse(filters?: Filters): OrderResponse {
             hash: "hash",
             order: forgeDbOrder(1653900784706),
         },
-    }, 1, filters);
+    }, new Pagination("1", "1"), filters);
 }

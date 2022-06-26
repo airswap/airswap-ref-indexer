@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { computePagination } from '../controller/pagination/index.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { OrderResponse } from './../model/OrderResponse.js';
 import { Database } from './Database.js';
@@ -37,16 +38,14 @@ export class InMemoryDatabase implements Database {
         if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
           if (requestFilter.sortOrder == SortOrder.ASC) {
             return a.order.approximatedSignerAmount - b.order.approximatedSignerAmount
-          } else {
-            return b.order.approximatedSignerAmount - a.order.approximatedSignerAmount
           }
+          return b.order.approximatedSignerAmount - a.order.approximatedSignerAmount
         }
         if (requestFilter.sortField == SortField.SENDER_AMOUNT) {
           if (requestFilter.sortOrder == SortOrder.ASC) {
             return a.order.approximatedSenderAmount - b.order.approximatedSenderAmount
-          } else {
-            return b.order.approximatedSenderAmount - a.order.approximatedSenderAmount
           }
+          return b.order.approximatedSenderAmount - a.order.approximatedSenderAmount
         }
       });
     const totalResultsCount = totalResults.length;
@@ -56,7 +55,7 @@ export class InMemoryDatabase implements Database {
         orders[`${orderHash}`] = IndexedOrder;
       });
 
-    return Promise.resolve(new OrderResponse(orders, Math.ceil(totalResultsCount / elementPerPage)));
+    return Promise.resolve(new OrderResponse(orders, computePagination(elementPerPage, totalResultsCount, requestFilter.page)));
   }
 
   addOrder(indexedOrder: IndexedOrder) {
@@ -82,14 +81,14 @@ export class InMemoryDatabase implements Database {
     const result = {};
     result[hash] = this.database[hash];
     if (this.database[hash]) {
-      return Promise.resolve(new OrderResponse(result, 1));
+      return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1)));
     }
-    return Promise.resolve(new OrderResponse(null, 0));
+    return Promise.resolve(new OrderResponse(null, computePagination(elementPerPage, 0)));
   }
 
   async getOrders(): Promise<OrderResponse> {
     const size = Object.keys(this.database).length;
-    return Promise.resolve(new OrderResponse(this.database, size == 0 ? 0 : Math.ceil(Object.keys(this.database).length / elementPerPage)));
+    return Promise.resolve(new OrderResponse(this.database, computePagination(elementPerPage, size)));
   }
 
   getFilters(): Promise<Filters> {
@@ -101,7 +100,7 @@ export class InMemoryDatabase implements Database {
   }
 
   generateHash(indexedOrder: IndexedOrder) {
-    const lightenOrder = {...indexedOrder.order};
+    const lightenOrder = { ...indexedOrder.order };
     delete lightenOrder.approximatedSenderAmount
     delete lightenOrder.approximatedSignerAmount
     const stringObject = JSON.stringify(lightenOrder);
