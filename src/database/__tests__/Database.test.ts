@@ -1,11 +1,12 @@
-import { DbOrder } from 'model/DbOrder.js';
-import { OtcOrder } from '../../model/OtcOrder';
+import { SortOrder } from './../filter/SortOrder';
+import { SortField } from './../filter/SortField';
+import { DbOrder } from 'model/DbOrder';
+import { forgeDbOrder, forgeIndexedOrder } from '../../Fixtures';
+import { IndexedOrder } from '../../model/IndexedOrder';
 import { AceBaseClient } from "../AcebaseClient";
 import { Database } from '../Database';
-import { SortField } from '../filter/SortField';
 import { InMemoryDatabase } from '../InMemoryDatabase';
 import { OrderResponse } from './../../model/OrderResponse';
-import { SortOrder } from './../filter/SortOrder';
 
 describe("Database implementations", () => {
     let inMemoryDatabase: InMemoryDatabase;
@@ -26,17 +27,17 @@ describe("Database implementations", () => {
         await acebaseClient.close();
     });
 
-    describe('get OtcOrder by filter', () => {
+    describe('get IndexedOrder by filter', () => {
         test("inMemoryDb", async () => { await getOtcOrderByFilter(inMemoryDatabase); });
         test("acebaseDb", async () => { await getOtcOrderByFilter(acebaseClient); });
     });
 
-    describe("Should add & get OtcOrder", () => {
+    describe("Should add & get IndexedOrder", () => {
         test("inMemoryDb", async () => { await getAndAddOtcOrder(inMemoryDatabase); });
         test("acebaseDb", async () => { await getAndAddOtcOrder(acebaseClient); });
     });
 
-    describe("Should set filters when adding OtcOrder", () => {
+    describe("Should set filters when adding IndexedOrder", () => {
         test("inMemoryDb", async () => { await shouldAddfiltersOnOtcAdd(inMemoryDatabase); });
         test("acebaseDb", async () => { await shouldAddfiltersOnOtcAdd(acebaseClient); });
     });
@@ -46,29 +47,29 @@ describe("Database implementations", () => {
         test("acebaseDb", async () => { await addAllAndGetOrders(acebaseClient); });
     });
 
-    describe("Should delete OtcOrder", () => {
+    describe("Should delete IndexedOrder", () => {
         test("inMemoryDb", async () => { await shouldDeleteOtcOrder(inMemoryDatabase); });
         test("acebaseDb", async () => { await shouldDeleteOtcOrder(acebaseClient); });
     });
 
-    describe("Should return true if OtcOrder exists", () => {
+    describe("Should return true if IndexedOrder exists", () => {
         test("inMemoryDb", async () => { await otcOrderExists(inMemoryDatabase); });
         test("acebaseDb", async () => { await otcOrderExists(acebaseClient); });
     });
 
-    describe("Should return false if OtcOrder does not exist", () => {
+    describe("Should return false if IndexedOrder does not exist", () => {
         test("inMemoryDb", async () => { await otcOrderDoesNotExist(inMemoryDatabase); });
         test("acebaseDb", async () => { await otcOrderDoesNotExist(acebaseClient); });
     });
 
-    describe("Should return OtcOrder", () => {
+    describe("Should return IndexedOrder", () => {
         test("inMemoryDb", async () => { await addOtcOrder(inMemoryDatabase); });
         test("acebaseDb", async () => { await addOtcOrder(acebaseClient); });
     });
 
-    describe("Should not return OtcOrder", () => {
-        test("inMemoryDb", async () => { await renturnsNullOnUnknownId(inMemoryDatabase); });
-        test("acebaseDb", async () => { await renturnsNullOnUnknownId(acebaseClient); });
+    describe("Should not return IndexedOrder", () => {
+        test("inMemoryDb", async () => { await renturnsNullOnUnknownHash(inMemoryDatabase); });
+        test("acebaseDb", async () => { await renturnsNullOnUnknownHash(acebaseClient); });
     });
 
     describe("sha 256 does not change", () => {
@@ -82,9 +83,11 @@ describe("Database implementations", () => {
             expiry: 1653138423537,
             signerWallet: "signerWallet",
             signerToken: "signerToken",
-            signerAmount: 2.1,
+            signerAmount: "2",
+            approximatedSignerAmount: 2,
             senderToken: "senderToken",
-            senderAmount: 1,
+            senderAmount: "1",
+            approximatedSenderAmount: 1,
             v: "v",
             r: "r",
             s: "s"
@@ -94,9 +97,11 @@ describe("Database implementations", () => {
             expiry: 1653138423537,
             signerWallet: "signerWallet",
             signerToken: "blip",
-            signerAmount: 20,
+            signerAmount: "20",
+            approximatedSignerAmount: 20,
             senderToken: "another",
-            senderAmount: 10,
+            senderAmount: "10",
+            approximatedSenderAmount: 10,
             v: "v",
             r: "r",
             s: "s"
@@ -106,17 +111,19 @@ describe("Database implementations", () => {
             expiry: 1653138423537,
             signerWallet: "signerWallet",
             signerToken: "signerToken",
-            signerAmount: 3,
+            signerAmount: "3",
+            approximatedSignerAmount: 3,
             senderToken: "senderToken",
-            senderAmount: 100,
+            senderAmount: "100",
+            approximatedSenderAmount: 100,
             v: "v",
             r: "r",
             s: "s"
         } as DbOrder;
 
-        const otcOrder1 = new OtcOrder(order1, 1653138423537, "id1");
-        const otcOrder2 = new OtcOrder(order2, 1653138423527, "id2");
-        const otcOrder3 = new OtcOrder(order3, 1653138423517, "id3");
+        const otcOrder1 = new IndexedOrder(order1, 1653138423537, "id1");
+        const otcOrder2 = new IndexedOrder(order2, 1653138423527, "id2");
+        const otcOrder3 = new IndexedOrder(order3, 1653138423517, "id3");
         await db.addOrder(otcOrder1);
         await db.addOrder(otcOrder2);
         await db.addOrder(otcOrder3);
@@ -169,35 +176,37 @@ describe("Database implementations", () => {
     }
 
     async function getAndAddOtcOrder(db: Database) {
-        const otcOrder = forgeOtcOrder();
+        const indexedOrder = forgeIndexedOrder();
 
-        await db.addOrder(otcOrder);
+        await db.addOrder(indexedOrder);
         const orders = await db.getOrders();
 
-        expect(orders).toEqual(new OrderResponse({ id: otcOrder }, 1));
+        expect(orders).toEqual(new OrderResponse({ hash: indexedOrder }, 1));
         return Promise.resolve();
     }
 
     async function addAllAndGetOrders(db: Database) {
-        const otcOrder = forgeOtcOrder();
-        const anotherOrder = forgeOtcOrder();
-        anotherOrder.id = "another_id";
+        const indexedOrder = forgeIndexedOrder();
+        const anotherOrder = forgeIndexedOrder();
+        anotherOrder.hash = "another_hash";
 
-        await db.addAll({ "id": otcOrder, "another_id": anotherOrder });
+        await db.addAll({ "hash": indexedOrder, "another_hash": anotherOrder });
         const orders = await db.getOrders();
 
-        expect(orders).toEqual(new OrderResponse({ "id": otcOrder, "another_id": anotherOrder }, 1));
+        expect(orders).toEqual(new OrderResponse({ "hash": indexedOrder, "another_hash": anotherOrder }, 1));
         return Promise.resolve();
     }
 
     async function shouldAddfiltersOnOtcAdd(db: Database) {
-        const otcOrder = forgeOtcOrder();
-        const anotherOrder = forgeOtcOrder();
-        anotherOrder.id = "another_id";
-        anotherOrder.order.senderAmount = 15;
-        anotherOrder.order.signerAmount = 50;
+        const indexedOrder = forgeIndexedOrder();
+        const anotherOrder = forgeIndexedOrder();
+        anotherOrder.hash = "another_hash";
+        anotherOrder.order.senderAmount = "15";
+        anotherOrder.order.approximatedSenderAmount = 15;
+        anotherOrder.order.signerAmount = "50";
+        anotherOrder.order.approximatedSignerAmount = 50;
 
-        await db.addAll({ "id": otcOrder, "another_id": anotherOrder });
+        await db.addAll({ "hash": indexedOrder, "another_hash": anotherOrder });
         const filters = await db.getFilters();
 
         expect(filters).toEqual({
@@ -208,10 +217,10 @@ describe("Database implementations", () => {
     }
 
     async function shouldDeleteOtcOrder(db: Database) {
-        const otcOrder = forgeOtcOrder();
-        await db.addOrder(otcOrder);
+        const indexedOrder = forgeIndexedOrder();
+        await db.addOrder(indexedOrder);
 
-        await db.deleteOrder("id");
+        await db.deleteOrder("hash");
         const orders = await db.getOrders();
 
         expect(orders).toEqual(new OrderResponse({}, 0));
@@ -219,70 +228,51 @@ describe("Database implementations", () => {
     }
 
     async function otcOrderExists(db: Database) {
-        const otcOrder = forgeOtcOrder();
-        await db.addOrder(otcOrder);
+        const indexedOrder = forgeIndexedOrder();
+        await db.addOrder(indexedOrder);
 
-        const orderExists = await db.orderExists("id");
+        const orderExists = await db.orderExists("hash");
 
         expect(orderExists).toBe(true);
         return Promise.resolve();
     }
 
     async function otcOrderDoesNotExist(db: Database) {
-        const otcOrder = forgeOtcOrder();
-        await db.addOrder(otcOrder);
+        const indexedOrder = forgeIndexedOrder();
+        await db.addOrder(indexedOrder);
 
-        const orderExists = await db.orderExists("unknownId");
+        const orderExists = await db.orderExists("unknownHash");
 
         expect(orderExists).toBe(false);
         return Promise.resolve();
     }
 
     async function addOtcOrder(db: Database) {
-        const otcOrder = forgeOtcOrder();
-        await db.addOrder(otcOrder);
+        const indexedOrder = forgeIndexedOrder();
+        await db.addOrder(indexedOrder);
 
-        const orderExists = await db.getOrder("id");
+        const orderExists = await db.getOrder("hash");
 
-        expect(orderExists).toEqual(new OrderResponse({ id: otcOrder }, 1));
+        expect(orderExists).toEqual(new OrderResponse({ hash: indexedOrder }, 1));
         return Promise.resolve();
     }
 
-    async function renturnsNullOnUnknownId(db: Database) {
-        const otcOrder = forgeOtcOrder();
-        await db.addOrder(otcOrder);
+    async function renturnsNullOnUnknownHash(db: Database) {
+        const indexedOrder = forgeIndexedOrder();
+        await db.addOrder(indexedOrder);
 
-        const orderExists = await db.getOrder("unknownId");
+        const orderExists = await db.getOrder("unknownHash");
 
         expect(orderExists).toEqual(new OrderResponse(null, 0));
         return Promise.resolve();
     }
 
     async function hashObject(db: Database) {
-        const otcOrder = new OtcOrder(forgeOrder(1653138423547), new Date(1653138423537).getTime(), "id");
+        const indexedOrder = new IndexedOrder(forgeDbOrder(1653138423547), new Date(1653138423537).getTime(), "hash");
 
-        const id = db.generateId(otcOrder);
+        const hash = db.generateHash(indexedOrder);
 
-        expect(id).toBe("98b83b6bd932edba78e8221f783495bee4c761ea71f758f3e76bffc137699670");
+        expect(hash).toBe("5e2f80a0d08dfbfee6bf22dc0bb636694ab3a2ee59aeef1fffb1dc13b1bcc547");
         return Promise.resolve();
     }
 });
-
-function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
-    return new OtcOrder(forgeOrder(expiryDate), expectedAddedDate, "id");
-}
-
-function forgeOrder(expiryDate: number): DbOrder {
-    return {
-        nonce: "nonce",
-        expiry: expiryDate,
-        signerWallet: "signerWallet",
-        signerToken: "dai",
-        signerAmount: 5,
-        senderToken: "ETH",
-        senderAmount: 10,
-        v: "v",
-        r: "r",
-        s: "s"
-    };
-}

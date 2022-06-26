@@ -1,8 +1,8 @@
 import { Order } from '@airswap/typescript';
 import { Request, Response } from 'express';
-import { DbOrder } from 'model/DbOrder.js';
+import { forgeDbOrder, forgeIndexedOrder, forgeOrderResponse } from '../../Fixtures';
 import { Database } from '../../database/Database';
-import { OtcOrder } from '../../model/OtcOrder';
+import { IndexedOrder } from '../../model/IndexedOrder';
 import { Peers } from '../../peer/Peers';
 import { OrderController } from '../OrderController';
 import { Filters } from './../../database/filter/Filters';
@@ -19,13 +19,13 @@ describe("Order controller", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeOtcOrder(1653900784696, 1653900784706) }, 1))),
-            getOrder: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeOtcOrder(1653900784696, 1653900784706) }, 1))),
-            getOrderBy: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeOtcOrder(1653900784696, 1653900784706) }, 1))),
+            getOrders: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, 1))),
+            getOrder: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, 1))),
+            getOrderBy: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, 1))),
             getFilters: jest.fn(() => Promise.resolve({ signerToken: { "ETH": { min: 10, max: 10 } }, senderToken: { "dai": { min: 5, max: 5 } } } as unknown as Filters) as Promise<Filters>),
             addOrder: jest.fn(() => Promise.resolve()),
             orderExists: jest.fn(() => Promise.resolve(true)),
-            generateId: jest.fn(),
+            generateHash: jest.fn(),
             deleteOrder: jest.fn(() => Promise.resolve()),
         };
         fakePeers = {
@@ -36,7 +36,7 @@ describe("Order controller", () => {
 
     describe("When debug mode enabled", () => {
         describe("Delete Order", () => {
-            test("Missing id", async () => {
+            test("Missing hash", async () => {
                 const mockRequest = {
                     body: {},
                     params: {},
@@ -60,7 +60,7 @@ describe("Order controller", () => {
             test("Order does not exists", async () => {
                 const mockRequest = {
                     body: {},
-                    params: { orderId: "a" } as Record<string, any>,
+                    params: { orderHash: "a" } as Record<string, any>,
                     method: "DELETE",
                     url: "/orders/a"
                 } as Request;
@@ -81,10 +81,10 @@ describe("Order controller", () => {
             });
 
             test("Delete order", async () => {
-                const order = forgeOtcOrder(1653900784696, 1653900784706);
+                const order = forgeIndexedOrder(1653900784696, 1653900784706);
                 const mockRequest = {
                     body: {},
-                    params: { orderId: "a" } as Record<string, any>,
+                    params: { orderHash: "a" } as Record<string, any>,
                     method: "DELETE",
                     url: "/orders/a"
                 } as Request;
@@ -122,7 +122,7 @@ describe("Order controller", () => {
                     json: jest.fn()
                 } as Partial<Response>;
 
-                const expected = forgeOtcOrderResponse();
+                const expected = forgeOrderResponse();
 
                 await new OrderController(fakePeers as Peers, fakeDb as Database).getOrders(mockRequest, mockResponse as Response);
 
@@ -146,7 +146,7 @@ describe("Order controller", () => {
                 const expectedFilters = new Filters();
                 expectedFilters.signerToken = { "ETH": { min: 10, max: 10 } };
                 expectedFilters.senderToken = { "dai": { min: 5, max: 5 } };
-                const expected = forgeOtcOrderResponse(expectedFilters);
+                const expected = forgeOrderResponse(expectedFilters);
 
                 await new OrderController(fakePeers as Peers, fakeDb as Database).getOrders(mockRequest, mockResponse as Response);
 
@@ -155,10 +155,10 @@ describe("Order controller", () => {
                 expect(mockResponse.json).toHaveBeenCalledWith(expected);
             });
 
-            test("get by id", async () => {
+            test("get by hash", async () => {
                 const mockRequest = {
                     body: undefined,
-                    params: { orderId: "aze" },
+                    params: { orderHash: "aze" },
                     query: {},
                     method: "GET",
                     url: "/orders"
@@ -169,7 +169,7 @@ describe("Order controller", () => {
                 } as Partial<Response>;
 
 
-                const expected = forgeOtcOrderResponse();
+                const expected = forgeOrderResponse();
 
                 await new OrderController(fakePeers as Peers, fakeDb as Database).getOrders(mockRequest, mockResponse as Response);
 
@@ -180,7 +180,7 @@ describe("Order controller", () => {
             test("get by filters", async () => {
                 const mockRequest = {
                     body: undefined,
-                    params: { orderId: undefined },
+                    params: { orderHash: undefined },
                     query: {
                         minSignerAmount: 200,
                         maxSignerAmount: 200,
@@ -197,7 +197,7 @@ describe("Order controller", () => {
                     json: jest.fn()
                 } as Partial<Response>;
 
-                const expected = forgeOtcOrderResponse();
+                const expected = forgeOrderResponse();
 
                 await new OrderController(fakePeers as Peers, fakeDb as Database).getOrders(mockRequest, mockResponse as Response);
 
@@ -217,9 +217,9 @@ describe("Order controller", () => {
         describe("Add Order", () => {
             test("Add order nominal & broadcast", async () => {
                 const order = forgeOrder(1653900784696);
-                const expectedForgeId = new OtcOrder(forgeDbOrder(1653900784696), 1653900784706, undefined);
-                const expected = forgeOtcOrder(1653900784706, 1653900784696);
-                expected.id = "a";
+                const expectedForgeHash = new IndexedOrder(forgeDbOrder(1653900784696), 1653900784706, undefined);
+                const expected = forgeIndexedOrder(1653900784706, 1653900784696);
+                expected.hash = "a";
                 const mockRequest = {
                     body: order,
                     params: {},
@@ -233,8 +233,8 @@ describe("Order controller", () => {
                 } as Partial<Response>;
 
                 //@ts-ignore
-                fakeDb.generateId.mockImplementation((order) => {
-                    expect(order).toEqual(expectedForgeId); // https://github.com/facebook/jest/issues/7950
+                fakeDb.generateHash.mockImplementation((order) => {
+                    expect(order).toEqual(expectedForgeHash); // https://github.com/facebook/jest/issues/7950
                     return "a";
                 });
                 //@ts-ignore
@@ -242,7 +242,7 @@ describe("Order controller", () => {
 
                 await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequest, mockResponse as Response);
 
-                expect(fakeDb.generateId).toHaveBeenCalledTimes(1);
+                expect(fakeDb.generateHash).toHaveBeenCalledTimes(1);
                 expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
                 expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
                 expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/orders", order);
@@ -250,7 +250,7 @@ describe("Order controller", () => {
             });
 
             test("Add order missing data", async () => {
-                const orderMissingExpiry = forgeOtcOrder(1653900784696, 1653900784706);
+                const orderMissingExpiry = forgeIndexedOrder(1653900784696, 1653900784706);
                 orderMissingExpiry.order.expiry = undefined;
 
                 const mockRequestOrderMissingexpiry = {
@@ -348,16 +348,16 @@ describe("Order controller", () => {
                 } as Partial<Response>;
 
                 //@ts-ignore
-                fakeDb.generateId.mockImplementation(() => "a");
+                fakeDb.generateHash.mockImplementation(() => "a");
                 //@ts-ignore
                 fakeDb.orderExists.mockImplementation(() => true);
 
-                const expected = forgeOtcOrder(1653900784706, 1653900784696);
-                expected.id = undefined;
+                const expected = forgeIndexedOrder(1653900784706, 1653900784696);
+                expected.hash = undefined;
 
                 await new OrderController(fakePeers as Peers, fakeDb as Database).addOrder(mockRequest, mockResponse as Response);
 
-                expect(fakeDb.generateId).toHaveBeenCalledWith(expected);
+                expect(fakeDb.generateHash).toHaveBeenCalledWith(expected);
                 expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
                 expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
                 expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
@@ -392,7 +392,7 @@ describe("Order controller", () => {
         test("Delete order", async () => {
             const mockRequest = {
                 body: {},
-                params: { orderId: "a" } as Record<string, any>,
+                params: { orderHash: "a" } as Record<string, any>,
                 method: "DELETE",
                 url: "/orders/a"
             } as Request;
@@ -412,25 +412,6 @@ describe("Order controller", () => {
     });
 });
 
-function forgeOtcOrder(expectedAddedDate: number, expiryDate: number) {
-    return new OtcOrder(forgeDbOrder(expiryDate), expectedAddedDate, "id");
-}
-
-function forgeDbOrder(expiryDate: number): DbOrder {
-    return {
-        nonce: "nonce",
-        expiry: expiryDate,
-        signerWallet: "signerWallet",
-        signerToken: "dai",
-        signerAmount: 5,
-        senderToken: "ETH",
-        senderAmount: 10,
-        v: "v",
-        r: "r",
-        s: "s"
-    };
-}
-
 function forgeOrder(expiryDate: number): Order {
     return {
         nonce: "nonce",
@@ -444,25 +425,4 @@ function forgeOrder(expiryDate: number): Order {
         r: "r",
         s: "s"
     };
-}
-
-function forgeOtcOrderResponse(filters?: Filters): OrderResponse {
-    return new OrderResponse({
-        aze: {
-            addedOn: 1653900784696,
-            id: "id",
-            order: {
-                expiry: 1653900784706,
-                nonce: "nonce",
-                r: "r",
-                s: "s",
-                senderAmount: 10,
-                senderToken: "ETH",
-                signerAmount: 5,
-                signerToken: "dai",
-                signerWallet: "signerWallet",
-                v: "v",
-            },
-        },
-    }, 1, filters);
 }

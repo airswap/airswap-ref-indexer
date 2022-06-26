@@ -2,19 +2,20 @@ import { Request, Response } from 'express';
 import { DbOrder } from 'model/DbOrder.js';
 import { Database } from '../../database/Database';
 import { OrderResponse } from './../../model/OrderResponse';
-import { OtcOrder } from './../../model/OtcOrder';
+import { IndexedOrder } from './../../model/IndexedOrder';
 import { Peers } from './../../peer/Peers';
 import { RootController } from './../RootController';
+import { forgeIndexedOrder } from '../../Fixtures';
 describe("Home controller", () => {
 
     let fakeDb: Partial<Database>;
     let fakePeers: Partial<Peers>;
     let registryAddress = "registry";
-    const OtcOrder = forgeOtcOrder(1653854738949, 1653854738959);
+    const IndexedOrder = forgeIndexedOrder(1653854738949, 1653854738959);
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve((new OrderResponse({ "aze": OtcOrder }, 1))) as Promise<OrderResponse>),
+            getOrders: jest.fn(() => Promise.resolve((new OrderResponse({ "aze": IndexedOrder }, 1))) as Promise<OrderResponse>),
         };
         fakePeers = {
             getPeers: jest.fn(() => [])
@@ -39,15 +40,17 @@ describe("Home controller", () => {
                 orders: {
                     aze: {
                         addedOn: 1653854738949,
-                        id: "id",
+                        hash: "hash",
                         order: {
                             expiry: 1653854738959,
                             nonce: "nonce",
                             r: "r",
                             s: "s",
-                            senderAmount: 10,
+                            senderAmount: "10",
+                            approximatedSenderAmount: 10,
                             senderToken: "ETH",
-                            signerAmount: 5,
+                            signerAmount: "5",
+                            approximatedSignerAmount: 5,
                             signerToken: "dai",
                             signerWallet: "signerWallet",
                             v: "v",
@@ -66,22 +69,3 @@ describe("Home controller", () => {
         expect(mockResponse.json).toHaveBeenCalledWith(expected);
     });
 });
-
-function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
-    return new OtcOrder(forgeOrder(expiryDate), expectedAddedDate, "id");
-}
-
-function forgeOrder(expiryDate: number): DbOrder {
-    return {
-        nonce: "nonce",
-        expiry: expiryDate,
-        signerWallet: "signerWallet",
-        signerToken: "dai",
-        signerAmount: 5,
-        senderToken: "ETH",
-        senderAmount: 10,
-        v: "v",
-        r: "r",
-        s: "s"
-    };
-}

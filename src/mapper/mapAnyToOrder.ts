@@ -11,9 +11,32 @@ export function mapAnyToDbOrder(data: any): DbOrder {
         expiry: toNumber(data.expiry),
         signerWallet: data.signerWallet,
         signerToken: data.signerToken,
-        signerAmount: toNumber(data.signerAmount),
+        signerAmount: data.signerAmount,
+        approximatedSignerAmount: toNumber(data.signerAmount),
         senderToken: data.senderToken,
-        senderAmount: toNumber(data.senderAmount),
+        senderAmount: data.senderAmount,
+        approximatedSenderAmount: toNumber(data.senderAmount),
+        r: data.r,
+        s: data.s,
+        v: data.v
+    }
+}
+
+export function mapAnyToOrder(data: any): DbOrder {
+    if (!data || typeof data != 'object') {
+        return undefined;
+    }
+
+    return {
+        nonce: data.nonce,
+        expiry: toNumber(data.expiry),
+        signerWallet: data.signerWallet,
+        signerToken: data.signerToken,
+        signerAmount: data.signerAmount,
+        approximatedSignerAmount: toNumber(data.approximatedSignerAmount),
+        senderToken: data.senderToken,
+        senderAmount: data.senderAmount,
+        approximatedSenderAmount: toNumber(data.approximatedSenderAmount),
         r: data.r,
         s: data.s,
         v: data.v

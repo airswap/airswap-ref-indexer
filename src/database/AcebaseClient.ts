@@ -1,7 +1,7 @@
 import { AceBase } from 'acebase';
 import crypto from "crypto";
-import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
-import { OtcOrder } from '../model/OtcOrder.js';
+import { mapAnyToDbOrder, mapAnyToOrder } from '../mapper/mapAnyToOrder.js';
+import { IndexedOrder } from '../model/IndexedOrder.js';
 import { AceBaseLocalSettings } from './../../node_modules/acebase/index.d';
 import { OrderResponse } from './../model/OrderResponse.js';
 import { Database } from './Database.js';
@@ -27,18 +27,18 @@ export class AceBaseClient implements Database {
                 this.erase();
             }
         });
-        this.db.indexes.create(`${ENTRY_REF}`, 'id');
+        this.db.indexes.create(`${ENTRY_REF}`, 'hash');
         this.db.indexes.create(`${ENTRY_REF}`, 'addedOn');
         this.db.indexes.create(`${ENTRY_REF}`, "signerToken");
-        this.db.indexes.create(`${ENTRY_REF}`, "signerAmount");
+        this.db.indexes.create(`${ENTRY_REF}`, "approximatedSignerAmount");
         this.db.indexes.create(`${ENTRY_REF}`, "senderToken");
-        this.db.indexes.create(`${ENTRY_REF}`, "senderAmount");
+        this.db.indexes.create(`${ENTRY_REF}`, "approximatedSenderAmount");
     }
 
     getFilters(): Promise<Filters> {
         return Promise.resolve(this.filters);
     }
-
+    
     async getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse> {
         const query = await this.db.query(`${ENTRY_REF}`);
 
@@ -49,24 +49,24 @@ export class AceBaseClient implements Database {
             query.filter('senderToken', 'in', requestFilter.senderTokens);
         }
         if (requestFilter.minSenderAmount != undefined) {
-            query.filter('senderAmount', '>=', requestFilter.minSenderAmount);
+            query.filter('approximatedSenderAmount', '>=', requestFilter.minSenderAmount);
         }
         if (requestFilter.maxSenderAmount != undefined) {
-            query.filter('senderAmount', '<=', requestFilter.maxSenderAmount);
+            query.filter('approximatedSenderAmount', '<=', requestFilter.maxSenderAmount);
         }
         if (requestFilter.minSignerAmount != undefined) {
-            query.filter('signerAmount', '>=', requestFilter.minSignerAmount);
+            query.filter('approximatedSignerAmount', '>=', requestFilter.minSignerAmount);
         }
         if (requestFilter.maxSignerAmount != undefined) {
-            query.filter('signerAmount', '<=', requestFilter.maxSignerAmount);
+            query.filter('approximatedSignerAmount', '<=', requestFilter.maxSignerAmount);
         }
         if (requestFilter.maxAddedDate != undefined) {
             query.filter('addedOn', '>=', requestFilter.maxAddedDate);
         }
         if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
-            query.sort('signerAmount', requestFilter.sortOrder == SortOrder.ASC)
+            query.sort('approximatedSignerAmount', requestFilter.sortOrder == SortOrder.ASC)
         } else if (requestFilter.sortField == SortField.SENDER_AMOUNT) {
-            query.sort('senderAmount', requestFilter.sortOrder == SortOrder.ASC)
+            query.sort('approximatedSenderAmount', requestFilter.sortOrder == SortOrder.ASC)
         }
         const totalResults = await query.count();
         const data = await query.skip((requestFilter.page - 1) * elementPerPage).take(elementPerPage + 1).get();
@@ -82,39 +82,39 @@ export class AceBaseClient implements Database {
         return this.db.close()
     }
 
-    async addOrder(otcOrder: OtcOrder): Promise<void> {
-        let toAdd = { ...otcOrder, ...otcOrder.order };
+    async addOrder(indexedOrder: IndexedOrder): Promise<void> {
+        let toAdd = { ...indexedOrder, ...indexedOrder.order };
         delete toAdd.order;
         await this.db.ref(ENTRY_REF).push(toAdd);
-        this.filters.addSignerToken(otcOrder.order.signerToken, otcOrder.order.signerAmount);
-        this.filters.addSenderToken(otcOrder.order.senderToken, otcOrder.order.senderAmount);
+        this.filters.addSignerToken(indexedOrder.order.signerToken, indexedOrder.order.approximatedSignerAmount);
+        this.filters.addSenderToken(indexedOrder.order.senderToken, indexedOrder.order.approximatedSenderAmount);
         return Promise.resolve();
     }
 
-    async addAll(orders: Record<string, OtcOrder>): Promise<void> {
-        await Promise.all(Object.keys(orders).map(async id => {
-            await this.addOrder(orders[id]);
+    async addAll(orders: Record<string, IndexedOrder>): Promise<void> {
+        await Promise.all(Object.keys(orders).map(async hash => {
+            await this.addOrder(orders[hash]);
         }));
         return Promise.resolve();
     }
 
-    async deleteOrder(id: string): Promise<void> {
+    async deleteOrder(hash: string): Promise<void> {
         await this.db.query(ENTRY_REF)
-            .filter('id', '==', id)
+            .filter('hash', '==', hash)
             .remove();
         return Promise.resolve();
     }
 
-    async getOrder(id: string): Promise<OrderResponse> {
+    async getOrder(hash: string): Promise<OrderResponse> {
         const query = await this.db.query(ENTRY_REF)
-            .filter('id', '==', id)
+            .filter('hash', '==', hash)
             .get();
         const serializedOrder = query.values()?.next()?.value?.val();
         if (!serializedOrder) {
             return Promise.resolve(new OrderResponse(null, 0));
         }
         const result = {};
-        result[id] = this.datarefToRecord(serializedOrder)[id];
+        result[hash] = this.datarefToRecord(serializedOrder)[hash];
         return Promise.resolve(new OrderResponse(result, 1));
     }
 
@@ -134,19 +134,21 @@ export class AceBaseClient implements Database {
         return await this.db.ref(ENTRY_REF).remove();
     }
 
-    private datarefToRecord(data): Record<string, OtcOrder> {
-        const mapped: Record<string, OtcOrder> = {};
-        mapped[data.id] = new OtcOrder(mapAnyToDbOrder(data), data.addedOn, data.id)
+    private datarefToRecord(data): Record<string, IndexedOrder> {
+        const mapped: Record<string, IndexedOrder> = {};
+        mapped[data.hash] = new IndexedOrder(mapAnyToOrder(data), data.addedOn, data.hash)
         return mapped;
     }
 
-    async orderExists(id: string): Promise<boolean> {
+    async orderExists(hash: string): Promise<boolean> {
         return await this.db.query(ENTRY_REF)
-            .filter('id', '==', id).exists();
+            .filter('hash', '==', hash).exists();
     }
 
-    generateId(otcOrder: OtcOrder) {
-        const lightenOrder = otcOrder.order;
+    generateHash(indexedOrder: IndexedOrder) {
+        const lightenOrder = {...indexedOrder.order};
+        delete lightenOrder.approximatedSenderAmount
+        delete lightenOrder.approximatedSignerAmount
         const stringObject = JSON.stringify(lightenOrder);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
         return hashed.digest("hex");

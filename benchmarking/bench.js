@@ -1,6 +1,11 @@
 import axios from "axios";
 
-const tokens = ["BTC", "ETH", "DAI", "AST"];
+const tokens = [
+    "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", // WBTC
+    "0x0000000000000000000000000000000000000000", // ETH
+    "0x6b175474e89094c44da98b954eedeac495271d0f", // DAI
+    "0x27054b13b1b798b345b591a4d22e6562d47ea75a", // AST
+];
 
 async function bench() {
     let lastDate = new Date().getTime();
@@ -19,13 +24,13 @@ async function bench() {
         try {
             await axios.post("http://localhost:4001/orders", {
                 nonce: "nonce",
-                expiry: 1653807874951,
+                expiry: "1653807874951",
                 signerWallet: "signerWallet",
                 signerToken: signerToken,
-                signerAmount: index,
+                signerAmount: `${index}`,
                 senderWallet: "senderWallet",
                 senderToken: senderToken,
-                senderAmount: 10,
+                senderAmount: "10",
                 r: "r",
                 s: "s",
                 v: "v",

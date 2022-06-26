@@ -3,9 +3,11 @@ export declare type DbOrder = {
     expiry: number;
     signerWallet: string;
     signerToken: string;
-    signerAmount: number;
     senderToken: string;
-    senderAmount: number;
+    signerAmount: string;
+    senderAmount: string;
+    approximatedSignerAmount: number;
+    approximatedSenderAmount: number;
 } & Signature;
 
 export declare type Signature = {

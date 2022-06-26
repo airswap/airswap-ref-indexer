@@ -7,7 +7,8 @@
     "start": "node ./dist/index.js",
     "registry": "node ./dist/registry.js",
     "compile": "npx tsc",
-    "test": "jest --verbose --coverage --no-cache"
+    "test": "jest --verbose --coverage --no-cache",
+    "bench": "node benchmarking/bench.js"
   },
   "type": "module",
   "license": "MIT",

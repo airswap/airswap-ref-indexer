@@ -1,12 +1,12 @@
 import { DbOrder } from 'model/DbOrder.js';
 
-export class OtcOrder {
-    id: string;
+export class IndexedOrder {
+    hash: string;
     order: DbOrder;
     addedOn: number;
 
-    constructor(dbOrder: DbOrder, addedOn: number, id?: string) {
-        this.id = id;
+    constructor(dbOrder: DbOrder, addedOn: number, hash?: string) {
+        this.hash = hash;
         this.order = dbOrder;
         this.addedOn = addedOn;
     }

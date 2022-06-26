@@ -1,6 +1,5 @@
+import { forgeIndexedOrder } from '../../Fixtures';
 import axios, { AxiosResponse } from "axios";
-import { DbOrder } from 'model/DbOrder.js';
-import { OtcOrder } from '../../model/OtcOrder';
 import { OrderClient } from '../OrderClient';
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -15,16 +14,16 @@ function axios200Response(data: object): AxiosResponse<any> {
     }
 };
 
-describe("OtcOrder client", () => {
-    it("add OtcOrder", async () => {
-        const OtcOrder = forgeOtcOrder();
+describe("IndexedOrder client", () => {
+    it("add IndexedOrder", async () => {
+        const IndexedOrder = forgeIndexedOrder();
 
         mockedAxios.post.mockImplementation((url: string, data: any) => {
             expect(url).toBe("my_url/orders/")
-            expect(data).toEqual(OtcOrder)
+            expect(data).toEqual(IndexedOrder)
             return Promise.resolve(axios200Response({}));
         });
-        const response = await new OrderClient().addOrder("my_url", OtcOrder)
+        const response = await new OrderClient().addOrder("my_url", IndexedOrder)
         expect(response).toBeDefined();
     });
 
@@ -37,7 +36,7 @@ describe("OtcOrder client", () => {
         expect(response).toBeDefined();
     });
 
-    it("delete OtcOrder", async () => {
+    it("delete IndexedOrder", async () => {
         mockedAxios.delete.mockImplementation((url: string, data: any) => {
             expect(url).toBe("my_url/orders/order_id")
             expect(data).toBeUndefined();
@@ -46,23 +45,4 @@ describe("OtcOrder client", () => {
         const response = await new OrderClient().delete("my_url", "order_id");
         expect(response).toBeDefined();
     });
-});  
-
-function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
-    return new OtcOrder(forgeOrder(expiryDate), expectedAddedDate, "id");
-}
-
-function forgeOrder(expiryDate: number): DbOrder {
-    return {
-        nonce: "nonce",
-        expiry: expiryDate,
-        signerWallet: "signerWallet",
-        signerToken: "dai",
-        signerAmount: 5,
-        senderToken: "ETH",
-        senderAmount: 10,
-        v: "v",
-        r: "r",
-        s: "s"
-    };
-}
+});
