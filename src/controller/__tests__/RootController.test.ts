@@ -57,7 +57,8 @@ describe("Home controller", () => {
                         },
                     },
                 },
-                pagination: { first: "1", last: "1" }
+                pagination: { first: "1", last: "1" },
+                entriesForQuery: 1
             },
             peers: [],
             registry: "registry",
