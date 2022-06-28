@@ -20,9 +20,9 @@ describe("Order controller", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, new Pagination("1", "1")))),
-            getOrder: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, new Pagination("1", "1")))),
-            getOrderBy: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, new Pagination("1", "1")))),
+            getOrders: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, new Pagination("1", "1"), 1))),
+            getOrder: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, new Pagination("1", "1"), 1))),
+            getOrderBy: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrder(1653900784696, 1653900784706) }, new Pagination("1", "1"), 1))),
             getFilters: jest.fn(() => Promise.resolve({ signerToken: { "ETH": { min: 10, max: 10 } }, senderToken: { "dai": { min: 5, max: 5 } } } as unknown as Filters) as Promise<Filters>),
             addOrder: jest.fn(() => Promise.resolve()),
             orderExists: jest.fn(() => Promise.resolve(true)),

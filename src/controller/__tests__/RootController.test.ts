@@ -14,7 +14,7 @@ describe("Home controller", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve((new OrderResponse({ "aze": IndexedOrder }, new Pagination("1", "1")))) as Promise<OrderResponse>),
+            getOrders: jest.fn(() => Promise.resolve((new OrderResponse({ "aze": IndexedOrder }, new Pagination("1", "1"), 1))) as Promise<OrderResponse>),
         };
         fakePeers = {
             getPeers: jest.fn(() => [])

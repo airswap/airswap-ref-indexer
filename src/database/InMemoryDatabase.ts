@@ -57,7 +57,7 @@ export class InMemoryDatabase implements Database {
         return { ...total };
       }, {});
 
-    return Promise.resolve(new OrderResponse(orders, computePagination(elementPerPage, totalResultsCount, requestFilter.page)));
+    return Promise.resolve(new OrderResponse(orders, computePagination(elementPerPage, totalResultsCount, requestFilter.page), totalResultsCount));
   }
 
   addOrder(indexedOrder: IndexedOrder) {
@@ -83,14 +83,14 @@ export class InMemoryDatabase implements Database {
     const result: Record<string, IndexedOrder> = {};
     result[hash] = this.database[hash];
     if (this.database[hash]) {
-      return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1)));
+      return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1), 1));
     }
-    return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 0)));
+    return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 0), 1));
   }
 
   async getOrders(): Promise<OrderResponse> {
     const size = Object.keys(this.database).length;
-    return Promise.resolve(new OrderResponse(this.database, computePagination(elementPerPage, size)));
+    return Promise.resolve(new OrderResponse(this.database, computePagination(elementPerPage, size), size));
   }
 
   getFilters(): Promise<Filters> {

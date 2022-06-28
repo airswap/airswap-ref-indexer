@@ -84,7 +84,7 @@ export class AceBaseClient implements Database {
             }
         });
         const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
-        return Promise.resolve(new OrderResponse(mapped, pagination));
+        return Promise.resolve(new OrderResponse(mapped, pagination, totalResults));
     }
 
     close(): Promise<void> {
@@ -121,11 +121,11 @@ export class AceBaseClient implements Database {
             .get();
         const serializedOrder = query.values()?.next()?.value?.val();
         if (!serializedOrder) {
-            return Promise.resolve(new OrderResponse({}, computePagination(elementPerPage, 0)));
+            return Promise.resolve(new OrderResponse({}, computePagination(elementPerPage, 0), 1));
         }
         const result: Record<string, IndexedOrder> = {};
         result[hash] = this.datarefToRecord(serializedOrder)[hash];
-        return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1)));
+        return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1), 1));
     }
 
     async getOrders(): Promise<OrderResponse> {
@@ -136,7 +136,7 @@ export class AceBaseClient implements Database {
             const mapp = this.datarefToRecord(dataSnapshot.val());
             mapped = { ...mapped, ...mapp };
         });
-        return Promise.resolve(new OrderResponse(mapped, computePagination(elementPerPage, totalResults)));
+        return Promise.resolve(new OrderResponse(mapped, computePagination(elementPerPage, totalResults), totalResults));
     }
 
     async erase() {
