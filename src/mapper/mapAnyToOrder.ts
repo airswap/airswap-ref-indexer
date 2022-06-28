@@ -8,17 +8,17 @@ import { toNumber } from '../converter/index.js';
  */
 export function mapAnyToDbOrder(data: any): DbOrder {
     return {
-        nonce: data.nonce,
+        nonce: String(data.nonce),
         expiry: toNumber(data.expiry)!,
-        signerWallet: data.signerWallet,
-        signerToken: data.signerToken,
-        signerAmount: data.signerAmount,
+        signerWallet: String(data.signerWallet),
+        signerToken: String(data.signerToken),
+        signerAmount: String(data.signerAmount),
         approximatedSignerAmount: toNumber(data.signerAmount)!,
-        senderToken: data.senderToken,
-        senderAmount: data.senderAmount,
+        senderToken: String(data.senderToken),
+        senderAmount: String(data.senderAmount),
         approximatedSenderAmount: toNumber(data.senderAmount)!,
-        r: data.r,
-        s: data.s,
-        v: data.v
+        r: String(data.r),
+        s: String(data.s),
+        v: String(data.v)
     }
 }

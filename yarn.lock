@@ -1230,17 +1230,17 @@ accepts@~1.3.8:
     mime-types "~2.1.34"
     negotiator "0.6.3"
 
-acebase-core@^1.17.0:
-  version "1.17.0"
-  resolved "https://registry.yarnpkg.com/acebase-core/-/acebase-core-1.17.0.tgz#daa5fd0f72fbe00109abd42f17cf9ffb4a45ac45"
-  integrity sha512-JT1vUy3EaoGGLvmD9tn4p7AGIGfaF2fsD1TgUXa+Pj27xJGylSEv+t4o9x3Ihi/VP+ZNpMK2Dx+nWGHcgOaKHQ==
+acebase-core@^1.18.0:
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/acebase-core/-/acebase-core-1.18.0.tgz#e372895c9dd6967986885ef24c541fee572f07e9"
+  integrity sha512-kFHHlyDYJx/b/lo20udKOyAsF/QCcddBzXgeTvKoC4/PR9Ux91XvQ8Djq1nS4thY+K3LxPKphSm8voGdyPyEaQ==
 
-acebase@^1.20.0:
-  version "1.20.0"
-  resolved "https://registry.yarnpkg.com/acebase/-/acebase-1.20.0.tgz#ca2c420ffb4d98114d51f7d9d38a0683e52cf6c9"
-  integrity sha512-gbGAa/Po6wlMvGD38J4W6vWYcJxvF4Ok+TaM/rcgFu4wPoxBUi+WgNA1OLpAGv5AzMmAV/bAmfoGldy/ed/QTQ==
+acebase@1.21.7:
+  version "1.21.7"
+  resolved "https://registry.yarnpkg.com/acebase/-/acebase-1.21.7.tgz#f459888f168be39efab48345f5b40581a9cdde96"
+  integrity sha512-+t6G87l5NiB8GfbwIekhlccJnRm/HbZNslmqsNhgcf8DVNKXwwcP1ATXz0DEEA7HBzWJH+JCkGL1cf3UMfZ22Q==
   dependencies:
-    acebase-core "^1.17.0"
+    acebase-core "^1.18.0"
     unidecode "^0.1.8"
 
 acorn-globals@^6.0.0:

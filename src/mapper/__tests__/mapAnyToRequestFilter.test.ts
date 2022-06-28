@@ -1,15 +1,8 @@
-import { SortOrder } from './../../database/filter/SortOrder';
-import { SortField } from './../../database/filter/SortField';
 import { mapAnyToRequestFilter } from '../mapAnyToRequestFilter';
+import { SortField } from './../../database/filter/SortField';
+import { SortOrder } from './../../database/filter/SortOrder';
 
 describe("mapAnyToRequestFilter", () => {
-    test("should return undefined", () => {
-        expect(mapAnyToRequestFilter("")).toBeUndefined();
-        expect(mapAnyToRequestFilter(undefined)).toBeUndefined();
-        expect(mapAnyToRequestFilter(null)).toBeUndefined();
-        expect(mapAnyToRequestFilter(1)).toBeUndefined();
-    });
-
     test("should map all string values", () => {
         expect(mapAnyToRequestFilter({
             maxSenderAmount: "20",

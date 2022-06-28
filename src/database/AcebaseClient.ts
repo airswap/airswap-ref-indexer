@@ -64,17 +64,24 @@ export class AceBaseClient implements Database {
         if (requestFilter.maxAddedDate != undefined) {
             query.filter('addedOn', '>=', requestFilter.maxAddedDate);
         }
+
+        const isAscSort = requestFilter.sortOrder == SortOrder.ASC;
         if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
-            query.sort('approximatedSignerAmount', requestFilter.sortOrder == SortOrder.ASC)
+            query.sort('approximatedSignerAmount', isAscSort)
         } else if (requestFilter.sortField == SortField.SENDER_AMOUNT) {
-            query.sort('approximatedSenderAmount', requestFilter.sortOrder == SortOrder.ASC)
+            query.sort('approximatedSenderAmount', isAscSort)
         }
+
         const totalResults = await query.count();
         const data = await query.skip((requestFilter.page - 1) * elementPerPage).take(elementPerPage + 1).get();
         let mapped = {};
         data.forEach(d => {
             const mapp = this.datarefToRecord(d.val());
-            mapped = { ...mapped, ...mapp };
+            if(!isAscSort){
+                mapped = { ...mapp, ...mapped  };
+            }else {
+                mapped = { ...mapped, ...mapp  };
+            }
         });
         const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
         return Promise.resolve(new OrderResponse(mapped, pagination));
@@ -116,7 +123,7 @@ export class AceBaseClient implements Database {
         if (!serializedOrder) {
             return Promise.resolve(new OrderResponse({}, computePagination(elementPerPage, 0)));
         }
-        const result : Record<string, IndexedOrder> = {};
+        const result: Record<string, IndexedOrder> = {};
         result[hash] = this.datarefToRecord(serializedOrder)[hash];
         return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1)));
     }

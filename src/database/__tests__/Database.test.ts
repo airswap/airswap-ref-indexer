@@ -1,9 +1,9 @@
-import { DbOrder } from './../../model/DbOrder';
 import { forgeDbOrder, forgeIndexedOrder } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
 import { AceBaseClient } from "../AcebaseClient";
 import { Database } from '../Database';
 import { InMemoryDatabase } from '../InMemoryDatabase';
+import { DbOrder } from './../../model/DbOrder';
 import { OrderResponse } from './../../model/OrderResponse';
 import { Pagination } from './../../model/Pagination.js';
 import { SortField } from './../filter/SortField';
@@ -148,16 +148,16 @@ describe("Database implementations", () => {
         expect(maxSenderAmount).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, new Pagination("1", "1")));
 
         const senderAmountAsc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.ASC });
-        expect(senderAmountAsc).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2, "id3": otcOrder3 }, new Pagination("1", "1")));
+        expect(Object.keys(senderAmountAsc.orders)).toEqual(["id1", "id2", "id3"]);
 
-        const senderAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.DESC });
-        expect(senderAmountDesc).toEqual(new OrderResponse({ "id3": otcOrder3, "id2": otcOrder2, "id1": otcOrder1 }, new Pagination("1", "1")));
+        const senderAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.DESC, senderTokens: ["senderToken"] });
+        expect(Object.keys(senderAmountDesc.orders)).toEqual(["id3", "id1"]);
 
         const signerAmountAsc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.ASC });
-        expect(signerAmountAsc).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3, "id2": otcOrder2 }, new Pagination("1", "1")));
+        expect(Object.keys(signerAmountAsc.orders)).toEqual(["id1", "id3", "id2"]);
 
-        const signerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC });
-        expect(signerAmountDesc).toEqual(new OrderResponse({ "id2": otcOrder2, "id3": otcOrder3, "id1": otcOrder1 }, new Pagination("1", "1")));
+        const signerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC, signerTokens: ["signerToken"] });
+        expect(Object.keys(signerAmountDesc.orders)).toEqual(["id3", "id1"]);
 
         const maxAddedOn = await db.getOrderBy({ page: 1, maxAddedDate: 1653138423527 });
         expect(maxAddedOn).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, new Pagination("1", "1")));
@@ -211,7 +211,7 @@ describe("Database implementations", () => {
         const filters = await db.getFilters();
 
         expect(filters).toEqual({
-            senderToken: { "ETH": { max: 15, min: 10 } },
+            senderToken: { "eth": { max: 15, min: 10 } },
             signerToken: { "dai": { max: 50, min: 5 } }
         });
         return Promise.resolve();
