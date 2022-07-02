@@ -30,7 +30,107 @@ describe("Database implementations", () => {
 
     describe('get IndexedOrder by filter', () => {
         test("inMemoryDb", async () => { await getOtcOrderByFilter(inMemoryDatabase); });
-        test("acebaseDb", async () => { await getOtcOrderByFilter(acebaseClient); });
+        test("acebaseDb", async () => {
+            const db= acebaseClient;
+            const order1 = {
+                nonce: "nonce",
+                expiry: 1653138423537,
+                signerWallet: "signerWallet",
+                signerToken: "signerToken",
+                signerAmount: "2",
+                approximatedSignerAmount: 2,
+                senderToken: "senderToken",
+                senderAmount: "1",
+                approximatedSenderAmount: 1,
+                v: "v",
+                r: "r",
+                s: "s"
+            } as DbOrder;
+            const order2 = {
+                nonce: "nonce",
+                expiry: 1653138423537,
+                signerWallet: "signerWallet",
+                signerToken: "blip",
+                signerAmount: "20",
+                approximatedSignerAmount: 20,
+                senderToken: "another",
+                senderAmount: "10",
+                approximatedSenderAmount: 10,
+                v: "v",
+                r: "r",
+                s: "s"
+            } as DbOrder;
+            const order3 = {
+                nonce: "nonce",
+                expiry: 1653138423537,
+                signerWallet: "signerWallet",
+                signerToken: "signerToken",
+                signerAmount: "3",
+                approximatedSignerAmount: 3,
+                senderToken: "senderToken",
+                senderAmount: "100",
+                approximatedSenderAmount: 100,
+                v: "v",
+                r: "r",
+                s: "s"
+            } as DbOrder;
+    
+            const otcOrder1 = new IndexedOrder(order1, 1653138423537, "id1");
+            const otcOrder2 = new IndexedOrder(order2, 1653138423527, "id2");
+            const otcOrder3 = new IndexedOrder(order3, 1653138423517, "id3");
+            await db.addOrder(otcOrder1);
+            await db.addOrder(otcOrder2);
+            await db.addOrder(otcOrder3);
+    
+            const minSignerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC });
+            expect(Object.keys(minSignerAmountDesc.orders)).toEqual(["id2", "id3", "id1"]);
+
+            const ordersFromToken = await db.getOrderBy({ page: 1, signerTokens: ["signerToken"] });
+            expect(ordersFromToken).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3 }, new Pagination("1", "1"), 2));
+    
+            const anotherToken = await db.getOrderBy({ page: 1, senderTokens: ["another"] });
+            expect(anotherToken).toEqual(new OrderResponse({ "id2": otcOrder2 }, new Pagination("1", "1"), 1));
+    
+            const minSignerAmountFromToken = await db.getOrderBy({ page: 1, minSignerAmount: 15 });
+            expect(minSignerAmountFromToken).toEqual(new OrderResponse({ "id2": otcOrder2 }, new Pagination("1", "1"), 1));
+    
+            const maxSignerAmountFromToken = await db.getOrderBy({ page: 1, maxSignerAmount: 5 });
+            expect(maxSignerAmountFromToken).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3 }, new Pagination("1", "1"), 2));
+    
+            const minSenderAmount = await db.getOrderBy({ page: 1, minSenderAmount: 20 });
+            expect(minSenderAmount).toEqual(new OrderResponse({ "id3": otcOrder3 }, new Pagination("1", "1"), 1));
+    
+            const maxSenderAmount = await db.getOrderBy({ page: 1, maxSenderAmount: 15 });
+            expect(maxSenderAmount).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, new Pagination("1", "1"), 2));
+    
+            const senderAmountAsc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.ASC });
+            expect(Object.keys(senderAmountAsc.orders)).toEqual(["id1", "id2", "id3"]);
+    
+            const senderAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.DESC, senderTokens: ["senderToken"] });
+            expect(Object.keys(senderAmountDesc.orders)).toEqual(["id3", "id1"]);
+    
+            const signerAmountAsc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.ASC });
+            expect(Object.keys(signerAmountAsc.orders)).toEqual(["id1", "id3", "id2"]);
+    
+            const signerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC, signerTokens: ["signerToken"] });
+            expect(Object.keys(signerAmountDesc.orders)).toEqual(["id3", "id1"]);        
+            
+
+    
+            const maxAddedOn = await db.getOrderBy({ page: 1, maxAddedDate: 1653138423527 });
+            expect(maxAddedOn).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, new Pagination("1", "1"), 2));
+    
+            const specificOne = await db.getOrderBy({
+                page: 1,
+                signerTokens: ["signerToken"],
+                senderTokens: ["senderToken"],
+                minSignerAmount: 0,
+                maxSignerAmount: 5,
+                minSenderAmount: 1,
+                maxSenderAmount: 3,
+            });
+            expect(specificOne).toEqual(new OrderResponse({ "id1": otcOrder1 }, new Pagination("1", "1"), 1));
+         });
     });
 
     describe("Should add & get IndexedOrder", () => {
@@ -157,7 +257,10 @@ describe("Database implementations", () => {
         expect(Object.keys(signerAmountAsc.orders)).toEqual(["id1", "id3", "id2"]);
 
         const signerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC, signerTokens: ["signerToken"] });
-        expect(Object.keys(signerAmountDesc.orders)).toEqual(["id3", "id1"]);
+        expect(Object.keys(signerAmountDesc.orders)).toEqual(["id3", "id1"]);        
+        
+        const minSignerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC });
+        expect(Object.keys(minSignerAmountDesc.orders)).toEqual(["id2", "id3", "id1"]);
 
         const maxAddedOn = await db.getOrderBy({ page: 1, maxAddedDate: 1653138423527 });
         expect(maxAddedOn).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, new Pagination("1", "1"), 2));

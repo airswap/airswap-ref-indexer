@@ -1,4 +1,4 @@
-import { AceBase } from 'acebase';
+import { AceBase, DataReference } from 'acebase';
 import crypto from "crypto";
 import { computePagination } from '../controller/pagination/index.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
@@ -18,22 +18,25 @@ export class AceBaseClient implements Database {
 
     private db: AceBase;
     private filters: Filters;
+    private ref: DataReference;
 
     constructor(databaseName: string, deleteOnStart = false) {
         this.filters = new Filters();
-        const options = { storage: { path: '.' } } as AceBaseLocalSettings;
+        const options = { storage: { path: '.' }, logLevel: 'log' } as AceBaseLocalSettings;
         this.db = new AceBase(databaseName, options);
         this.db.ready(() => {
             if (deleteOnStart) {
                 this.erase();
             }
         });
+
+        this.ref = this.db.ref(ENTRY_REF);
         this.db.indexes.create(`${ENTRY_REF}`, 'hash');
         this.db.indexes.create(`${ENTRY_REF}`, 'addedOn');
-        this.db.indexes.create(`${ENTRY_REF}`, "signerToken");
         this.db.indexes.create(`${ENTRY_REF}`, "approximatedSignerAmount");
-        this.db.indexes.create(`${ENTRY_REF}`, "senderToken");
         this.db.indexes.create(`${ENTRY_REF}`, "approximatedSenderAmount");
+        // this.db.indexes.create(`${ENTRY_REF}`, "signerToken"); https://github.com/appy-one/acebase/issues/124
+        // this.db.indexes.create(`${ENTRY_REF}`, "senderToken");
     }
 
     getFilters(): Promise<Filters> {
@@ -41,7 +44,7 @@ export class AceBaseClient implements Database {
     }
 
     async getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse> {
-        const query = await this.db.query(`${ENTRY_REF}`);
+        const query = this.ref.query();
 
         if (requestFilter.signerTokens != undefined) {
             query.filter('signerToken', 'in', requestFilter.signerTokens);
@@ -73,16 +76,12 @@ export class AceBaseClient implements Database {
         }
 
         const totalResults = await query.count();
-        const data = await query.skip((requestFilter.page - 1) * elementPerPage).take(elementPerPage + 1).get();
-        let mapped = {};
-        data.forEach(d => {
-            const mapp = this.datarefToRecord(d.val());
-            if(!isAscSort){
-                mapped = { ...mapp, ...mapped  };
-            }else {
-                mapped = { ...mapped, ...mapp  };
-            }
-        });
+        const entriesSkipped = (requestFilter.page - 1) * elementPerPage;
+        const data = await query.skip(entriesSkipped).take(elementPerPage).get();
+        const mapped = data.reduce((total, indexedOrder) => {
+            const mapped = this.datarefToRecord(indexedOrder.val());
+            return { ...total, ...mapped };
+        }, {});
         const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
         return Promise.resolve(new OrderResponse(mapped, pagination, totalResults));
     }
@@ -95,7 +94,7 @@ export class AceBaseClient implements Database {
         let toAdd = { ...indexedOrder, ...indexedOrder.order };
         //@ts-ignore
         delete toAdd.order;
-        await this.db.ref(ENTRY_REF).push(toAdd);
+        await this.ref.push(toAdd);
         this.filters.addSignerToken(indexedOrder.order.signerToken, indexedOrder.order.approximatedSignerAmount);
         this.filters.addSenderToken(indexedOrder.order.senderToken, indexedOrder.order.approximatedSenderAmount);
         return Promise.resolve();
@@ -109,14 +108,14 @@ export class AceBaseClient implements Database {
     }
 
     async deleteOrder(hash: string): Promise<void> {
-        await this.db.query(ENTRY_REF)
+        await this.ref.query()
             .filter('hash', '==', hash)
             .remove();
         return Promise.resolve();
     }
 
     async getOrder(hash: string): Promise<OrderResponse> {
-        const query = await this.db.query(ENTRY_REF)
+        const query = await this.ref.query()
             .filter('hash', '==', hash)
             .get();
         const serializedOrder = query.values()?.next()?.value?.val();
@@ -129,8 +128,8 @@ export class AceBaseClient implements Database {
     }
 
     async getOrders(): Promise<OrderResponse> {
-        const data = await this.db.query(ENTRY_REF).take(1000000).get(); // bypass default limitation 
-        const totalResults = await this.db.query(ENTRY_REF).take(1000000).count();
+        const data = await this.ref.query().take(1000000).get(); // bypass default limitation 
+        const totalResults = await this.ref.query().take(1000000).count();
         let mapped = {};
         data.forEach(dataSnapshot => {
             const mapp = this.datarefToRecord(dataSnapshot.val());
@@ -151,7 +150,7 @@ export class AceBaseClient implements Database {
     }
 
     async orderExists(hash: string): Promise<boolean> {
-        return await this.db.query(ENTRY_REF)
+        return await this.ref.query()
             .filter('hash', '==', hash).exists();
     }
 
