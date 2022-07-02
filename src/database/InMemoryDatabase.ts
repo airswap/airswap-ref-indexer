@@ -90,7 +90,7 @@ export class InMemoryDatabase implements Database {
 
   async getOrders(): Promise<OrderResponse> {
     const size = Object.keys(this.database).length;
-    return Promise.resolve(new OrderResponse(this.database, computePagination(elementPerPage, size), size));
+    return Promise.resolve(new OrderResponse(this.database, computePagination(size, size), size));
   }
 
   getFilters(): Promise<Filters> {

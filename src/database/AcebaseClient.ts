@@ -135,7 +135,7 @@ export class AceBaseClient implements Database {
             const mapp = this.datarefToRecord(dataSnapshot.val());
             mapped = { ...mapped, ...mapp };
         });
-        return Promise.resolve(new OrderResponse(mapped, computePagination(elementPerPage, totalResults), totalResults));
+        return Promise.resolve(new OrderResponse(mapped, computePagination(totalResults, totalResults), totalResults));
     }
 
     async erase() {
