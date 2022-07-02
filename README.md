@@ -10,20 +10,12 @@ For now the registry is http only, it will be in smart contract in a near future
 - NodeJs 14.X
 - yarn
 
-# Commands
-Compile
-> $ yarn compile
-
-Start the regsitry
-> $ yarn registry
-
-Start the node
-> $ yarn start
-
 # How to start ?
 > $ cp .env.example .env
 
 Edit the file with the correct values. If you are running the registry on the same machine <ip> should be replaced by localhost.
+
+If you want to use your local ip, "LOCAL_ONLY=1", You need to find ethernet card name : ifconfig/ipconfig/ip address and paste it in LOCAL_INTERFACES
 
 Then
 > $ yarn && yarn compile
