@@ -75,7 +75,7 @@ export class AceBaseClient implements Database {
             query.sort('approximatedSenderAmount', isAscSort)
         }
 
-        const totalResults = await query.count();
+        const totalResults = await query.take(1000000).count()
         const entriesSkipped = (requestFilter.page - 1) * elementPerPage;
         const data = await query.skip(entriesSkipped).take(elementPerPage).get();
         const mapped = data.reduce((total, indexedOrder) => {
