@@ -44,7 +44,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"nonce\": \"nonce\",\r\n    \"expiry\": 1653807874951,\r\n    \"signerWallet\": \"signerWallet\",\r\n    \"signerToken\": \"signerToken\",\r\n    \"signerAmount\": 3.9,\r\n    \"senderWallet\": \"senderWallet\",\r\n    \"senderToken\": \"senderToken\",\r\n    \"senderAmount\": 19,\r\n    \"r\": \"r\",\r\n    \"s\": \"s\",\r\n    \"v\": \"v\"\r\n}",
+							"raw": "{\r\n    \"nonce\": \"nonce\",\r\n    \"expiry\": \"1653807874951\",\r\n    \"signerWallet\": \"signerWallet\",\r\n    \"signerToken\": \"0x0000000000000000000000000000000000000000\",\r\n    \"signerAmount\": \"40\",\r\n    \"senderWallet\": \"senderWallet\",\r\n    \"senderToken\": \"senderToken\",\r\n    \"senderAmount\": \"140\",\r\n    \"r\": \"r\",\r\n    \"s\": \"s\",\r\n    \"v\": \"v\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -70,7 +70,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{node_url}}/orders?sortField=SIGNER_AMOUNT&signerTokens=ETH&senderTokens=DAI,BTC&page=1&sortOrder=ASC&minSignerAmount=1&maxSignerAmount=10&minSenderAmount=1&maxSenderAmount=10&maxAddedDate=1655233391573",
+							"raw": "http://{{node_url}}/orders?sortField=SIGNER_AMOUNT&page=2&sortOrder=ASC",
 							"protocol": "http",
 							"host": [
 								"{{node_url}}"
@@ -84,40 +84,47 @@
 									"value": "SIGNER_AMOUNT"
 								},
 								{
-									"key": "signerTokens",
-									"value": "ETH"
-								},
-								{
 									"key": "senderTokens",
-									"value": "DAI,BTC"
+									"value": "0x0000000000000000000000000000000000000000",
+									"disabled": true
 								},
 								{
 									"key": "page",
-									"value": "1"
+									"value": "2"
 								},
 								{
 									"key": "sortOrder",
 									"value": "ASC"
 								},
 								{
+									"key": "signerTokens",
+									"value": "0x0000000000000000000000000000000000000000",
+									"disabled": true
+								},
+								{
 									"key": "minSignerAmount",
-									"value": "1"
+									"value": "5",
+									"disabled": true
 								},
 								{
 									"key": "maxSignerAmount",
-									"value": "10"
+									"value": "10",
+									"disabled": true
 								},
 								{
 									"key": "minSenderAmount",
-									"value": "1"
+									"value": "1",
+									"disabled": true
 								},
 								{
 									"key": "maxSenderAmount",
-									"value": "10"
+									"value": "10",
+									"disabled": true
 								},
 								{
 									"key": "maxAddedDate",
-									"value": "1655233391573"
+									"value": "1655233391573",
+									"disabled": true
 								}
 							]
 						}
@@ -130,13 +137,19 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{node_url}}/orders",
+							"raw": "http://{{node_url}}/orders?filters=true",
 							"protocol": "http",
 							"host": [
 								"{{node_url}}"
 							],
 							"path": [
 								"orders"
+							],
+							"query": [
+								{
+									"key": "filters",
+									"value": "true"
+								}
 							]
 						}
 					},
