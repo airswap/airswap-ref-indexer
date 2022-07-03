@@ -6,12 +6,12 @@ export class OrderResponse {
     orders: Record<string, IndexedOrder>;
     pagination: Pagination;
     filters: Filters | undefined;
-    entriesForQuery: number;
+    ordersForQuery: number;
 
-    constructor(orders: Record<string, IndexedOrder>, pagination: Pagination, entriesForQuery: number, filters?: Filters) {
+    constructor(orders: Record<string, IndexedOrder>, pagination: Pagination, ordersForQuery: number, filters?: Filters) {
         this.orders = orders;
         this.pagination = pagination;
         this.filters = filters;
-        this.entriesForQuery = entriesForQuery;
+        this.ordersForQuery = ordersForQuery;
     }
 }
