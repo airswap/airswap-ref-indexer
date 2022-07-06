@@ -1,8 +1,13 @@
-import { Order } from '@airswap/typescript';
-import { OtcOrder } from '../../model/OtcOrder';
+import { forgeDbOrder, forgeIndexedOrder } from '../../Fixtures';
+import { IndexedOrder } from '../../model/IndexedOrder';
 import { AceBaseClient } from "../AcebaseClient";
 import { Database } from '../Database';
 import { InMemoryDatabase } from '../InMemoryDatabase';
+import { DbOrder } from './../../model/DbOrder';
+import { OrderResponse } from './../../model/OrderResponse';
+import { Pagination } from './../../model/Pagination.js';
+import { SortField } from './../filter/SortField';
+import { SortOrder } from './../filter/SortOrder';
 
 describe("Database implementations", () => {
     let inMemoryDatabase: InMemoryDatabase;
@@ -23,44 +28,149 @@ describe("Database implementations", () => {
         await acebaseClient.close();
     });
 
-    describe('get OtcOrder by filter', () => {
-        test("inMemoryDb", async () => { await getOtcOrderByFlter(inMemoryDatabase); });
-        test("acebaseDb", async () => { await getOtcOrderByFlter(acebaseClient); });
+    describe('get IndexedOrder by filter', () => {
+        test("inMemoryDb", async () => { await getOtcOrderByFilter(inMemoryDatabase); });
+        test("acebaseDb", async () => {
+            const db= acebaseClient;
+            const order1 = {
+                nonce: "nonce",
+                expiry: 1653138423537,
+                signerWallet: "signerWallet",
+                signerToken: "signerToken",
+                signerAmount: "2",
+                approximatedSignerAmount: 2,
+                senderToken: "senderToken",
+                senderAmount: "1",
+                approximatedSenderAmount: 1,
+                v: "v",
+                r: "r",
+                s: "s"
+            } as DbOrder;
+            const order2 = {
+                nonce: "nonce",
+                expiry: 1653138423537,
+                signerWallet: "signerWallet",
+                signerToken: "blip",
+                signerAmount: "20",
+                approximatedSignerAmount: 20,
+                senderToken: "another",
+                senderAmount: "10",
+                approximatedSenderAmount: 10,
+                v: "v",
+                r: "r",
+                s: "s"
+            } as DbOrder;
+            const order3 = {
+                nonce: "nonce",
+                expiry: 1653138423537,
+                signerWallet: "signerWallet",
+                signerToken: "signerToken",
+                signerAmount: "3",
+                approximatedSignerAmount: 3,
+                senderToken: "senderToken",
+                senderAmount: "100",
+                approximatedSenderAmount: 100,
+                v: "v",
+                r: "r",
+                s: "s"
+            } as DbOrder;
+    
+            const otcOrder1 = new IndexedOrder(order1, 1653138423537, "id1");
+            const otcOrder2 = new IndexedOrder(order2, 1653138423527, "id2");
+            const otcOrder3 = new IndexedOrder(order3, 1653138423517, "id3");
+            await db.addOrder(otcOrder1);
+            await db.addOrder(otcOrder2);
+            await db.addOrder(otcOrder3);
+    
+            const minSignerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC });
+            expect(Object.keys(minSignerAmountDesc.orders)).toEqual(["id2", "id3", "id1"]);
+
+            const ordersFromToken = await db.getOrderBy({ page: 1, signerTokens: ["signerToken"] });
+            expect(ordersFromToken).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3 }, new Pagination("1", "1"), 2));
+    
+            const anotherToken = await db.getOrderBy({ page: 1, senderTokens: ["another"] });
+            expect(anotherToken).toEqual(new OrderResponse({ "id2": otcOrder2 }, new Pagination("1", "1"), 1));
+    
+            const minSignerAmountFromToken = await db.getOrderBy({ page: 1, minSignerAmount: 15 });
+            expect(minSignerAmountFromToken).toEqual(new OrderResponse({ "id2": otcOrder2 }, new Pagination("1", "1"), 1));
+    
+            const maxSignerAmountFromToken = await db.getOrderBy({ page: 1, maxSignerAmount: 5 });
+            expect(maxSignerAmountFromToken).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3 }, new Pagination("1", "1"), 2));
+    
+            const minSenderAmount = await db.getOrderBy({ page: 1, minSenderAmount: 20 });
+            expect(minSenderAmount).toEqual(new OrderResponse({ "id3": otcOrder3 }, new Pagination("1", "1"), 1));
+    
+            const maxSenderAmount = await db.getOrderBy({ page: 1, maxSenderAmount: 15 });
+            expect(maxSenderAmount).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, new Pagination("1", "1"), 2));
+    
+            const senderAmountAsc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.ASC });
+            expect(Object.keys(senderAmountAsc.orders)).toEqual(["id1", "id2", "id3"]);
+    
+            const senderAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.DESC, senderTokens: ["senderToken"] });
+            expect(Object.keys(senderAmountDesc.orders)).toEqual(["id3", "id1"]);
+    
+            const signerAmountAsc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.ASC });
+            expect(Object.keys(signerAmountAsc.orders)).toEqual(["id1", "id3", "id2"]);
+    
+            const signerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC, signerTokens: ["signerToken"] });
+            expect(Object.keys(signerAmountDesc.orders)).toEqual(["id3", "id1"]);        
+            
+
+    
+            const maxAddedOn = await db.getOrderBy({ page: 1, maxAddedDate: 1653138423527 });
+            expect(maxAddedOn).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, new Pagination("1", "1"), 2));
+    
+            const specificOne = await db.getOrderBy({
+                page: 1,
+                signerTokens: ["signerToken"],
+                senderTokens: ["senderToken"],
+                minSignerAmount: 0,
+                maxSignerAmount: 5,
+                minSenderAmount: 1,
+                maxSenderAmount: 3,
+            });
+            expect(specificOne).toEqual(new OrderResponse({ "id1": otcOrder1 }, new Pagination("1", "1"), 1));
+         });
     });
 
-    describe("Should add & get OtcOrder", () => {
+    describe("Should add & get IndexedOrder", () => {
         test("inMemoryDb", async () => { await getAndAddOtcOrder(inMemoryDatabase); });
         test("acebaseDb", async () => { await getAndAddOtcOrder(acebaseClient); });
     });
 
-    describe("Should add all & get orders", () => {
-        test("inMemoryDb", async () => { await addAllAndGetOders(acebaseClient); });
-        test("acebaseDb", async () => { await addAllAndGetOders(inMemoryDatabase); });
+    describe("Should set filters when adding IndexedOrder", () => {
+        test("inMemoryDb", async () => { await shouldAddfiltersOnOtcAdd(inMemoryDatabase); });
+        test("acebaseDb", async () => { await shouldAddfiltersOnOtcAdd(acebaseClient); });
     });
 
-    describe("Should delete OtcOrder", () => {
+    describe("Should add all & get orders", () => {
+        test("inMemoryDb", async () => { await addAllAndGetOrders(inMemoryDatabase); });
+        test("acebaseDb", async () => { await addAllAndGetOrders(acebaseClient); });
+    });
+
+    describe("Should delete IndexedOrder", () => {
         test("inMemoryDb", async () => { await shouldDeleteOtcOrder(inMemoryDatabase); });
         test("acebaseDb", async () => { await shouldDeleteOtcOrder(acebaseClient); });
     });
 
-    describe("Should return true if OtcOrder exists", () => {
+    describe("Should return true if IndexedOrder exists", () => {
         test("inMemoryDb", async () => { await otcOrderExists(inMemoryDatabase); });
         test("acebaseDb", async () => { await otcOrderExists(acebaseClient); });
     });
 
-    describe("Should return false if OtcOrder does not exist", () => {
+    describe("Should return false if IndexedOrder does not exist", () => {
         test("inMemoryDb", async () => { await otcOrderDoesNotExist(inMemoryDatabase); });
         test("acebaseDb", async () => { await otcOrderDoesNotExist(acebaseClient); });
     });
 
-    describe("Should return OtcOrder", () => {
+    describe("Should return IndexedOrder", () => {
         test("inMemoryDb", async () => { await addOtcOrder(inMemoryDatabase); });
         test("acebaseDb", async () => { await addOtcOrder(acebaseClient); });
     });
 
-    describe("Should not return OtcOrder", () => {
-        test("inMemoryDb", async () => { await renturnsNullOnUnknownId(inMemoryDatabase); });
-        test("acebaseDb", async () => { await renturnsNullOnUnknownId(acebaseClient); });
+    describe("Should not return IndexedOrder", () => {
+        test("inMemoryDb", async () => { await renturnsNullOnUnknownHash(inMemoryDatabase); });
+        test("acebaseDb", async () => { await renturnsNullOnUnknownHash(acebaseClient); });
     });
 
     describe("sha 256 does not change", () => {
@@ -68,173 +178,205 @@ describe("Database implementations", () => {
         test("acebaseDb", async () => { await hashObject(acebaseClient); });
     });
 
-    async function getOtcOrderByFlter(db: Database) {
+    async function getOtcOrderByFilter(db: Database) {
         const order1 = {
             nonce: "nonce",
             expiry: 1653138423537,
             signerWallet: "signerWallet",
             signerToken: "signerToken",
-            signerAmount: 2,
+            signerAmount: "2",
+            approximatedSignerAmount: 2,
             senderToken: "senderToken",
-            senderAmount: 1,
+            senderAmount: "1",
+            approximatedSenderAmount: 1,
             v: "v",
             r: "r",
             s: "s"
-        } as unknown as Order;
+        } as DbOrder;
         const order2 = {
             nonce: "nonce",
             expiry: 1653138423537,
             signerWallet: "signerWallet",
             signerToken: "blip",
-            signerAmount: 20,
+            signerAmount: "20",
+            approximatedSignerAmount: 20,
             senderToken: "another",
-            senderAmount: 10,
+            senderAmount: "10",
+            approximatedSenderAmount: 10,
             v: "v",
             r: "r",
             s: "s"
-        } as unknown as Order;
+        } as DbOrder;
         const order3 = {
             nonce: "nonce",
             expiry: 1653138423537,
             signerWallet: "signerWallet",
             signerToken: "signerToken",
-            signerAmount: 2,
+            signerAmount: "3",
+            approximatedSignerAmount: 3,
             senderToken: "senderToken",
-            senderAmount: 100,
+            senderAmount: "100",
+            approximatedSenderAmount: 100,
             v: "v",
             r: "r",
             s: "s"
-        } as unknown as Order;
+        } as DbOrder;
 
-        const otcOrder1 = new OtcOrder(order1, "1653138423537", "id1");
-        const otcOrder2 = new OtcOrder(order2, "1653138423537", "id2");
-        const otcOrder3 = new OtcOrder(order3, "1653138423537", "id3");
+        const otcOrder1 = new IndexedOrder(order1, 1653138423537, "id1");
+        const otcOrder2 = new IndexedOrder(order2, 1653138423527, "id2");
+        const otcOrder3 = new IndexedOrder(order3, 1653138423517, "id3");
         await db.addOrder(otcOrder1);
         await db.addOrder(otcOrder2);
         await db.addOrder(otcOrder3);
 
-        const ordersFromToken = await db.getOrderBy("signerToken");
-        expect(ordersFromToken).toEqual({ "id1": otcOrder1, "id3": otcOrder3 });
+        const ordersFromToken = await db.getOrderBy({ page: 1, signerTokens: ["signerToken"] });
+        expect(ordersFromToken).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3 }, new Pagination("1", "1"), 2));
 
-        const anotherToken = await db.getOrderBy(undefined, "another");
-        expect(anotherToken).toEqual({ "id2": otcOrder2 });
+        const anotherToken = await db.getOrderBy({ page: 1, senderTokens: ["another"] });
+        expect(anotherToken).toEqual(new OrderResponse({ "id2": otcOrder2 }, new Pagination("1", "1"), 1));
 
-        const minSignerAmountFromToken = await db.getOrderBy(undefined, undefined, 15);
-        expect(minSignerAmountFromToken).toEqual({ "id2": otcOrder2 });
+        const minSignerAmountFromToken = await db.getOrderBy({ page: 1, minSignerAmount: 15 });
+        expect(minSignerAmountFromToken).toEqual(new OrderResponse({ "id2": otcOrder2 }, new Pagination("1", "1"), 1));
 
-        const maxSignerAmountFromToken = await db.getOrderBy(undefined, undefined, undefined, 5);
-        expect(maxSignerAmountFromToken).toEqual({ "id1": otcOrder1, "id3": otcOrder3 });
+        const maxSignerAmountFromToken = await db.getOrderBy({ page: 1, maxSignerAmount: 5 });
+        expect(maxSignerAmountFromToken).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3 }, new Pagination("1", "1"), 2));
 
-        const minSenderAmount = await db.getOrderBy(undefined, undefined, undefined, undefined, 20);
-        expect(minSenderAmount).toEqual({ "id3": otcOrder3 });
+        const minSenderAmount = await db.getOrderBy({ page: 1, minSenderAmount: 20 });
+        expect(minSenderAmount).toEqual(new OrderResponse({ "id3": otcOrder3 }, new Pagination("1", "1"), 1));
 
-        const maxSenderAmount = await db.getOrderBy(undefined, undefined, undefined, undefined, undefined, 15);
-        expect(maxSenderAmount).toEqual({ "id1": otcOrder1, "id2": otcOrder2 });
+        const maxSenderAmount = await db.getOrderBy({ page: 1, maxSenderAmount: 15 });
+        expect(maxSenderAmount).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, new Pagination("1", "1"), 2));
 
-        const specificOne = await db.getOrderBy("signerToken", "senderToken", 0, 5, 1, 3);
-        expect(specificOne).toEqual({ "id1": otcOrder1 });
+        const senderAmountAsc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.ASC });
+        expect(Object.keys(senderAmountAsc.orders)).toEqual(["id1", "id2", "id3"]);
+
+        const senderAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.DESC, senderTokens: ["senderToken"] });
+        expect(Object.keys(senderAmountDesc.orders)).toEqual(["id3", "id1"]);
+
+        const signerAmountAsc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.ASC });
+        expect(Object.keys(signerAmountAsc.orders)).toEqual(["id1", "id3", "id2"]);
+
+        const signerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC, signerTokens: ["signerToken"] });
+        expect(Object.keys(signerAmountDesc.orders)).toEqual(["id3", "id1"]);        
+        
+        const minSignerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC });
+        expect(Object.keys(minSignerAmountDesc.orders)).toEqual(["id2", "id3", "id1"]);
+
+        const maxAddedOn = await db.getOrderBy({ page: 1, maxAddedDate: 1653138423527 });
+        expect(maxAddedOn).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, new Pagination("1", "1"), 2));
+
+        const specificOne = await db.getOrderBy({
+            page: 1,
+            signerTokens: ["signerToken"],
+            senderTokens: ["senderToken"],
+            minSignerAmount: 0,
+            maxSignerAmount: 5,
+            minSenderAmount: 1,
+            maxSenderAmount: 3,
+        });
+        expect(specificOne).toEqual(new OrderResponse({ "id1": otcOrder1 }, new Pagination("1", "1"), 1));
 
         return Promise.resolve();
     }
 
     async function getAndAddOtcOrder(db: Database) {
-        const otcOrder = forgeOtcOrder();
+        const indexedOrder = forgeIndexedOrder();
 
-        await db.addOrder(otcOrder);
+        await db.addOrder(indexedOrder);
         const orders = await db.getOrders();
 
-        expect(orders).toEqual({ id: otcOrder });
+        expect(orders).toEqual(new OrderResponse({ hash: indexedOrder }, new Pagination("1", "1"), 1));
         return Promise.resolve();
     }
 
-    async function addAllAndGetOders(db: Database) {
-        const otcOrder = forgeOtcOrder();
-        const anotherOrder = forgeOtcOrder();
-        anotherOrder.id = "another_id";
+    async function addAllAndGetOrders(db: Database) {
+        const indexedOrder = forgeIndexedOrder();
+        const anotherOrder = forgeIndexedOrder();
+        anotherOrder.hash = "another_hash";
 
-        await db.addAll({ "id": otcOrder, "another_id": anotherOrder });
+        await db.addAll({ "hash": indexedOrder, "another_hash": anotherOrder });
         const orders = await db.getOrders();
 
-        expect(orders).toEqual({ "id": otcOrder, "another_id": anotherOrder });
+        expect(orders).toEqual(new OrderResponse({ "hash": indexedOrder, "another_hash": anotherOrder }, new Pagination("1", "1"), 2));
+        return Promise.resolve();
+    }
+
+    async function shouldAddfiltersOnOtcAdd(db: Database) {
+        const indexedOrder = forgeIndexedOrder();
+        const anotherOrder = forgeIndexedOrder();
+        anotherOrder.hash = "another_hash";
+        anotherOrder.order.senderAmount = "15";
+        anotherOrder.order.approximatedSenderAmount = 15;
+        anotherOrder.order.signerAmount = "50";
+        anotherOrder.order.approximatedSignerAmount = 50;
+
+        await db.addAll({ "hash": indexedOrder, "another_hash": anotherOrder });
+        const filters = await db.getFilters();
+
+        expect(filters).toEqual({
+            senderToken: { "eth": { max: 15, min: 10 } },
+            signerToken: { "dai": { max: 50, min: 5 } }
+        });
         return Promise.resolve();
     }
 
     async function shouldDeleteOtcOrder(db: Database) {
-        const otcOrder = forgeOtcOrder();
-        await db.addOrder(otcOrder);
+        const indexedOrder = forgeIndexedOrder();
+        await db.addOrder(indexedOrder);
 
-        await db.deleteOrder("id");
+        await db.deleteOrder("hash");
         const orders = await db.getOrders();
 
-        expect(orders).toEqual({});
+        expect(orders).toEqual(new OrderResponse({}, new Pagination("1", "1"), 0));
         return Promise.resolve();
     }
 
     async function otcOrderExists(db: Database) {
-        const otcOrder = forgeOtcOrder();
-        await db.addOrder(otcOrder);
+        const indexedOrder = forgeIndexedOrder();
+        await db.addOrder(indexedOrder);
 
-        const orderExists = await db.orderExists("id");
+        const orderExists = await db.orderExists("hash");
 
         expect(orderExists).toBe(true);
         return Promise.resolve();
     }
 
     async function otcOrderDoesNotExist(db: Database) {
-        const otcOrder = forgeOtcOrder();
-        await db.addOrder(otcOrder);
+        const indexedOrder = forgeIndexedOrder();
+        await db.addOrder(indexedOrder);
 
-        const orderExists = await db.orderExists("unknownId");
+        const orderExists = await db.orderExists("unknownHash");
 
         expect(orderExists).toBe(false);
         return Promise.resolve();
     }
 
     async function addOtcOrder(db: Database) {
-        const otcOrder = forgeOtcOrder();
-        await db.addOrder(otcOrder);
+        const indexedOrder = forgeIndexedOrder();
+        await db.addOrder(indexedOrder);
 
-        const orderExists = await db.getOrder("id");
+        const orderExists = await db.getOrder("hash");
 
-        expect(orderExists).toEqual({ id: otcOrder });
+        expect(orderExists).toEqual(new OrderResponse({ hash: indexedOrder }, new Pagination("1", "1"), 1));
         return Promise.resolve();
     }
 
-    async function renturnsNullOnUnknownId(db: Database) {
-        const otcOrder = forgeOtcOrder();
-        await db.addOrder(otcOrder);
+    async function renturnsNullOnUnknownHash(db: Database) {
+        const indexedOrder = forgeIndexedOrder();
+        await db.addOrder(indexedOrder);
 
-        const orderExists = await db.getOrder("unknownId");
+        const orderExists = await db.getOrder("unknownHash");
 
-        expect(orderExists).toBe(null);
+        expect(orderExists).toEqual(new OrderResponse({}, new Pagination("1", "1"), 1));
         return Promise.resolve();
     }
 
     async function hashObject(db: Database) {
-        const otcOrder = new OtcOrder(forgeOrder("1653138423547"), `${new Date(1653138423537).getTime()}`, "id");
+        const indexedOrder = new IndexedOrder(forgeDbOrder(1653138423547), new Date(1653138423537).getTime(), "hash");
 
-        const id = db.generateId(otcOrder);
+        const hash = db.generateHash(indexedOrder);
 
-        expect(id).toBe("7ce9b3e1b35f046bbafc49999f784471a36e7e3e0910d524414ec31eac2af74d");
+        expect(hash).toBe("5e2f80a0d08dfbfee6bf22dc0bb636694ab3a2ee59aeef1fffb1dc13b1bcc547");
         return Promise.resolve();
     }
 });
-
-function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
-    return new OtcOrder(forgeOrder(`${expiryDate}`), `${expectedAddedDate}`, "id");
-}
-
-function forgeOrder(expiryDate: string): Order {
-    return {
-        nonce: "nonce",
-        expiry: expiryDate,
-        signerWallet: "signerWallet",
-        signerToken: "dai",
-        signerAmount: "5",
-        senderToken: "ETH",
-        senderAmount: "10",
-        v: "v",
-        r: "r",
-        s: "s"
-    };
-}

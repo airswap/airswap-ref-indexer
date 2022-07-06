@@ -1,11 +1,13 @@
-
 import { Order } from '@airswap/typescript';
 import { isValidOrder } from '@airswap/utils';
 import { Request, Response } from "express";
 import { Database } from "../database/Database.js";
-import { mapAnyToOrder } from '../mapper/mapAnyToOrder.js';
-import { OtcOrder } from '../model/OtcOrder.js';
+import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
+import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
+import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Peers } from "../peer/Peers.js";
+import { isDateInRange, isNumeric } from '../validator/index.js';
+import { OrderResponse } from './../model/OrderResponse';
 
 const validationDurationInWeek = 1;
 
@@ -24,28 +26,29 @@ export class OrderController {
     addOrder = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
 
-        if (!request.body || Object.keys(request.body).length == 0 || !isValidOrder(request.body.order)) {
+        if (!request.body
+            || Object.keys(request.body).length == 0
+            || !isValidOrder(request.body)
+            || !areNumberFieldsValid(request.body)
+            || !isDateInRange(request.body?.expiry, validationDurationInWeek)
+        ) {
             response.sendStatus(400);
             return;
         }
 
-        const order = mapAnyToOrder(request.body.order);
-        if (!areAmountValids(order) || !isDateInRange(order.expiry)) {
-            response.sendStatus(400);
-            return;
-        }
-
-        const otcOrder = new OtcOrder(order, request.body.addedOn || `${new Date().getTime()}`);
-        const id = this.database.generateId(otcOrder);
-        const orderExists = await this.database.orderExists(id);
+        const order = mapAnyToDbOrder(request.body);
+        const addedTimestamp = isNumeric(request.body.addedOn) ? +request.body.addedOn : new Date().getTime();
+        const indexedOrder = new IndexedOrder(order, addedTimestamp);
+        const hash = this.database.generateHash(indexedOrder);
+        const orderExists = await this.database.orderExists(hash);
         if (orderExists) {
             console.log("already exists")
             response.sendStatus(204);
             return;
         }
 
-        otcOrder.id = id;
-        this.database.addOrder(otcOrder);
+        indexedOrder.hash = hash;
+        this.database.addOrder(indexedOrder);
         this.peers.broadcast(request.method, request.url, request.body);
         response.sendStatus(204);
     }
@@ -56,58 +59,47 @@ export class OrderController {
             return;
         }
         console.log("R<---", request.method, request.url, request.body);
-        if (!request.params.orderId) {
+        if (!request.params.orderHash) {
             response.sendStatus(400);
             return;
         }
 
-        if (!this.database.orderExists(request.params.orderId)) {
+        if (!this.database.orderExists(request.params.orderHash)) {
             response.sendStatus(404);
             return;
         }
 
-        this.database.deleteOrder(request.params.orderId);
+        this.database.deleteOrder(request.params.orderHash);
         this.peers.broadcast(request.method, request.url, request.body);
         response.sendStatus(204);
     }
 
     getOrders = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
-        let orders = undefined;
-        if (request.params.orderId) {
-            orders = await this.database.getOrder(request.params.orderId);
+        if (request.query === null || typeof request.query != 'object') {
+            response.sendStatus(400);
+            return;
         }
-        else if (Object.keys(request.query).length === 0) {
+
+        let orders: OrderResponse;
+        if (request.params.orderHash) {
+            orders = await this.database.getOrder(request.params.orderHash);
+        }
+        else if (Object.keys(request.query).filter(key => key !== "filters").length === 0) {
             orders = await this.database.getOrders();
         }
         else {
-            orders = await this.database.getOrderBy(
-                request.query.signerToken as string,
-                request.query.senderToken as string,
-                request.query.minSignerAmount ? +request.query.minSignerAmount : undefined,
-                request.query.maxSignerAmount ? +request.query.maxSignerAmount : undefined,
-                request.query.minSenderAmount ? +request.query.minSenderAmount : undefined,
-                request.query.maxSenderAmount ? +request.query.maxSenderAmount : undefined,
-            );
+            orders = await this.database.getOrderBy(mapAnyToRequestFilter(request.query));
         }
-        response.json({ orders });
+        let result = { ...orders };
+        if (request.query.filters) {
+            const filters = await this.database.getFilters();
+            result.filters = filters;
+        }
+        response.json(result);
     }
 }
 
-function isDateInRange(date: string) {
-    if (!isNumeric(date)) {
-        return false;
-    }
-
-    let maxDate = new Date();
-    maxDate.setDate(maxDate.getDate() + validationDurationInWeek * 7);
-    return +date < maxDate.getTime();
-}
-
-function areAmountValids(order: Order) {
-    return isNumeric(order.senderAmount) && isNumeric(order.signerAmount)
-}
-
-function isNumeric(value: string) {
-    return value !== undefined && value !== null && `${value}`.trim() !== "" && !isNaN(+value) && +value > 0
+function areNumberFieldsValid(order: Order) {
+    return isNumeric(order.senderAmount) && isNumeric(order.signerAmount) && isNumeric(order.expiry)
 }

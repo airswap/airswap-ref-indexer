@@ -1,0 +1,347 @@
+{
+	"info": {
+		"_postman_id": "0d591a50-5755-4fae-b8c1-5d006ce9ac18",
+		"name": "airswap-indexer-node",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7249142"
+	},
+	"item": [
+		{
+			"name": "orders",
+			"item": [
+				{
+					"name": "Delete an order",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"status\": \"done\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{node_url}}/orders/bb22096b18182424888fcdf5ed3a94160271d8a9266590d1bc832cbe642bf337",
+							"protocol": "http",
+							"host": [
+								"{{node_url}}"
+							],
+							"path": [
+								"orders",
+								"bb22096b18182424888fcdf5ed3a94160271d8a9266590d1bc832cbe642bf337"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add an order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nonce\": \"nonce\",\r\n    \"expiry\": \"1653807874951\",\r\n    \"signerWallet\": \"signerWallet\",\r\n    \"signerToken\": \"0x0000000000000000000000000000000000000000\",\r\n    \"signerAmount\": \"40\",\r\n    \"senderWallet\": \"senderWallet\",\r\n    \"senderToken\": \"senderToken\",\r\n    \"senderAmount\": \"140\",\r\n    \"r\": \"r\",\r\n    \"s\": \"s\",\r\n    \"v\": \"v\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{node_url}}/orders",
+							"protocol": "http",
+							"host": [
+								"{{node_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get order with filters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{node_url}}/orders?sortField=SIGNER_AMOUNT&page=2&sortOrder=ASC",
+							"protocol": "http",
+							"host": [
+								"{{node_url}}"
+							],
+							"path": [
+								"orders"
+							],
+							"query": [
+								{
+									"key": "sortField",
+									"value": "SIGNER_AMOUNT"
+								},
+								{
+									"key": "senderTokens",
+									"value": "0x0000000000000000000000000000000000000000",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "2"
+								},
+								{
+									"key": "sortOrder",
+									"value": "ASC"
+								},
+								{
+									"key": "signerTokens",
+									"value": "0x0000000000000000000000000000000000000000",
+									"disabled": true
+								},
+								{
+									"key": "minSignerAmount",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "maxSignerAmount",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "minSenderAmount",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "maxSenderAmount",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "maxAddedDate",
+									"value": "1655233391573",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{node_url}}/orders?filters=true",
+							"protocol": "http",
+							"host": [
+								"{{node_url}}"
+							],
+							"path": [
+								"orders"
+							],
+							"query": [
+								{
+									"key": "filters",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "root",
+			"item": [
+				{
+					"name": "Get /",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{node_url}}/",
+							"protocol": "http",
+							"host": [
+								"{{node_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "peers",
+			"item": [
+				{
+					"name": "Get peers from node",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{node_url}}/peers/",
+							"protocol": "http",
+							"host": [
+								"{{node_url}}"
+							],
+							"path": [
+								"peers",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add peers to node",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"urls\": [\r\n        \"192.168.1.58:4001\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{node_url}}/peers/",
+							"protocol": "http",
+							"host": [
+								"{{node_url}}"
+							],
+							"path": [
+								"peers",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete peers from node",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://{{node_url}}/peers/192.168.1.58:4001",
+							"protocol": "http",
+							"host": [
+								"{{node_url}}"
+							],
+							"path": [
+								"peers",
+								"192.168.1.58:4001"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "registry",
+			"item": [
+				{
+					"name": "Get ips",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{registry_url}}",
+							"protocol": "http",
+							"host": [
+								"{{registry_url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add an ip",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ip\": \"192.168.1.58:4001\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{registry_url}}",
+							"protocol": "http",
+							"host": [
+								"{{registry_url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete an ip",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://{{registry_url}}/192.168.1.58",
+							"protocol": "http",
+							"host": [
+								"{{registry_url}}"
+							],
+							"path": [
+								"192.168.1.58"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "node_url",
+			"value": "localhost:4001"
+		},
+		{
+			"key": "registry_url",
+			"value": "localhost:4000"
+		}
+	]
+}

@@ -28,7 +28,7 @@ export class Webserver {
     app.use(cors());
     app.use(bodyParser.json());
 
-    router.route("/orders/:orderId?")
+    router.route("/orders/:orderHash?")
       .get(this.orderController.getOrders)
       .post(this.orderController.addOrder)
       .delete(this.orderController.deleteOrder) // only available when debug mode is enabled

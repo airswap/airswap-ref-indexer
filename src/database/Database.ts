@@ -1,19 +1,24 @@
-import { OtcOrder } from '../model/OtcOrder.js';
+import { OrderResponse } from './../model/OrderResponse.js';
+import { IndexedOrder } from '../model/IndexedOrder.js';
+import { Filters } from './filter/Filters.js';
+import { RequestFilter } from './filter/RequestFilter.js';
 
 export interface Database {
-    addOrder(OtcOrder: OtcOrder): Promise<void>;
+    addOrder(IndexedOrder: IndexedOrder): Promise<void>;
 
-    addAll(orders: Record<string, OtcOrder>):  Promise<void>;
+    addAll(orders: Record<string, IndexedOrder>): Promise<void>;
 
-    deleteOrder(id: String):  Promise<void>;
+    deleteOrder(hash: String): Promise<void>;
 
-    getOrder(id: string): Promise<Record<string, OtcOrder>>;
-    
-    getOrders(): Promise<Record<string, OtcOrder>>;
-        
-    getOrderBy(signerToken?: string, senderToken?: string, minSignerAmount?: number, maxSignerAmount?: number, minSenderAmount?: number, maxSenderAmount?: number): Promise<Record<string, OtcOrder>>;
+    getOrder(hash: string): Promise<OrderResponse>;
 
-    orderExists(id: string): Promise<boolean>;
+    getOrders(): Promise<OrderResponse>;
 
-    generateId(otcOrder: OtcOrder): string;
+    getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse>;
+
+    orderExists(hash: string): Promise<boolean>;
+
+    generateHash(indexedOrder: IndexedOrder): string;
+
+    getFilters(): Promise<Filters>;
 }

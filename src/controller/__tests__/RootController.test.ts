@@ -1,7 +1,8 @@
-import { Order } from '@airswap/typescript';
 import { Request, Response } from 'express';
+import { Pagination } from '../../model/Pagination.js';
 import { Database } from '../../database/Database';
-import { OtcOrder } from './../../model/OtcOrder';
+import { forgeIndexedOrder } from '../../Fixtures';
+import { OrderResponse } from './../../model/OrderResponse';
 import { Peers } from './../../peer/Peers';
 import { RootController } from './../RootController';
 describe("Home controller", () => {
@@ -9,11 +10,11 @@ describe("Home controller", () => {
     let fakeDb: Partial<Database>;
     let fakePeers: Partial<Peers>;
     let registryAddress = "registry";
-    const OtcOrder = forgeOtcOrder(1653854738949, 1653854738959);
+    const IndexedOrder = forgeIndexedOrder(1653854738949, 1653854738959);
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve(({ "aze": OtcOrder })) as Promise<Record<string, OtcOrder>>),
+            getOrders: jest.fn(() => Promise.resolve((new OrderResponse({ "aze": IndexedOrder }, new Pagination("1", "1"), 1))) as Promise<OrderResponse>),
         };
         fakePeers = {
             getPeers: jest.fn(() => [])
@@ -35,23 +36,29 @@ describe("Home controller", () => {
         const expected =
         {
             database: {
-                aze: {
-                    addedOn: "1653854738949",
-                    id: "id",
-                    order: {
-                        expiry: "1653854738959",
-                        nonce: "nonce",
-                        r: "r",
-                        s: "s",
-                        senderAmount: "10",
-                        senderToken: "ETH",
-                        signerAmount: "5",
-                        signerToken: "dai",
-                        signerWallet: "signerWallet",
-                        v: "v",
+                orders: {
+                    aze: {
+                        addedOn: 1653854738949,
+                        hash: "hash",
+                        order: {
+                            expiry: 1653854738959,
+                            nonce: "nonce",
+                            r: "r",
+                            s: "s",
+                            senderAmount: "10",
+                            approximatedSenderAmount: 10,
+                            senderToken: "ETH",
+                            signerAmount: "5",
+                            approximatedSignerAmount: 5,
+                            signerToken: "dai",
+                            signerWallet: "signerWallet",
+                            v: "v",
 
+                        },
                     },
                 },
+                pagination: { first: "1", last: "1" },
+                ordersForQuery: 1
             },
             peers: [],
             registry: "registry",
@@ -62,22 +69,3 @@ describe("Home controller", () => {
         expect(mockResponse.json).toHaveBeenCalledWith(expected);
     });
 });
-
-function forgeOtcOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
-    return new OtcOrder(forgeOrder(`${expiryDate}`), `${expectedAddedDate}`, "id");
-}
-
-function forgeOrder(expiryDate: string): Order {
-    return {
-        nonce: "nonce",
-        expiry: expiryDate,
-        signerWallet: "signerWallet",
-        signerToken: "dai",
-        signerAmount: "5",
-        senderToken: "ETH",
-        senderAmount: "10",
-        v: "v",
-        r: "r",
-        s: "s"
-    };
-}

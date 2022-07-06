@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Peers } from './../../peer/Peers';
 import { PeersController } from './../PeersController';
-describe("OtcOrder controller", () => {
+describe("IndexedOrder controller", () => {
     let fakePeers: Partial<Peers>;
 
     beforeEach(() => {
@@ -135,7 +135,7 @@ describe("OtcOrder controller", () => {
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
         });
 
-        test("Add: unknonwn id", () => {
+        test("Add: unknonwn hash", () => {
             const mockRequest = {
                 body: undefined,
                 params: { peerUrl: "to_remove" } as Record<string, any>,

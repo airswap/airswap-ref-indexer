@@ -1,65 +1,112 @@
 import crypto from "crypto";
-import { OtcOrder } from '../model/OtcOrder.js';
+import { computePagination } from '../controller/pagination/index.js';
+import { IndexedOrder } from '../model/IndexedOrder.js';
+import { OrderResponse } from './../model/OrderResponse.js';
 import { Database } from './Database.js';
+import { Filters } from './filter/Filters.js';
+import { RequestFilter } from './filter/RequestFilter.js';
+import { SortField } from "./filter/SortField.js";
+import { SortOrder } from "./filter/SortOrder.js";
 
+const elementPerPage = 20;
 export class InMemoryDatabase implements Database {
-  database: Record<string, OtcOrder>;
+  database: Record<string, IndexedOrder>;
+  filters: Filters;
 
   constructor() {
     this.database = {};
+    this.filters = new Filters();
   }
 
-  getOrderBy(signerToken?: string, senderToken?: string, minSignerAmount?: number, maxSignerAmount?: number, minSenderAmount?: number, maxSenderAmount?): Promise<Record<string, OtcOrder>> {
-    const orders = {};
-    Object.values(this.database).filter((OtcOrder: OtcOrder) => {
-      const order = OtcOrder.order;
+  getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse> {
+    const totalResults = Object.values(this.database).filter((indexedOrder: IndexedOrder) => {
+      const order = indexedOrder.order;
       let isFound = true;
-      if (signerToken != undefined) { isFound = isFound && signerToken === order.signerToken }
-      if (senderToken != undefined) { isFound = isFound && senderToken === order.senderToken }
-      if (minSenderAmount != undefined) { isFound = isFound && +order.senderAmount >= minSenderAmount }
-      if (maxSenderAmount != undefined) { isFound = isFound && order.senderAmount <= maxSenderAmount }
-      if (minSignerAmount != undefined) { isFound = isFound && +order.signerAmount >= minSignerAmount }
-      if (maxSignerAmount != undefined) { isFound = isFound && +order.signerAmount <= maxSignerAmount }
+      if (requestFilter.signerTokens != undefined) { isFound = isFound && requestFilter.signerTokens.indexOf(order.signerToken) !== -1; }
+      if (requestFilter.senderTokens != undefined) { isFound = isFound && requestFilter.senderTokens.indexOf(order.senderToken) !== -1; }
+      if (requestFilter.minSenderAmount != undefined) { isFound = isFound && order.approximatedSenderAmount >= requestFilter.minSenderAmount; }
+      if (requestFilter.maxSenderAmount != undefined) { isFound = isFound && order.approximatedSenderAmount <= requestFilter.maxSenderAmount; }
+      if (requestFilter.minSignerAmount != undefined) { isFound = isFound && order.approximatedSignerAmount >= requestFilter.minSignerAmount; }
+      if (requestFilter.maxSignerAmount != undefined) { isFound = isFound && order.approximatedSignerAmount <= requestFilter.maxSignerAmount; }
+      if (requestFilter.maxAddedDate != undefined) {
+        isFound = isFound && +indexedOrder.addedOn >= requestFilter.maxAddedDate;
+      }
       return isFound;
-    }).forEach((OtcOrder) => {
-      const orderId = OtcOrder['id'];
-      orders[`${orderId}`] = OtcOrder;
-    });
+    })
+      .sort((a: IndexedOrder, b: IndexedOrder) => {
+        if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
+          if (requestFilter.sortOrder == SortOrder.ASC) {
+            return a.order.approximatedSignerAmount - b.order.approximatedSignerAmount
+          }
+          return b.order.approximatedSignerAmount - a.order.approximatedSignerAmount
+        }
+        if (requestFilter.sortOrder == SortOrder.ASC) {
+          return a.order.approximatedSenderAmount - b.order.approximatedSenderAmount
+        }
+        return b.order.approximatedSenderAmount - a.order.approximatedSenderAmount
+      });
+    const totalResultsCount = totalResults.length;
+    const orders: Record<string, IndexedOrder> = totalResults
+      .slice((requestFilter.page - 1) * elementPerPage, requestFilter.page * elementPerPage)
+      .reduce((total, indexedOrder) => {
+        const orderId = indexedOrder['hash'];
+        if (orderId) {
+          return { ...total, [orderId]: indexedOrder };
+        }
+        console.warn("InMemoryDb - Defect Object:", indexedOrder);
+        return { ...total };
+      }, {});
 
-    return Promise.resolve(orders);
+    return Promise.resolve(new OrderResponse(orders, computePagination(elementPerPage, totalResultsCount, requestFilter.page), totalResultsCount));
   }
 
-  addOrder = (OtcOrder: OtcOrder) => {
-    this.database[OtcOrder.id] = OtcOrder;
+  addOrder(indexedOrder: IndexedOrder) {
+    this.database[indexedOrder.hash!] = indexedOrder;
+    this.filters.addSignerToken(indexedOrder.order.signerToken, indexedOrder.order.approximatedSignerAmount);
+    this.filters.addSenderToken(indexedOrder.order.senderToken, indexedOrder.order.approximatedSenderAmount);
     return Promise.resolve();
   }
 
-  addAll = (orders: Record<string, OtcOrder>) => {
-    this.database = { ...orders };
+  async addAll(orders: Record<string, IndexedOrder>): Promise<void> {
+    await Promise.all(Object.keys(orders).map(async hash => {
+      await this.addOrder(orders[hash]);
+    }));
     return Promise.resolve();
   }
 
-  deleteOrder = (id: string) => {
-    this.database[id] = undefined;
+  deleteOrder(hash: string) {
+    delete this.database[hash];
     return Promise.resolve();
   }
 
-  getOrder(id: string): Promise<Record<string, OtcOrder>> {
-    const result = {};
-    result[id] = this.database[id];
-    return Promise.resolve(this.database[id] ? result : null);
+  getOrder(hash: string): Promise<OrderResponse> {
+    const result: Record<string, IndexedOrder> = {};
+    result[hash] = this.database[hash];
+    if (this.database[hash]) {
+      return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1), 1));
+    }
+    return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 0), 1));
   }
 
-  async getOrders(): Promise<Record<string, OtcOrder>> {
-    return Promise.resolve(this.database);
+  async getOrders(): Promise<OrderResponse> {
+    const size = Object.keys(this.database).length;
+    return Promise.resolve(new OrderResponse(this.database, computePagination(size, size), size));
   }
 
-  orderExists = (id: string): Promise<boolean> => {
-    return Promise.resolve(Object.keys(this.database).indexOf(id) != -1);
+  getFilters(): Promise<Filters> {
+    return Promise.resolve(this.filters);
   }
 
-  generateId(otcOrder: OtcOrder) {
-    const lightenOrder = otcOrder.order;
+  orderExists(hash: string): Promise<boolean> {
+    return Promise.resolve(Object.keys(this.database).indexOf(hash) != -1);
+  }
+
+  generateHash(indexedOrder: IndexedOrder) {
+    const lightenOrder = { ...indexedOrder.order };
+    //@ts-ignore
+    delete lightenOrder.approximatedSenderAmount
+    //@ts-ignore
+    delete lightenOrder.approximatedSignerAmount
     const stringObject = JSON.stringify(lightenOrder);
     const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
     return hashed.digest("hex");
@@ -67,6 +114,7 @@ export class InMemoryDatabase implements Database {
 
   erase() {
     this.database = {};
+    this.filters = new Filters();
     return Promise.resolve();
   }
 

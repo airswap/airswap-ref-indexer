@@ -1,9 +1,14 @@
 {
+  "version": "1.0.0-alpha",
+  "engines" : { 
+    "node" : ">=14.19.0"
+  },
   "scripts": {
     "start": "node ./dist/index.js",
     "registry": "node ./dist/registry.js",
     "compile": "npx tsc",
-    "test": "jest --verbose --coverage --no-cache"
+    "test": "jest --verbose --coverage --no-cache",
+    "bench": "node benchmarking/bench.js"
   },
   "type": "module",
   "license": "MIT",
@@ -11,7 +16,7 @@
     "@airswap/libraries": "^3.0.3",
     "@airswap/typescript": "^3.0.0",
     "@airswap/utils": "^3.0.0",
-    "acebase": "^1.20.0",
+    "acebase": "1.21.7",
     "axios": "^0.27.2",
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",

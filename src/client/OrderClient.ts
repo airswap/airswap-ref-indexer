@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { OtcOrder } from '../model/OtcOrder.js';
+import { IndexedOrder } from '../model/IndexedOrder.js';
 
 const orderPath = "/orders/";
 export class OrderClient {
@@ -7,12 +7,12 @@ export class OrderClient {
         console.log("S---> GET", url + orderPath);
         return await axios.get(url + orderPath)
     }
-    async addOrder(url: string, OtcOrder: OtcOrder) {
-        console.log("S---> POST", url + orderPath, OtcOrder);
-        return await axios.post(url + orderPath, OtcOrder)
+    async addOrder(url: string, IndexedOrder: IndexedOrder) {
+        console.log("S---> POST", url + orderPath, IndexedOrder);
+        return await axios.post(url + orderPath, IndexedOrder)
     }
-    async delete(url: string, orderId: string) {
-        console.log("S---> DELETE", url + orderPath + orderId);
-        return await axios.delete(url + orderPath + orderId);
+    async delete(url: string, orderHash: string) {
+        console.log("S---> DELETE", url + orderPath + orderHash);
+        return await axios.delete(url + orderPath + orderHash);
     }
 }
