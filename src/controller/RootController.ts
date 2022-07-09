@@ -13,13 +13,19 @@ export class RootController {
         this.database = database;
     }
 
-    get = async (request: Request, response: Response) => {
+    async get(request: Request, response: Response) {
         console.log("R<---", request.method, request.url, request.body);
+        const result = await this.getService();
+        response.json(result);
+    }
+
+    public async getService() {
         const orders = await this.database.getOrders();
-        response.json({
+        return {
             peers: this.peers.getPeers(),
             registry: this.registry,
             database: orders,
-        });
+        };
     }
+
 }

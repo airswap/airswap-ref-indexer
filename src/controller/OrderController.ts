@@ -25,32 +25,37 @@ export class OrderController {
 
     addOrder = async (request: Request, response: Response) => {
         console.log("R<---", request.method, request.url, request.body);
+        try {
+            await this.addOrderService(request.body);
+            this.peers.broadcast(request.method, request.url, request.body);
+            response.sendStatus(204);
+        } catch (error) {
+            response.sendStatus(+(error as Error).message);
+        }
+    }
 
-        if (!request.body
-            || Object.keys(request.body).length == 0
-            || !isValidOrder(request.body)
-            || !areNumberFieldsValid(request.body)
-            || !isDateInRange(request.body?.expiry, validationDurationInWeek)
+    async addOrderService(body: any): Promise<void> {
+        if (!body
+            || Object.keys(body).length == 0
+            || !isValidOrder(body)
+            || !areNumberFieldsValid(body)
+            || !isDateInRange(body?.expiry, validationDurationInWeek)
         ) {
-            response.sendStatus(400);
-            return;
+            throw Error("400");
         }
 
-        const order = mapAnyToDbOrder(request.body);
-        const addedTimestamp = isNumeric(request.body.addedOn) ? +request.body.addedOn : new Date().getTime();
+        const order = mapAnyToDbOrder(body);
+        const addedTimestamp = isNumeric(body.addedOn) ? +body.addedOn : new Date().getTime();
         const indexedOrder = new IndexedOrder(order, addedTimestamp);
         const hash = this.database.generateHash(indexedOrder);
         const orderExists = await this.database.orderExists(hash);
         if (orderExists) {
-            console.log("already exists")
-            response.sendStatus(204);
-            return;
+            console.log("already exists");
+            throw Error("204");
         }
 
         indexedOrder.hash = hash;
         this.database.addOrder(indexedOrder);
-        this.peers.broadcast(request.method, request.url, request.body);
-        response.sendStatus(204);
     }
 
     deleteOrder = async (request: Request, response: Response) => {
@@ -81,22 +86,27 @@ export class OrderController {
             return;
         }
 
+        const result = await this.getOrderService(request.query, request.params.orderHash);
+        response.json(result);
+    }
+
+    public async getOrderService(query: Record<string, any>, orderHash?: string): Promise<any> {
         let orders: OrderResponse;
-        if (request.params.orderHash) {
-            orders = await this.database.getOrder(request.params.orderHash);
+        if (orderHash) {
+            orders = await this.database.getOrder(orderHash);
         }
-        else if (Object.keys(request.query).filter(key => key !== "filters").length === 0) {
+        else if (Object.keys(query).filter(key => key !== "filters").length === 0) {
             orders = await this.database.getOrders();
         }
         else {
-            orders = await this.database.getOrderBy(mapAnyToRequestFilter(request.query));
+            orders = await this.database.getOrderBy(mapAnyToRequestFilter(query));
         }
         let result = { ...orders };
-        if (request.query.filters) {
+        if (query.filters) {
             const filters = await this.database.getFilters();
             result.filters = filters;
         }
-        response.json(result);
+        return Promise.resolve(result);
     }
 }
 
