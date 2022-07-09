@@ -39,7 +39,7 @@ export class RequestForQuote {
                     break;
                 case "addOrder":
                     try {
-                        await this.orderController.addOrderService(request.body);
+                        await this.orderController.addOrderService(params);
                         response.json(new JsonRpcResponse(id, undefined));
                     } catch (error) {
                         response.json(new JsonRpcResponse(id, new ErrorResponse(-(+(error as Error).message), "")))

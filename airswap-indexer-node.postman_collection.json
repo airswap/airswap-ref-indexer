@@ -13,7 +13,7 @@
 					"name": "JSON-RPC",
 					"item": [
 						{
-							"name": "Get orders",
+							"name": "Get orders wtih filters",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -24,7 +24,61 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"jsonrpc\": \"2.0\",\r\n    \"id\": \"1\",\r\n    \"method\": \"getOrders\",\r\n    \"params\": {\r\n    }\r\n}"
+									"raw": "{\r\n    \"jsonrpc\": \"2.0\",\r\n    \"id\": \"1\",\r\n    \"method\": \"getOrders\",\r\n    \"params\": {\r\n        \"sortField\": \"SIGNER_AMOUNT\",\r\n        \"page\": 2,\r\n        \"sortOrder\": \"ASC\"\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "http://{{node_url}}/",
+									"protocol": "http",
+									"host": [
+										"{{node_url}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add an order",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"jsonrpc\": \"2.0\",\r\n    \"id\": \"1\",\r\n    \"method\": \"addOrder\",\r\n    \"params\": {\r\n        \"nonce\": \"nonce\",\r\n        \"expiry\": \"1653807874951\",\r\n        \"signerWallet\": \"signerWallet\",\r\n        \"signerToken\": \"0x0000000000000000000000000000000000000000\",\r\n        \"signerAmount\": \"40\",\r\n        \"senderWallet\": \"senderWallet\",\r\n        \"senderToken\": \"senderToken\",\r\n        \"senderAmount\": \"142\",\r\n        \"r\": \"r\",\r\n        \"s\": \"s\",\r\n        \"v\": \"v\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{node_url}}/",
+									"protocol": "http",
+									"host": [
+										"{{node_url}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get orders",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"jsonrpc\": \"2.0\",\r\n    \"id\": \"1\",\r\n    \"method\": \"getOrders\",\r\n    \"params\": {}\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
 								},
 								"url": {
 									"raw": "http://{{node_url}}/",
