@@ -10,6 +10,38 @@
 			"name": "orders",
 			"item": [
 				{
+					"name": "JSON-RPC",
+					"item": [
+						{
+							"name": "Get orders",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"jsonrpc\": \"2.0\",\r\n    \"id\": \"1\",\r\n    \"method\": \"getOrders\",\r\n    \"params\": {\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "http://{{node_url}}/",
+									"protocol": "http",
+									"host": [
+										"{{node_url}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Delete an order",
 					"request": {
 						"method": "DELETE",
