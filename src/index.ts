@@ -1,3 +1,4 @@
+import { OrderService } from './service/OrderService';
 import "dotenv/config";
 import publicIp from "public-ip";
 import { BroadcastClient } from './client/BroadcastClient.js';
@@ -12,6 +13,7 @@ import { InMemoryDatabase } from './database/InMemoryDatabase.js';
 import { getLocalIp } from "./ip_helper.js";
 import { Peers } from "./peer/Peers.js";
 import { Webserver } from "./webserver/index.js";
+import { RequestForQuote } from "webserver/RequestForQuote.js";
 
 // Env Variables
 assertEnvironmentIsComplete();
@@ -28,16 +30,21 @@ const orderClient = new OrderClient();
 const peersClient = new PeersClient();
 const broadcastClient = new BroadcastClient();
 const registryClient = new RegistryClient(REGISTRY);
+
 const database = getDatabase();
+
+const orderService = new OrderService(database);
 const peers = new Peers(database, host, peersClient, broadcastClient);
+
 const rootController = new RootController(peers, database, REGISTRY);
-const orderController = new OrderController(peers, database, debugMode);
+const orderController = new OrderController(peers, orderService, database);
 const peersController = new PeersController(peers);
 
 // Network register & synchronization 
 const { data: peersFromRegistry } = await registryClient.getPeersFromRegistry();
 await requestDataFromOtherPeer();
-new Webserver(+EXPRESS_PORT, orderController, peersController, rootController, debugMode).run();
+const webserver = new Webserver(+EXPRESS_PORT, orderController, peersController, rootController, debugMode).run();
+new RequestForQuote(webserver, orderService, rootController).run();
 registerInNetwork();
 
 // Shutdown signals

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Pagination } from '../../model/Pagination.js';
 import { Database } from '../../database/Database';
 import { forgeIndexedOrder } from '../../Fixtures';
-import { OrderResponse } from './../../model/OrderResponse';
+import { OrderResponse } from './../../model/response/OrderResponse';
 import { Peers } from './../../peer/Peers';
 import { RootController } from './../RootController';
 describe("Home controller", () => {

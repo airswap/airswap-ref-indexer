@@ -4,7 +4,7 @@ import { computePagination } from '../controller/pagination/index.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { AceBaseLocalSettings } from './../../node_modules/acebase/index.d';
-import { OrderResponse } from './../model/OrderResponse.js';
+import { OrderResponse } from './../model/response/OrderResponse.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
 import { RequestFilter } from './filter/RequestFilter';

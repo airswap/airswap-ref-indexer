@@ -47,12 +47,12 @@ export class Webserver {
         .get(this.rootController.get);
     }
 
-    app.use(router);
-
-    new RequestForQuote(app, this.orderController, this.rootController).run();
+    app.use(router);    
 
     app.listen(this.port, () => {
       console.log(`Server listening on port ${this.port}`);
     });
+
+    return app;
   };
 }

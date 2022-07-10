@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { computePagination } from '../controller/pagination/index.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
-import { OrderResponse } from './../model/OrderResponse.js';
+import { OrderResponse } from './../model/response/OrderResponse.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
 import { RequestFilter } from './filter/RequestFilter.js';

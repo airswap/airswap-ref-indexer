@@ -3,7 +3,7 @@ import { DbOrder } from './model/DbOrder.js';
 import { Pagination } from './model/Pagination.js';
 import { Filters } from './database/filter/Filters';
 import { IndexedOrder } from './model/IndexedOrder';
-import { OrderResponse } from './model/OrderResponse';
+import { OrderResponse } from './model/response/OrderResponse';
 
 export function forgeIndexedOrder(expectedAddedDate = new Date().getTime(), expiryDate = new Date().getTime() + 10) {
     return new IndexedOrder(forgeDbOrder(expiryDate), expectedAddedDate, "hash");

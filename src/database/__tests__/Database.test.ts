@@ -4,7 +4,7 @@ import { AceBaseClient } from "../AcebaseClient";
 import { Database } from '../Database';
 import { InMemoryDatabase } from '../InMemoryDatabase';
 import { DbOrder } from './../../model/DbOrder';
-import { OrderResponse } from './../../model/OrderResponse';
+import { OrderResponse } from './../../model/response/OrderResponse';
 import { Pagination } from './../../model/Pagination.js';
 import { SortField } from './../filter/SortField';
 import { SortOrder } from './../filter/SortOrder';

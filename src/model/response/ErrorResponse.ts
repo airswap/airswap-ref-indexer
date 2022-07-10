@@ -1,4 +1,3 @@
-import { OrderResponse } from './OrderResponse';
 export class ErrorResponse {
     private code: number;
     private message: string;

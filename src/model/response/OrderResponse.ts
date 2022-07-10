@@ -1,6 +1,6 @@
-import { Pagination } from './Pagination.js';
-import { Filters } from './../database/filter/Filters';
-import { IndexedOrder } from './IndexedOrder';
+import { Pagination } from './../Pagination.js';
+import { Filters } from './../../database/filter/Filters';
+import { IndexedOrder } from '../IndexedOrder';
 
 export class OrderResponse {
     orders: Record<string, IndexedOrder>;
