@@ -32,7 +32,8 @@ export class RequestForQuote {
             const { id, method, params = {} } = request.body;
 
             if (Object.keys(this.orderService.methods).indexOf(method) === -1) {
-                response.json(new JsonRpcResponse(id, new NotFound("Method does not exist.")))
+                response.json(new JsonRpcResponse(id, new NotFound("Method does not exist.")));
+                return;
             }
 
             try {
