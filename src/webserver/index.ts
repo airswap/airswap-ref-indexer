@@ -1,6 +1,7 @@
 import bodyParser from "body-parser";
 import cors from "cors";
-import express from "express";
+import express, { Express } from "express";
+import { Server } from 'http';
 import { OrderController } from '../controller/OrderController.js';
 import { PeersController } from './../controller/PeersController.js';
 import { RootController } from './../controller/RootController.js';
@@ -12,6 +13,7 @@ export class Webserver {
   private orderController: OrderController;
   private peersController: PeersController;
   private rootController: RootController;
+  private server!: Server;
   private isDebugMode: boolean;
 
   constructor(port: number,
@@ -26,11 +28,10 @@ export class Webserver {
     this.isDebugMode = isDebugMode;
   }
 
-  run() {
+  run(): Express {
     const app = express();
     app.use(cors());
     app.use(bodyParser.json());
-
 
     router.route("/peers/:peerUrl?")
       .get(this.peersController.getPeers)
@@ -46,12 +47,16 @@ export class Webserver {
         .get(this.rootController.get);
     }
 
-    app.use(router);    
+    app.use(router);
 
-    app.listen(this.port, () => {
+    this.server = app.listen(this.port, () => {
       console.log(`Server listening on port ${this.port}`);
     });
 
     return app;
-  };
+  }
+
+  stop() {
+    this.server.close();
+  }
 }

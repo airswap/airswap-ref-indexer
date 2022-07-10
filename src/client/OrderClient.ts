@@ -9,7 +9,12 @@ export class OrderClient {
     }
     async getOrders_JSON_RPC(url: string) {
         console.log("S---> POST", url);
-        const response = await axios.post(url);
+        const response = await axios.post(url, {
+            jsonrpc: "2.0",
+            id: "1",
+            method: "getOrders",
+            params: {}
+        });
         return { data: response?.data?.result };
     }
     async addOrder(url: string, IndexedOrder: IndexedOrder) {
