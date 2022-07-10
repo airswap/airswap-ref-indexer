@@ -22,18 +22,23 @@ async function bench() {
         ];
 
         try {
-            await axios.post("http://localhost:4001/orders", {
-                nonce: "nonce",
-                expiry: "1653807874951",
-                signerWallet: "signerWallet",
-                signerToken: signerToken,
-                signerAmount: `${index}`,
-                senderWallet: "senderWallet",
-                senderToken: senderToken,
-                senderAmount: "10",
-                r: "r",
-                s: "s",
-                v: "v",
+            await axios.post("http://localhost:4001/", {
+                jsonrpc: "2.0",
+                id: "1",
+                method: "addOrder",
+                params: {
+                    nonce: "nonce",
+                    expiry: "1653807874951",
+                    signerWallet: "signerWallet",
+                    signerToken: signerToken,
+                    signerAmount: `${index}`,
+                    senderWallet: "senderWallet",
+                    senderToken: senderToken,
+                    senderAmount: "10",
+                    r: "r",
+                    s: "s",
+                    v: "v",
+                },
             });
         } catch (error) {
             console.log(error);
