@@ -1,6 +1,6 @@
-import { OrderService } from './service/OrderService';
 import "dotenv/config";
 import publicIp from "public-ip";
+import { OrderService } from './service/OrderService.js';
 import { BroadcastClient } from './client/BroadcastClient.js';
 import { OrderClient } from './client/OrderClient.js';
 import { PeersClient } from './client/PeersClient.js';
@@ -13,7 +13,7 @@ import { InMemoryDatabase } from './database/InMemoryDatabase.js';
 import { getLocalIp } from "./ip_helper.js";
 import { Peers } from "./peer/Peers.js";
 import { Webserver } from "./webserver/index.js";
-import { RequestForQuote } from "webserver/RequestForQuote.js";
+import { RequestForQuote } from "./webserver/RequestForQuote.js";
 
 // Env Variables
 assertEnvironmentIsComplete();

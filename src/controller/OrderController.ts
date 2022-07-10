@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
-import { OrderService } from './../service/OrderService';
 import { Database } from "../database/Database.js";
-import { Peers } from "../peer/Peers.js";
 import { IndexedOrderError } from "../model/error/IndexedOrderError.js";
-import { ClientError } from "../model/error/ClientError.js";
+import { Peers } from "../peer/Peers.js";
+import { OrderService } from './../service/OrderService';
 
 export class OrderController {
 

@@ -1,4 +1,4 @@
-import { IndexedOrderError } from "./IndexedOrderError";
+import { IndexedOrderError } from "./IndexedOrderError.js";
 
 export class AlreadyExistsError extends IndexedOrderError {
     constructor() {

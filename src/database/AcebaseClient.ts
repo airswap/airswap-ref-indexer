@@ -120,7 +120,7 @@ export class AceBaseClient implements Database {
             .get();
         const serializedOrder = query.values()?.next()?.value?.val();
         if (!serializedOrder) {
-            return Promise.resolve(new OrderResponse({}, computePagination(elementPerPage, 0), 1));
+            return Promise.resolve(new OrderResponse({}, computePagination(elementPerPage, 0), 0));
         }
         const result: Record<string, IndexedOrder> = {};
         result[hash] = this.datarefToRecord(serializedOrder)[hash];
@@ -134,7 +134,7 @@ export class AceBaseClient implements Database {
         data.forEach(dataSnapshot => {
             const mapp = this.datarefToRecord(dataSnapshot.val());
             mapped = { ...mapped, ...mapp };
-        });
+        });        
         return Promise.resolve(new OrderResponse(mapped, computePagination(totalResults, totalResults), totalResults));
     }
 

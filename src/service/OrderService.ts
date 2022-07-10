@@ -1,20 +1,28 @@
-import { AlreadyExistsError } from './../model/error/AlreadyExists';
-import { ClientError } from './../model/error/ClientError';
 import { Order } from '@airswap/typescript';
 import { isValidOrder } from '@airswap/utils';
-import { OrderResponse } from './../model/response/OrderResponse.js';
-import { IndexedOrder } from './../model/IndexedOrder.js';
+import { Database } from '../database/Database.js';
+import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
 import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
 import { isDateInRange, isNumeric } from '../validator/index.js';
-import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
-import { Database } from '../database/Database.js';
+import { AlreadyExistsError } from './../model/error/AlreadyExists.js';
+import { ClientError } from './../model/error/ClientError.js';
+import { IndexedOrder } from './../model/IndexedOrder.js';
+import { OrderResponse } from './../model/response/OrderResponse.js';
+
 const validationDurationInWeek = 1;
 
 export class OrderService {
+    public methods = { getOrders: "getOrders", addOrder: "addOrder" } as Record<string, string>;
     private database: Database;
 
     constructor(database: Database) {
         this.database = database;
+
+        const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter((name) => name !== "constructor").sort();
+        if (!(methods.length === Object.keys(this.methods).length && methods.every((value: string) => value === this.methods[value]))) {
+            console.error("Diverging:", methods, this.methods)
+            throw new Error("Hardcoded method names & real are diverging");
+        }
     }
 
     public async addOrder(body: any): Promise<void> {
@@ -42,6 +50,9 @@ export class OrderService {
     }
 
     public async getOrders(query: Record<string, any>, orderHash?: string): Promise<any> {
+        if (query === undefined || query === null) {
+            throw new ClientError("Incorrect query");
+        }
         let orders: OrderResponse;
         if (orderHash) {
             orders = await this.database.getOrder(orderHash);

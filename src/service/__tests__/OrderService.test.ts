@@ -88,6 +88,17 @@ describe("Order service", () => {
             });
             expect(result).toEqual(expected);
         });
+
+
+        test("get but data are null", async () => {
+            await expect(async () => {
+                // @ts-ignore
+                await new OrderService(fakeDb as Database).getOrders(null, undefined)
+            }).rejects.toThrow(ClientError);
+
+            expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
+            expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
+        });
     });
 
     describe("Add Order", () => {

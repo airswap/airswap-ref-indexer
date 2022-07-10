@@ -1,20 +1,19 @@
 import { Express, Request, Response } from "express";
-import { ErrorResponse } from '../model/response/ErrorResponse.js';
+import { IndexedOrderError } from '../model/error/IndexedOrderError.js';
+import { NotFound } from '../model/error/NotFound.js';
 import { JsonRpcResponse } from '../model/response/JsonRpcResponse.js';
-import { OrderService } from './../service/OrderService.js';
 import { RootController } from './../controller/RootController.js';
+import { OrderService } from './../service/OrderService.js';
 
 export class RequestForQuote {
     private server: Express;
     private orderService: OrderService;
     private rootController: RootController;
 
-    private methods = ["getOrders", "addOrder"]
-
-    constructor(server: Express, OrderService: OrderService, rootController: RootController) {
+    constructor(server: Express, orderService: OrderService, rootController: RootController) {
         this.server = server;
-        this.orderService = OrderService;
         this.rootController = rootController;
+        this.orderService = orderService;
     }
 
     async run() {
@@ -26,27 +25,26 @@ export class RequestForQuote {
 
         this.server.post('*', async (request: Request, response: Response) => {
             console.log("R<---", request.method, request.url, request.body);
-            const { id, method, params } = request.body;
+            const { id, method, params = {} } = request.body;
 
-            if (this.methods.indexOf(method) === -1) {
-                response.json(new JsonRpcResponse(id, new ErrorResponse(-404, "Method not found.")));
+            if (Object.keys(this.orderService.methods).indexOf(method) === -1) {
+                response.json(new JsonRpcResponse(id, new NotFound("Method does not exist.")))
             }
 
-            switch (method) {
-                case "getOrders":
-                    const result = await this.orderService.getOrders(params, params.orderHash);
-                    response.json(new JsonRpcResponse(id, result));
-                    break;
-                case "addOrder":
-                    try {
+            try {
+                let result;
+                switch (method) {
+                    case this.orderService.methods.getOrders:
+                        result = await this.orderService.getOrders(params, params?.orderHash);
+                        break;
+                    case this.orderService.methods.addOrder:
                         await this.orderService.addOrder(params);
-                        response.json(new JsonRpcResponse(id, undefined));
-                    } catch (error) {
-                        response.json(new JsonRpcResponse(id, new ErrorResponse(-(+(error as Error).message), "")))
-                    }
-                    break;
+                        break;
+                }
+                response.json(new JsonRpcResponse(id, result));
+            } catch (error) {
+                response.json(new JsonRpcResponse(id, error as IndexedOrderError))
             }
         });
     }
-
 }
