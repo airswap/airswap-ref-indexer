@@ -7,6 +7,11 @@ export class OrderClient {
         console.log("S---> GET", url + orderPath);
         return await axios.get(url + orderPath)
     }
+    async getOrders_JSON_RPC(url: string) {
+        console.log("S---> POST", url);
+        const response = await axios.post(url);
+        return { data: response?.data?.result };
+    }
     async addOrder(url: string, IndexedOrder: IndexedOrder) {
         console.log("S---> POST", url + orderPath, IndexedOrder);
         return await axios.post(url + orderPath, IndexedOrder)
