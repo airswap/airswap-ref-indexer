@@ -44,7 +44,7 @@ const peersController = new PeersController(peers);
 const { data: peersFromRegistry } = await registryClient.getPeersFromRegistry();
 await requestDataFromOtherPeer();
 const webserver = new Webserver(+EXPRESS_PORT, orderController, peersController, rootController, debugMode).run();
-new RequestForQuote(webserver, orderService, rootController).run();
+new RequestForQuote(webserver, orderService, rootController, peers).run();
 registerInNetwork();
 
 // Shutdown signals

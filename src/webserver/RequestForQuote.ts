@@ -1,4 +1,5 @@
 import { Express, Request, Response } from "express";
+import { Peers } from './../peer/Peers.js';
 import { IndexedOrderError } from '../model/error/IndexedOrderError.js';
 import { NotFound } from '../model/error/NotFound.js';
 import { JsonRpcResponse } from '../model/response/JsonRpcResponse.js';
@@ -9,11 +10,14 @@ export class RequestForQuote {
     private server: Express;
     private orderService: OrderService;
     private rootController: RootController;
+    private peers: Peers;
 
-    constructor(server: Express, orderService: OrderService, rootController: RootController) {
+    constructor(server: Express, orderService: OrderService, rootController: RootController, peers: Peers) {
         this.server = server;
         this.rootController = rootController;
         this.orderService = orderService;
+        this.orderService = orderService;
+        this.peers = peers;
     }
 
     async run() {
@@ -39,6 +43,7 @@ export class RequestForQuote {
                         break;
                     case this.orderService.methods.addOrder:
                         await this.orderService.addOrder(params);
+                        this.peers.broadcast(request.method, request.url, request.body);
                         break;
                 }
                 response.json(new JsonRpcResponse(id, result));
