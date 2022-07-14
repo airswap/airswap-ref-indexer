@@ -81,11 +81,11 @@ export class InMemoryDatabase implements Database {
 
   getOrder(hash: string): Promise<OrderResponse> {
     const result: Record<string, IndexedOrder> = {};
-    result[hash] = this.database[hash];
     if (this.database[hash]) {
+      result[hash] = this.database[hash];
       return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1), 1));
     }
-    return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 0), 1));
+    return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 0), 0));
   }
 
   async getOrders(): Promise<OrderResponse> {

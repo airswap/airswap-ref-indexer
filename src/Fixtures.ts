@@ -1,3 +1,4 @@
+import { JsonRpcResponse } from './model/response/JsonRpcResponse';
 import { Order } from '@airswap/typescript';
 import { DbOrder } from './model/DbOrder.js';
 import { Pagination } from './model/Pagination.js';
@@ -50,4 +51,8 @@ export function forgeOrderResponse(filters?: Filters): OrderResponse {
             order: forgeDbOrder(1653900784706),
         },
     }, new Pagination("1", "1"), 1, filters);
+}
+
+export function forgeJsonRpcResponse(id: string, response: OrderResponse): JsonRpcResponse {
+    return new JsonRpcResponse(id, response);
 }

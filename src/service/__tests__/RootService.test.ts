@@ -5,7 +5,7 @@ import { forgeIndexedOrder } from '../../Fixtures';
 import { OrderResponse } from '../../model/response/OrderResponse';
 import { Peers } from '../../peer/Peers';
 import { RootService } from '../RootService';
-describe("Home controller", () => {
+describe("Root service", () => {
 
     let fakeDb: Partial<Database>;
     let fakePeers: Partial<Peers>;
@@ -24,31 +24,7 @@ describe("Home controller", () => {
     test("/", async () => {
         const expected =
         {
-            database: {
-                orders: {
-                    aze: {
-                        addedOn: 1653854738949,
-                        hash: "hash",
-                        order: {
-                            expiry: 1653854738959,
-                            nonce: "nonce",
-                            r: "r",
-                            s: "s",
-                            senderAmount: "10",
-                            approximatedSenderAmount: 10,
-                            senderToken: "ETH",
-                            signerAmount: "5",
-                            approximatedSignerAmount: 5,
-                            signerToken: "dai",
-                            signerWallet: "signerWallet",
-                            v: "v",
-
-                        },
-                    },
-                },
-                pagination: { first: "1", last: "1" },
-                ordersForQuery: 1
-            },
+            database: 1,
             peers: [],
             registry: "registry",
         };

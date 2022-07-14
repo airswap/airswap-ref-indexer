@@ -39,7 +39,7 @@ export class RequestForQuote {
                 return;
             }
 
-            if (params.length !== 1 && params[0] !== undefined) {
+            if (params.length !== 1 || params[0] === undefined) {
                 const error = new ClientError("Empty params");
                 response.status(error.code);
                 response.json(new JsonRpcResponse(id, error));
@@ -53,7 +53,7 @@ export class RequestForQuote {
                 response.status(200);
                 switch (method) {
                     case this.orderService.methods.getOrders:
-                        result = await this.orderService.getOrders(parameters, parameters.orderHash);
+                        result = await this.orderService.getOrders(parameters);
                         break;
                     case this.orderService.methods.addOrder:
                         await this.orderService.addOrder(parameters);

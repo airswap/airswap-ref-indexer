@@ -21,8 +21,8 @@ export class OrderClient {
         console.log("S---> POST", url + orderPath, IndexedOrder);
         return await axios.post(url + orderPath, IndexedOrder)
     }
-    async delete(url: string, orderHash: string) {
-        console.log("S---> DELETE", url + orderPath + orderHash);
-        return await axios.delete(url + orderPath + orderHash);
+    async delete(url: string, hash: string) {
+        console.log("S---> DELETE", url + orderPath + hash);
+        return await axios.delete(url + orderPath + hash);
     }
 }

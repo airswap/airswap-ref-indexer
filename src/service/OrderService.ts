@@ -50,13 +50,13 @@ export class OrderService {
         return Promise.resolve();
     }
 
-    public async getOrders(query: Record<string, any>, orderHash?: string): Promise<any> {
+    public async getOrders(query: Record<string, any>): Promise<any> {
         if (query === undefined || query === null) {
             throw new ClientError("Incorrect query");
         }
         let orders: OrderResponse;
-        if (orderHash) {
-            orders = await this.database.getOrder(orderHash);
+        if (query.hash) {
+            orders = await this.database.getOrder(query.hash);
         }
         else if (Object.keys(query).filter(key => key !== "filters").length === 0) {
             orders = await this.database.getOrders();

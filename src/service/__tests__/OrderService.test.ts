@@ -35,7 +35,7 @@ describe("Order service", () => {
         test("get all", async () => {
             const expected = forgeOrderResponse();
 
-            const result = await new OrderService(fakeDb as Database).getOrders({}, undefined);
+            const result = await new OrderService(fakeDb as Database).getOrders({});
 
             expect(fakeDb.getOrders).toHaveBeenCalled();
             expect(result).toEqual(expected);
@@ -47,7 +47,7 @@ describe("Order service", () => {
             expectedFilters.senderToken = { "dai": { min: 5, max: 5 } };
             const expected = forgeOrderResponse(expectedFilters);
 
-            const result = await new OrderService(fakeDb as Database).getOrders({ filters: true } as Record<string, any>, undefined);
+            const result = await new OrderService(fakeDb as Database).getOrders({ filters: true } as Record<string, any>);
 
             expect(fakeDb.getOrders).toHaveBeenCalled();
             expect(fakeDb.getFilters).toHaveBeenCalledTimes(1);
@@ -57,7 +57,7 @@ describe("Order service", () => {
         test("get by hash", async () => {
             const expected = forgeOrderResponse();
 
-            const result = await new OrderService(fakeDb as Database).getOrders({ orderHash: "aze" }, "aze");
+            const result = await new OrderService(fakeDb as Database).getOrders({ hash: "aze" });
 
             expect(fakeDb.getOrder).toHaveBeenCalledWith("aze");
             expect(result).toEqual(expected);
@@ -75,7 +75,7 @@ describe("Order service", () => {
 
             const expected = forgeOrderResponse();
 
-            const result = await new OrderService(fakeDb as Database).getOrders(body, undefined);
+            const result = await new OrderService(fakeDb as Database).getOrders(body);
 
             expect(fakeDb.getOrderBy).toHaveBeenCalledWith({
                 maxSenderAmount: 20,

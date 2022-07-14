@@ -1,7 +1,9 @@
+import { Order } from '@airswap/typescript';
 import bodyParser from "body-parser";
 import express from 'express';
 import http from "http";
 import supertest from "supertest";
+import { forgeJsonRpcResponse, forgeOrderResponse } from '../../Fixtures';
 import { Peers } from '../../peer/Peers';
 import { OrderService } from './../../service/OrderService';
 import { RootService } from './../../service/RootService';
@@ -19,17 +21,11 @@ describe("Order controller", () => {
     let webserver: express.Express;
     let server: http.Server;
 
-    beforeAll(() => {
+    beforeEach(() => {
         webserver = express();
         webserver.use(bodyParser.json());
         server = webserver.listen(9875, () => { console.log("listening") });
-    });
 
-    afterAll(() => {
-        server.close();
-    });
-
-    beforeEach(() => {
         fakeRootService = {
             get: jest.fn()
         }
@@ -41,7 +37,12 @@ describe("Order controller", () => {
             getOrders: jest.fn(),
             addOrder: jest.fn()
         }
-        fakeOrderService.methods = { "aze": "aze" }
+        fakeOrderService.methods = { "getOrders": "getOrders" }
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+        server.close();
     });
 
     describe("GET *", () => {
@@ -86,93 +87,48 @@ describe("Order controller", () => {
                     done();
                 });
         });
+
+        test("should return 400 if params is not an array", done => {
+            const expected = {
+                id: "-1",
+                jsonrpc: "2.0",
+                result: {
+                    code: 400,
+                    message: "Empty params"
+                }
+            };
+            new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
+            supertest(webserver)
+                .post("/")
+                .type("json")
+                .send({ id: "-1", method: "getOrders", params: {} })
+                .then(response => {
+                    expect(response.body).toEqual(expected);
+                    expect(response.statusCode).toBe(400);
+                    done();
+                });
+        });
     });
 
-    //     describe('Get orders', () => {
-    //         test("get all with filers", async () => {
-    //             const mockRequest = {
-    //                 body: {},
-    //                 params: {},
-    //                 query: { filters: true } as Record<string, any>,
-    //                 method: "POST",
-    //                 url: "/"
-    //             } as Request;
+    describe('Get orders', () => {
+        test("nominal", (done) => {
+            const expected = forgeJsonRpcResponse("-1", forgeOrderResponse());
+            fakeOrderService.getOrders = jest.fn().mockResolvedValue(forgeOrderResponse());
 
-    //             const mockResponse = {
-    //                 json: jest.fn()
-    //             } as Partial<Response>;
+            new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
+            supertest(webserver)
+                .post("/")
+                .type("json")
+                .send({ id: "-1", method: "getOrders", params: [{ filters: true }] })
+                .then(response => {
+                    expect(response.body).toEqual(expected);
+                    expect(response.statusCode).toBe(200);
+                    expect(fakeOrderService.getOrders).toHaveBeenCalledWith({ "filters": true });
+                    done();
+                });
+        });
+    });
 
-    //             const expectedFilters = new Filters();
-    //             expectedFilters.signerToken = { "ETH": { min: 10, max: 10 } };
-    //             expectedFilters.senderToken = { "dai": { min: 5, max: 5 } };
-
-    //             const expected = [forgeOrderResponse()];
-    //             fakeOrderService.getOrders = jest.fn().mockResolvedValue(expected);
-
-    //             await new RequestForQuote(express, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).getOrders(mockRequest, mockResponse as Response);
-
-    //             expect(fakeOrderService.getOrders).toHaveBeenCalledWith({ "filters": true }, undefined);
-    //             expect(mockResponse.json).toHaveBeenCalledWith(expected);
-    //         });
-
-    //         test("get by hash", async () => {
-    //             const mockRequest = {
-    //                 body: {},
-    //                 params: { orderHash: "aze" },
-    //                 query: {},
-    //                 method: "POST",
-    //                 url: "/"
-    //             } as unknown as Request;
-
-    //             const mockResponse = {
-    //                 json: jest.fn()
-    //             } as Partial<Response>;
-
-    //             const expected = [forgeOrderResponse()];
-    //             fakeOrderService.getOrders = jest.fn().mockResolvedValue(expected);
-
-    //             await new RequestForQuote(express, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).getOrders(mockRequest, mockResponse as Response);
-
-    //             expect(fakeOrderService.getOrders).toHaveBeenCalledWith({}, "aze");
-    //             expect(mockResponse.json).toHaveBeenCalledWith(expected);
-    //         });
-
-    //         test("get by filters", async () => {
-    //             const mockRequest = {
-    //                 body: undefined,
-    //                 params: { orderHash: undefined },
-    //                 query: {
-    //                     minSignerAmount: 200,
-    //                     maxSignerAmount: 200,
-    //                     minSenderAmount: 2,
-    //                     maxSenderAmount: 20,
-    //                     signerTokens: ["eth"],
-    //                     senderTokens: ["dai"]
-    //                 },
-    //                 method: "POST",
-    //                 url: "/"
-    //             } as unknown as Request;
-
-    //             const mockResponse = {
-    //                 json: jest.fn()
-    //             } as Partial<Response>;
-
-    //             const expected = [forgeOrderResponse()];
-    //             fakeOrderService.getOrders = jest.fn().mockResolvedValue(expected);
-
-    //             await new RequestForQuote(express, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).getOrders(mockRequest, mockResponse as Response);
-
-    //             expect(fakeOrderService.getOrders).toHaveBeenCalledWith({
-    //                 maxSenderAmount: 20,
-    //                 maxSignerAmount: 200,
-    //                 minSenderAmount: 2,
-    //                 minSignerAmount: 200,
-    //                 senderTokens: ["dai"],
-    //                 signerTokens: ["eth"]
-    //             }, undefined);
-    //             expect(mockResponse.json).toHaveBeenCalledWith(expected);
-    //         });
-    //     });
 
     //     describe("Add Order", () => {
     //         test("Add order nominal & broadcast", async () => {
@@ -256,17 +212,17 @@ describe("Order controller", () => {
     //     });
 });
 
-// function forgeOrder(expiryDate: number): Order {
-//     return {
-//         nonce: "nonce",
-//         expiry: `${expiryDate}`,
-//         signerWallet: "signerWallet",
-//         signerToken: "dai",
-//         signerAmount: "5",
-//         senderToken: "ETH",
-//         senderAmount: "10",
-//         v: "v",
-//         r: "r",
-//         s: "s"
-//     };
-// }
+function forgeOrder(expiryDate: number): Order {
+    return {
+        nonce: "nonce",
+        expiry: `${expiryDate}`,
+        signerWallet: "signerWallet",
+        signerToken: "dai",
+        signerAmount: "5",
+        senderToken: "ETH",
+        senderAmount: "10",
+        v: "v",
+        r: "r",
+        s: "s"
+    };
+}
