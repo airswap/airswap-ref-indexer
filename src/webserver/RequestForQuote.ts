@@ -1,5 +1,6 @@
-import { ClientError } from './../model/error/ClientError';
 import { Express, Request, Response } from "express";
+import { SuccessResponse } from '../model/response/SuccessResponse.js';
+import { ClientError } from './../model/error/ClientError.js';
 import { IndexedOrderError } from '../model/error/IndexedOrderError.js';
 import { NotFound } from '../model/error/NotFound.js';
 import { JsonRpcResponse } from '../model/response/JsonRpcResponse.js';
@@ -58,6 +59,7 @@ export class RequestForQuote {
                     case METHODS.addOrder:
                         await this.orderService.addOrder(parameters);
                         this.peers.broadcast(request.method, request.url, request.body);
+                        result = new SuccessResponse("Added");
                         response.status(201);
                         break;
                 }

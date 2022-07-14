@@ -140,7 +140,7 @@ describe("Order controller", () => {
                 .type("json")
                 .send(payload)
                 .then(response => {
-                    expect(response.body).toEqual({ id:"-1", "jsonrpc": "2.0" });
+                    expect(response.body).toEqual({ id: "-1", "jsonrpc": "2.0", "result": { "message": "Added" } });
                     expect(response.statusCode).toBe(201);
                     expect(fakeOrderService.addOrder).toHaveBeenCalledWith(order);
                     expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/", payload);
@@ -162,7 +162,7 @@ describe("Order controller", () => {
                 .type("json")
                 .send(payload)
                 .then(response => {
-                    expect(response.body).toEqual({ id:"-1", "jsonrpc": "2.0", "result":  { "code": 400, "message": "an error" }});
+                    expect(response.body).toEqual({ id: "-1", "jsonrpc": "2.0", "result": { "code": 400, "message": "an error" } });
                     expect(response.statusCode).toBe(400);
                     expect(fakeOrderService.addOrder).toHaveBeenCalledWith(order);
                     expect(fakePeers.broadcast).not.toHaveBeenCalled();
