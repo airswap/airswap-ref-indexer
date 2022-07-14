@@ -1,3 +1,4 @@
+import { ClientError } from './../model/error/ClientError';
 import { Express, Request, Response } from "express";
 import { IndexedOrderError } from '../model/error/IndexedOrderError.js';
 import { NotFound } from '../model/error/NotFound.js';
@@ -29,7 +30,7 @@ export class RequestForQuote {
 
         this.server.post('*', async (request: Request, response: Response) => {
             console.log("R<---", request.method, request.url, request.body);
-            const { id, method, params = {} } = request.body;
+            const { id, method, params = [] } = request.body;
 
             if (Object.keys(this.orderService.methods).indexOf(method) === -1) {
                 const error = new NotFound("Method does not exist.");
@@ -38,15 +39,24 @@ export class RequestForQuote {
                 return;
             }
 
+            if (params.length !== 1 && params[0] !== undefined) {
+                const error = new ClientError("Empty params");
+                response.status(error.code);
+                response.json(new JsonRpcResponse(id, error));
+                return;
+            }
+
+            const parameters = params[0];
+
             try {
                 let result;
                 response.status(200);
                 switch (method) {
                     case this.orderService.methods.getOrders:
-                        result = await this.orderService.getOrders(params, params?.orderHash);
+                        result = await this.orderService.getOrders(parameters, parameters.orderHash);
                         break;
                     case this.orderService.methods.addOrder:
-                        await this.orderService.addOrder(params);
+                        await this.orderService.addOrder(parameters);
                         this.peers.broadcast(request.method, request.url, request.body);
                         response.status(201);
                         break;
