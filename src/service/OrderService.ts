@@ -1,5 +1,6 @@
 import { Order } from '@airswap/typescript';
 import { isValidOrder } from '@airswap/utils';
+import { SuccessResponse } from 'model/response/SuccessResponse.js';
 import { Database } from '../database/Database.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
 import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';

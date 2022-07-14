@@ -4,9 +4,8 @@ import { BroadcastClient } from './client/BroadcastClient.js';
 import { OrderClient } from './client/OrderClient.js';
 import { PeersClient } from './client/PeersClient.js';
 import { RegistryClient } from './client/RegistryClient.js';
-import { OrderController } from './controller/OrderController.js';
 import { PeersController } from './controller/PeersController.js';
-import { RootController } from './controller/RootController.js';
+import { RootService } from './service/RootService.js';
 import { AceBaseClient } from './database/AcebaseClient.js';
 import { InMemoryDatabase } from './database/InMemoryDatabase.js';
 import { getLocalIp } from "./ip_helper.js";
@@ -36,14 +35,13 @@ const database = getDatabase();
 const orderService = new OrderService(database);
 const peers = new Peers(database, host, peersClient, broadcastClient);
 
-const rootController = new RootController(peers, database, REGISTRY);
-const orderController = new OrderController(peers, orderService, database);
+const rootController = new RootService(peers, database, REGISTRY);
 const peersController = new PeersController(peers);
 
 // Network register & synchronization 
 const { data: peersFromRegistry } = await registryClient.getPeersFromRegistry();
 await requestDataFromOtherPeer();
-const webserver = new Webserver(+EXPRESS_PORT, orderController, peersController, rootController, debugMode);
+const webserver = new Webserver(+EXPRESS_PORT, peersController, rootController, debugMode);
 const expressApp = webserver.run();
 new RequestForQuote(expressApp, orderService, rootController, peers).run();
 registerInNetwork();
