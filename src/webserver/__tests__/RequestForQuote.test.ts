@@ -1,3 +1,4 @@
+import { ClientError } from './../../model/error/ClientError';
 import { Order } from '@airswap/typescript';
 import bodyParser from "body-parser";
 import express from 'express';
@@ -37,7 +38,6 @@ describe("Order controller", () => {
             getOrders: jest.fn(),
             addOrder: jest.fn()
         }
-        fakeOrderService.methods = { "getOrders": "getOrders" }
     });
 
     afterEach(() => {
@@ -130,86 +130,46 @@ describe("Order controller", () => {
     });
 
 
-    //     describe("Add Order", () => {
-    //         test("Add order nominal & broadcast", async () => {
-    //             const order = forgeOrder(1653900784696);
-    //             const mockRequest = {
-    //                 body: order,
-    //                 params: {},
-    //                 method: "POST",
-    //                 url: "/"
-    //             } as Request;
+    describe("Add Order", () => {
+        test("Add order nominal & broadcast", done => {
+            const order = forgeOrder(1653900784696);
+            const payload = { id: "-1", method: "addOrder", params: [order] };
+            new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
+            supertest(webserver)
+                .post("/")
+                .type("json")
+                .send(payload)
+                .then(response => {
+                    expect(response.body).toEqual({ id:"-1", "jsonrpc": "2.0" });
+                    expect(response.statusCode).toBe(201);
+                    expect(fakeOrderService.addOrder).toHaveBeenCalledWith(order);
+                    expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/", payload);
+                    done();
+                });
+        });
 
-    //             const mockResponse = {
-    //                 json: jest.fn(),
-    //                 sendStatus: jest.fn(),
-    //             } as Partial<Response>;
+        test("Add order error, no broadcast", done => {
+            const order = forgeOrder(1653900784696);
+            const payload = { id: "-1", method: "addOrder", params: [order] };
 
-    //             await new RequestForQuote(express, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).addOrder(mockRequest, mockResponse as Response);
+            fakeOrderService.addOrder = jest.fn().mockImplementation(() => {
+                throw new ClientError("an error");
+            })
+            new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
 
-    //             expect(fakeOrderService.addOrder).toHaveBeenCalledWith(order);
-    //             expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/", order);
-    //             expect(mockResponse.sendStatus).toHaveBeenCalledWith(201);
-    //         });
-
-    //         test("Add order missing data", async () => {
-    //             const orderMissingExpiry = forgeOrder(1653900784696);
-    //             // @ts-ignore
-    //             orderMissingExpiry.expiry = undefined;
-
-    //             const mockRequestOrderMissingexpiry = {
-    //                 body: orderMissingExpiry,
-    //                 params: {},
-    //                 method: "POST",
-    //                 url: "/"
-    //             } as Request;
-
-    //             const mockResponse = {
-    //                 status: jest.fn(),
-    //                 send: jest.fn(),
-    //             } as Partial<Response>;
-
-    //             fakeOrderService.addOrder = jest.fn().mockImplementationOnce(() => {
-    //                 throw new ClientError("Order incomplete");
-    //             });
-    //             await new RequestForQuote(express, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).addOrder(mockRequestOrderMissingexpiry, mockResponse as Response);
-
-    //             expect(fakeOrderService.addOrder).toHaveBeenCalledWith(orderMissingExpiry);
-    //             expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
-    //             expect(mockResponse.status).toHaveBeenCalledWith(400);
-    //             expect(mockResponse.send).toHaveBeenCalledWith("Order incomplete");
-    //         });
-
-    //         test("Add: already added", async () => {
-    //             const order = forgeOrder(1653900784696);
-    //             const mockRequest = {
-    //                 body: order,
-    //                 params: {},
-    //                 method: "POST",
-    //                 url: "/"
-    //             } as Request;
-
-    //             const mockResponse = {
-    //                 status: jest.fn(),
-    //                 send: jest.fn(),
-    //             } as Partial<Response>;
-
-    //             const expected = forgeIndexedOrder(1653900784706, 1653900784696);
-    //             //@ts-ignore
-    //             expected.hash = undefined;
-
-    //             fakeOrderService.addOrder = jest.fn().mockImplementationOnce(() => {
-    //                 throw new AlreadyExistsError();
-    //             });
-
-    //             await new RequestForQuote(express, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).addOrder(mockRequest, mockResponse as Response);
-
-    //             expect(fakeOrderService.addOrder).toHaveBeenCalledWith(order);
-    //             expect(fakePeers.broadcast).toHaveBeenCalledTimes(0);
-    //             expect(mockResponse.status).toHaveBeenCalledWith(204);
-    //             expect(mockResponse.send).toHaveBeenCalledWith("Already exists");
-    //         });
-    //     });
+            supertest(webserver)
+                .post("/")
+                .type("json")
+                .send(payload)
+                .then(response => {
+                    expect(response.body).toEqual({ id:"-1", "jsonrpc": "2.0", "result":  { "code": 400, "message": "an error" }});
+                    expect(response.statusCode).toBe(400);
+                    expect(fakeOrderService.addOrder).toHaveBeenCalledWith(order);
+                    expect(fakePeers.broadcast).not.toHaveBeenCalled();
+                    done();
+                });
+        });
+    });
 });
 
 function forgeOrder(expiryDate: number): Order {

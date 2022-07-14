@@ -12,16 +12,16 @@ import { OrderResponse } from './../model/response/OrderResponse.js';
 
 const validationDurationInWeek = 1;
 
+export const METHODS = { getOrders: "getOrders", addOrder: "addOrder" } as Record<string, string>;
 export class OrderService {
-    public methods = { getOrders: "getOrders", addOrder: "addOrder" } as Record<string, string>;
     private database: Database;
 
     constructor(database: Database) {
         this.database = database;
 
         const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter((name) => name !== "constructor").sort();
-        if (!(methods.length === Object.keys(this.methods).length && methods.every((value: string) => value === this.methods[value]))) {
-            console.error("Diverging:", methods, this.methods)
+        if (!(methods.length === Object.keys(METHODS).length && methods.every((value: string) => value === METHODS[value]))) {
+            console.error("Diverging:", methods, METHODS)
             throw new Error("Hardcoded method names & real are diverging");
         }
     }
