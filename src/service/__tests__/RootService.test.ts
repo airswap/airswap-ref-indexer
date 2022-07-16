@@ -21,10 +21,10 @@ describe("Root service", () => {
         };
     })
 
-    test("/", async () => {
+    test("get", async () => {
         const expected =
         {
-            database: 1,
+            databaseOrders: 1,
             peers: [],
             registry: "registry",
         };

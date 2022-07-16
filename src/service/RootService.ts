@@ -1,3 +1,4 @@
+import { HealthCheckResponse } from './../model/response/HealthCheckResponse.js';
 import { Database } from '../database/Database.js';
 import { Peers } from '../peer/Peers.js';
 export class RootService {
@@ -12,13 +13,9 @@ export class RootService {
         this.database = database;
     }
 
-    public async get() {
+    public async get(): Promise<HealthCheckResponse> {
         const orders = await this.database.getOrders();
-        return {
-            peers: this.peers.getPeers(),
-            registry: this.registry,
-            database: orders.ordersForQuery,
-        };
+        return new HealthCheckResponse(this.peers.getPeers(), this.registry, orders.ordersForQuery);
     }
 
 }

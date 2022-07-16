@@ -26,7 +26,7 @@ export class RequestForQuote {
         this.server.get('*', async (request: Request, response: Response) => {
             console.log("R<---", request.method, request.url, request.body);
             const result = await this.rootService.get();
-            response.json(result);
+            response.json(new JsonRpcResponse("-1", result));
         });
 
         this.server.post('*', async (request: Request, response: Response) => {

@@ -20,7 +20,6 @@ assertEnvironmentIsComplete();
 // Configure host value 
 const REGISTRY = process.env.REGISTRY!;
 const EXPRESS_PORT = process.env.EXPRESS_PORT!;
-const debugMode = process.env.DEBUG_ENABLED == "1";
 const host = process.env.LOCAL_ONLY === "1" ? getLocalIp() + ":" + EXPRESS_PORT : (await publicIp.v4()) + ":" + EXPRESS_PORT;
 console.log("HOST is", host);
 
@@ -41,7 +40,7 @@ const peersController = new PeersController(peers);
 // Network register & synchronization 
 const { data: peersFromRegistry } = await registryClient.getPeersFromRegistry();
 await requestDataFromOtherPeer();
-const webserver = new Webserver(+EXPRESS_PORT, peersController, rootController, debugMode);
+const webserver = new Webserver(+EXPRESS_PORT, peersController);
 const expressApp = webserver.run();
 new RequestForQuote(expressApp, orderService, rootController, peers).run();
 registerInNetwork();

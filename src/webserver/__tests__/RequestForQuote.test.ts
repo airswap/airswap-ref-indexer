@@ -1,3 +1,4 @@
+import { HealthCheckResponse } from './../../model/response/HealthCheckResponse';
 import { ClientError } from './../../model/error/ClientError';
 import { Order } from '@airswap/typescript';
 import bodyParser from "body-parser";
@@ -47,13 +48,14 @@ describe("Order controller", () => {
 
     describe("GET *", () => {
         test("should give basic info", done => {
+            const result = new HealthCheckResponse([], "registry", 100)
             const expected = {
-                peers: [],
-                registry: "registry",
-                database: 100,
+                "jsonrpc": "2.0",
+                "id": "-1",
+                result
             };
             // @ts-ignore
-            fakeRootService.get.mockImplementation(() => Promise.resolve(expected));
+            fakeRootService.get.mockImplementation(() => Promise.resolve(result));
 
             new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
             supertest(webserver)

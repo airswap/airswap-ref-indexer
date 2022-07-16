@@ -26,7 +26,7 @@ async function bench() {
                 jsonrpc: "2.0",
                 id: "1",
                 method: "addOrder",
-                params: {
+                params: [{
                     nonce: "nonce",
                     expiry: "1653807874951",
                     signerWallet: "signerWallet",
@@ -38,7 +38,7 @@ async function bench() {
                     r: "r",
                     s: "s",
                     v: "v",
-                },
+                }],
             });
         } catch (error) {
             console.log(error);

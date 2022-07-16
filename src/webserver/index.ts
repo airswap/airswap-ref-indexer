@@ -3,25 +3,17 @@ import cors from "cors";
 import express, { Express } from "express";
 import { Server } from 'http';
 import { PeersController } from './../controller/PeersController.js';
-import { RootService } from '../service/RootService.js';
 
 const router = express.Router();
 
 export class Webserver {
   private port: number
   private peersController: PeersController;
-  private rootController: RootService;
   private server!: Server;
-  private isDebugMode: boolean;
 
-  constructor(port: number,
-    peersController: PeersController,
-    rootController: RootService,
-    isDebugMode: boolean) {
+  constructor(port: number, peersController: PeersController) {
     this.port = port;
     this.peersController = peersController;
-    this.rootController = rootController;
-    this.isDebugMode = isDebugMode;
   }
 
   run(): Express {
@@ -33,11 +25,6 @@ export class Webserver {
       .get(this.peersController.getPeers)
       .post(this.peersController.addPeers)
       .delete(this.peersController.removePeer);
-
-    if (this.isDebugMode) {
-      router.route("/")
-        .get(this.rootController.get);
-    }
 
     app.use(router);
 
