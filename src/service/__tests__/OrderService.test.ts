@@ -103,9 +103,9 @@ describe("Order service", () => {
 
     describe("Add Order", () => {
         test("Add order nominal & broadcast", async () => {
-            const order = forgeOrder(1653900784696);
-            const expectedForgeHash = new IndexedOrder(forgeDbOrder(1653900784696), 1653900784706, undefined);
-            const expected = forgeIndexedOrder(1653900784706, 1653900784696);
+            const order = forgeOrder(1653900784796);
+            const expectedForgeHash = new IndexedOrder(forgeDbOrder(1653900784796), 1653900784706, undefined);
+            const expected = forgeIndexedOrder(1653900784706, 1653900784796);
             expected.hash = "a";
 
             //@ts-ignore
@@ -176,14 +176,14 @@ describe("Order service", () => {
         });
 
         test("Add: already added", async () => {
-            const order = forgeOrder(1653900784696);
+            const order = forgeOrder(1653900784796);
 
             //@ts-ignore
             fakeDb.generateHash.mockImplementation(() => "a");
             //@ts-ignore
             fakeDb.orderExists.mockImplementation(() => true);
 
-            const expected = forgeIndexedOrder(1653900784706, 1653900784696);
+            const expected = forgeIndexedOrder(1653900784706, 1653900784796);
             //@ts-ignore
             expected.hash = undefined;
 
