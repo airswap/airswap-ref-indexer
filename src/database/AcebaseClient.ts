@@ -18,37 +18,32 @@ const elementPerPage = 20;
 export class AceBaseClient implements Database {
 
     private db!: AceBase;
-    private filters: Filters;
+    private filters!: Filters;
     private ref!: DataReference;
 
-    constructor(databaseName: string, deleteOnStart = false) {
-        this.filters = new Filters();
+    public async connect(databaseName: string, deleteOnStart = false): Promise<void> {        
         const options = { storage: { path: '.' }, logLevel: 'log' } as AceBaseLocalSettings;
-        if (deleteOnStart) {
-            fs.promises.rm(`${databaseName}.acebase`, { recursive: true })
-                .then(() => {
-                    this.db = new AceBase(databaseName, options);
-                    this.db.ready(() => {
-                        this.connect();
-                    });
-                });
-        } else {
-            this.db = new AceBase(databaseName, options);
+        const dbName = `${databaseName}.acebase`;
+        if (deleteOnStart && fs.existsSync(dbName)) {            
+            await fs.promises.rm(dbName, { recursive: true });
+        } 
+        this.db = new AceBase(databaseName, options);
+        return new Promise((resolve, reject) => {
             this.db.ready(() => {
-                this.connect();
+                this.ref = this.db.ref(ENTRY_REF);
+                this.db.indexes.create(`${ENTRY_REF}`, 'hash');
+                this.db.indexes.create(`${ENTRY_REF}`, 'addedOn');
+                this.db.indexes.create(`${ENTRY_REF}`, "approximatedSignerAmount");
+                this.db.indexes.create(`${ENTRY_REF}`, "approximatedSenderAmount");
+                // this.db.indexes.create(`${ENTRY_REF}`, "signerToken"); https://github.com/appy-one/acebase/issues/124
+                // this.db.indexes.create(`${ENTRY_REF}`, "senderToken");
+                resolve();
             });
-        }
-
+        });
     }
 
-    private connect() {
-        this.ref = this.db.ref(ENTRY_REF);
-        this.db.indexes.create(`${ENTRY_REF}`, 'hash');
-        this.db.indexes.create(`${ENTRY_REF}`, 'addedOn');
-        this.db.indexes.create(`${ENTRY_REF}`, "approximatedSignerAmount");
-        this.db.indexes.create(`${ENTRY_REF}`, "approximatedSenderAmount");
-        // this.db.indexes.create(`${ENTRY_REF}`, "signerToken"); https://github.com/appy-one/acebase/issues/124
-        // this.db.indexes.create(`${ENTRY_REF}`, "senderToken");
+    public constructor() {
+        this.filters = new Filters();
     }
 
     getFilters(): Promise<Filters> {
@@ -92,6 +87,10 @@ export class AceBaseClient implements Database {
         const data = await query.skip(entriesSkipped).take(elementPerPage).get();
         const mapped = data.reduce((total, indexedOrder) => {
             const mapped = this.datarefToRecord(indexedOrder.val());
+            // @ts-ignore
+            if(total[Object.keys(mapped)[0]])
+            // @ts-ignore
+            {console.warn("found duplication", Object.keys(mapped)[0], total[Object.keys(mapped)[0]], mapped)};
             return { ...total, ...mapped };
         }, {});
         const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
@@ -169,9 +168,10 @@ export class AceBaseClient implements Database {
     generateHash(indexedOrder: IndexedOrder) {
         const lightenOrder = { ...indexedOrder.order };
         //@ts-ignore
-        delete lightenOrder.approximatedSenderAmount
+        delete lightenOrder.approximatedSenderAmount;
         //@ts-ignore
-        delete lightenOrder.approximatedSignerAmount
+        delete lightenOrder.approximatedSignerAmount;
+        console.log(lightenOrder);
         const stringObject = JSON.stringify(lightenOrder);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
         return hashed.digest("hex");

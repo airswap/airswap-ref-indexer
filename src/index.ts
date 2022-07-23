@@ -1,5 +1,6 @@
 import "dotenv/config";
 import publicIp from "public-ip";
+import { Database } from './database/Database';
 import { BroadcastClient } from './client/BroadcastClient.js';
 import { OrderClient } from './client/OrderClient.js';
 import { PeersClient } from './client/PeersClient.js';
@@ -29,7 +30,7 @@ const peersClient = new PeersClient();
 const broadcastClient = new BroadcastClient();
 const registryClient = new RegistryClient(REGISTRY);
 
-const database = getDatabase();
+const database = await getDatabase();
 
 const orderService = new OrderService(database);
 const peers = new Peers(database, host, peersClient, broadcastClient);
@@ -102,13 +103,17 @@ async function gracefulShutdown(webserver: Webserver) {
   process.exit(0);
 }
 
-function getDatabase() {
+async function getDatabase(): Promise<Database> {
   const deleteDbOnStart = process.env.DELETE_DB_ON_START == "1";
   const databseType = process.env.DATABASE_TYPE;
   if (databseType === "ACEBASE") {
-    return new AceBaseClient("airswapDb", deleteDbOnStart);
+    const acebaseClient = new AceBaseClient();
+    await acebaseClient.connect("airswapDb", deleteDbOnStart);
+    return Promise.resolve(acebaseClient);
   } else if (databseType === "IN_MEMORY") {
-    return new InMemoryDatabase();
+    const inMemoryDb = new InMemoryDatabase();
+    await inMemoryDb.connect("airswapDb", deleteDbOnStart);
+    return Promise.resolve(inMemoryDb);
   }
   console.error("Unknown database, check env file !")
   process.exit(5);

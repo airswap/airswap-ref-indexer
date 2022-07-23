@@ -17,6 +17,9 @@ export class InMemoryDatabase implements Database {
     this.database = {};
     this.filters = new Filters();
   }
+  connect(databaseName: string, deleteOnStart: boolean): Promise<void> {
+    return Promise.resolve();
+  }
 
   getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse> {
     const totalResults = Object.values(this.database).filter((indexedOrder: IndexedOrder) => {
@@ -118,5 +121,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  close() { }
+  close() {
+    return Promise.resolve();
+  }
 }

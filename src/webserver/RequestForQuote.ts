@@ -65,6 +65,7 @@ export class RequestForQuote {
                 }
                 response.json(new JsonRpcResponse(id, result));
             } catch (error) {
+                console.log("error", error)
                 const err = error as IndexedOrderError;
                 response.status(err.code);
                 response.json(new JsonRpcResponse(id, err));

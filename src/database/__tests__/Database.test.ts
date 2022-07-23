@@ -13,9 +13,11 @@ describe("Database implementations", () => {
     let inMemoryDatabase: InMemoryDatabase;
     let acebaseClient: AceBaseClient;
 
-    beforeAll(() => {
+    beforeAll(async () => {
         inMemoryDatabase = new InMemoryDatabase();
-        acebaseClient = new AceBaseClient("dbtest", true);
+        acebaseClient = new AceBaseClient();
+        await acebaseClient.connect("dbtest", true);
+        await inMemoryDatabase.connect("dbtest", true);
     });
 
     beforeEach(async () => {

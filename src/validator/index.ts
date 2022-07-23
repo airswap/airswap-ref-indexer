@@ -7,7 +7,11 @@ export function isDateInRange(date: string, validationDurationInWeek: number) {
         return false;
     }
 
-    let maxDate = new Date();
-    maxDate.setDate(maxDate.getDate() + validationDurationInWeek * 7);
-    return +date < maxDate.getTime();
+    const currentDate = new Date();
+    if (currentDate.getTime() >= +date) {
+        return false;
+    }
+
+    currentDate.setDate(currentDate.getDate() + validationDurationInWeek * 7);
+    return +date < currentDate.getTime();
 }

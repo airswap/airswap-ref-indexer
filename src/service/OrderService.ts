@@ -44,7 +44,7 @@ export class OrderService {
         const addedTimestamp = isNumeric(body.addedOn) ? +body.addedOn : new Date().getTime();
         const indexedOrder = new IndexedOrder(order, addedTimestamp);
         const hash = this.database.generateHash(indexedOrder);
-        const orderExists = await this.database.orderExists(hash);
+        const orderExists = await this.database.orderExists(hash);        
         if (orderExists) {
             throw new AlreadyExistsError();
         }

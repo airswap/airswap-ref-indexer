@@ -21,4 +21,9 @@ export interface Database {
     generateHash(indexedOrder: IndexedOrder): string;
 
     getFilters(): Promise<Filters>;
+
+    connect(databaseName: string, deleteOnStart: boolean): Promise<void>;
+    
+    close(): Promise<void>;
+
 }
