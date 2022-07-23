@@ -10,26 +10,38 @@ import { Filters } from './filter/Filters.js';
 import { RequestFilter } from './filter/RequestFilter';
 import { SortField } from './filter/SortField.js';
 import { SortOrder } from './filter/SortOrder.js';
+import fs from "fs";
 
 const ENTRY_REF = "otcOrders";
 const elementPerPage = 20;
 
 export class AceBaseClient implements Database {
 
-    private db: AceBase;
+    private db!: AceBase;
     private filters: Filters;
-    private ref: DataReference;
+    private ref!: DataReference;
 
     constructor(databaseName: string, deleteOnStart = false) {
         this.filters = new Filters();
         const options = { storage: { path: '.' }, logLevel: 'log' } as AceBaseLocalSettings;
-        this.db = new AceBase(databaseName, options);
-        this.db.ready(() => {
-            if (deleteOnStart) {
-                this.erase();
-            }
-        });
+        if (deleteOnStart) {
+            fs.promises.rm(`${databaseName}.acebase`, { recursive: true })
+                .then(() => {
+                    this.db = new AceBase(databaseName, options);
+                    this.db.ready(() => {
+                        this.connect();
+                    });
+                });
+        } else {
+            this.db = new AceBase(databaseName, options);
+            this.db.ready(() => {
+                this.connect();
+            });
+        }
 
+    }
+
+    private connect() {
         this.ref = this.db.ref(ENTRY_REF);
         this.db.indexes.create(`${ENTRY_REF}`, 'hash');
         this.db.indexes.create(`${ENTRY_REF}`, 'addedOn');
@@ -134,7 +146,7 @@ export class AceBaseClient implements Database {
         data.forEach(dataSnapshot => {
             const mapp = this.datarefToRecord(dataSnapshot.val());
             mapped = { ...mapped, ...mapp };
-        });        
+        });
         return Promise.resolve(new OrderResponse(mapped, computePagination(totalResults, totalResults), totalResults));
     }
 
