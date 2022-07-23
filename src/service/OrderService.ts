@@ -50,7 +50,7 @@ export class OrderService {
         }
 
         indexedOrder.hash = hash;
-        this.database.addOrder(indexedOrder);
+        await this.database.addOrder(indexedOrder);
         return Promise.resolve();
     }
 

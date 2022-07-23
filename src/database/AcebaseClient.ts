@@ -171,7 +171,6 @@ export class AceBaseClient implements Database {
         delete lightenOrder.approximatedSenderAmount;
         //@ts-ignore
         delete lightenOrder.approximatedSignerAmount;
-        console.log(lightenOrder);
         const stringObject = JSON.stringify(lightenOrder);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
         return hashed.digest("hex");
