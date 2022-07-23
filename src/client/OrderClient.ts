@@ -13,7 +13,7 @@ export class OrderClient {
             jsonrpc: "2.0",
             id: "1",
             method: "getOrders",
-            params: {}
+            params: [{}]
         });
         return { data: response?.data?.result };
     }

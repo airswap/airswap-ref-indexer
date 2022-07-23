@@ -27,13 +27,17 @@ export class OrderService {
     }
 
     public async addOrder(body: any): Promise<void> {
-        if (!body
-            || Object.keys(body).length == 0
-            || !isValidOrder(body)
-            || !areNumberFieldsValid(body)
-            || !isDateInRange(body.expiry, validationDurationInWeek)
-        ) {
-            throw new ClientError("Order incomplete");
+        if (!body || Object.keys(body).length == 0) {
+            throw new ClientError("No body");
+        }
+        if (!isValidOrder(body)) {
+            throw new ClientError("Missing fields");
+        }
+        if (!areNumberFieldsValid(body)) {
+            throw new ClientError("Number fields are incorrect");
+        }
+        if (!isDateInRange(body.expiry, validationDurationInWeek)) {
+            throw new ClientError("Invalid expiry date");
         }
 
         const order = mapAnyToDbOrder(body);

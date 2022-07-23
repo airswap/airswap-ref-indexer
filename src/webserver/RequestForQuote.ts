@@ -67,7 +67,7 @@ export class RequestForQuote {
             } catch (error) {
                 const err = error as IndexedOrderError;
                 response.status(err.code);
-                response.json(new JsonRpcResponse(id, err))
+                response.json(new JsonRpcResponse(id, err));
             }
         });
     }
