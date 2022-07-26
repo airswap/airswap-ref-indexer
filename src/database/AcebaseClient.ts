@@ -86,11 +86,7 @@ export class AceBaseClient implements Database {
         const entriesSkipped = (requestFilter.page - 1) * elementPerPage;
         const data = await query.skip(entriesSkipped).take(elementPerPage).get();
         const mapped = data.reduce((total, indexedOrder) => {
-            const mapped = this.datarefToRecord(indexedOrder.val());
-            // @ts-ignore
-            if(total[Object.keys(mapped)[0]])
-            // @ts-ignore
-            {console.warn("found duplication", Object.keys(mapped)[0], total[Object.keys(mapped)[0]], mapped)};
+            const mapped = this.datarefToRecord(indexedOrder.val());           
             return { ...total, ...mapped };
         }, {});
         const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
