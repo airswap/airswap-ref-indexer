@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { computePagination } from '../controller/pagination/index.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
-import { OrderResponse } from './../model/OrderResponse.js';
+import { OrderResponse } from './../model/response/OrderResponse.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
 import { RequestFilter } from './filter/RequestFilter.js';
@@ -16,6 +16,9 @@ export class InMemoryDatabase implements Database {
   constructor() {
     this.database = {};
     this.filters = new Filters();
+  }
+  connect(databaseName: string, deleteOnStart: boolean): Promise<void> {
+    return Promise.resolve();
   }
 
   getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse> {
@@ -81,11 +84,11 @@ export class InMemoryDatabase implements Database {
 
   getOrder(hash: string): Promise<OrderResponse> {
     const result: Record<string, IndexedOrder> = {};
-    result[hash] = this.database[hash];
     if (this.database[hash]) {
+      result[hash] = this.database[hash];
       return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1), 1));
     }
-    return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 0), 1));
+    return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 0), 0));
   }
 
   async getOrders(): Promise<OrderResponse> {
@@ -118,5 +121,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  close() { }
+  close() {
+    return Promise.resolve();
+  }
 }

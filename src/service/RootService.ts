@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+import { HealthCheckResponse } from './../model/response/HealthCheckResponse.js';
 import { Database } from '../database/Database.js';
 import { Peers } from '../peer/Peers.js';
-export class RootController {
+export class RootService {
 
     private peers: Peers;
     private registry: string;
@@ -13,13 +13,9 @@ export class RootController {
         this.database = database;
     }
 
-    get = async (request: Request, response: Response) => {
-        console.log("R<---", request.method, request.url, request.body);
+    public async get(): Promise<HealthCheckResponse> {
         const orders = await this.database.getOrders();
-        response.json({
-            peers: this.peers.getPeers(),
-            registry: this.registry,
-            database: orders,
-        });
+        return new HealthCheckResponse(this.peers.getPeers(), this.registry, orders.ordersForQuery);
     }
+
 }

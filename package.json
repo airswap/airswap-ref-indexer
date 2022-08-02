@@ -1,7 +1,7 @@
 {
   "version": "1.0.0-alpha",
-  "engines" : { 
-    "node" : ">=14.19.0"
+  "engines": {
+    "node": ">=14.19.0"
   },
   "scripts": {
     "start": "node ./dist/index.js",
@@ -16,13 +16,15 @@
     "@airswap/libraries": "^3.0.3",
     "@airswap/typescript": "^3.0.0",
     "@airswap/utils": "^3.0.0",
+    "@types/supertest": "^2.0.12",
     "acebase": "1.21.7",
     "axios": "^0.27.2",
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
-    "public-ip": "^5.0.0"
+    "public-ip": "^5.0.0",
+    "supertest": "^6.2.4"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",

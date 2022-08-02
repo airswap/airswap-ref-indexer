@@ -4,39 +4,46 @@ import { computePagination } from '../controller/pagination/index.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { AceBaseLocalSettings } from './../../node_modules/acebase/index.d';
-import { OrderResponse } from './../model/OrderResponse.js';
+import { OrderResponse } from './../model/response/OrderResponse.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
 import { RequestFilter } from './filter/RequestFilter';
 import { SortField } from './filter/SortField.js';
 import { SortOrder } from './filter/SortOrder.js';
+import fs from "fs";
 
 const ENTRY_REF = "otcOrders";
 const elementPerPage = 20;
 
 export class AceBaseClient implements Database {
 
-    private db: AceBase;
-    private filters: Filters;
-    private ref: DataReference;
+    private db!: AceBase;
+    private filters!: Filters;
+    private ref!: DataReference;
 
-    constructor(databaseName: string, deleteOnStart = false) {
-        this.filters = new Filters();
+    public async connect(databaseName: string, deleteOnStart = false): Promise<void> {        
         const options = { storage: { path: '.' }, logLevel: 'log' } as AceBaseLocalSettings;
+        const dbName = `${databaseName}.acebase`;
+        if (deleteOnStart && fs.existsSync(dbName)) {            
+            await fs.promises.rm(dbName, { recursive: true });
+        } 
         this.db = new AceBase(databaseName, options);
-        this.db.ready(() => {
-            if (deleteOnStart) {
-                this.erase();
-            }
+        return new Promise((resolve, reject) => {
+            this.db.ready(() => {
+                this.ref = this.db.ref(ENTRY_REF);
+                this.db.indexes.create(`${ENTRY_REF}`, 'hash');
+                this.db.indexes.create(`${ENTRY_REF}`, 'addedOn');
+                this.db.indexes.create(`${ENTRY_REF}`, "approximatedSignerAmount");
+                this.db.indexes.create(`${ENTRY_REF}`, "approximatedSenderAmount");
+                // this.db.indexes.create(`${ENTRY_REF}`, "signerToken"); https://github.com/appy-one/acebase/issues/124
+                // this.db.indexes.create(`${ENTRY_REF}`, "senderToken");
+                resolve();
+            });
         });
+    }
 
-        this.ref = this.db.ref(ENTRY_REF);
-        this.db.indexes.create(`${ENTRY_REF}`, 'hash');
-        this.db.indexes.create(`${ENTRY_REF}`, 'addedOn');
-        this.db.indexes.create(`${ENTRY_REF}`, "approximatedSignerAmount");
-        this.db.indexes.create(`${ENTRY_REF}`, "approximatedSenderAmount");
-        // this.db.indexes.create(`${ENTRY_REF}`, "signerToken"); https://github.com/appy-one/acebase/issues/124
-        // this.db.indexes.create(`${ENTRY_REF}`, "senderToken");
+    public constructor() {
+        this.filters = new Filters();
     }
 
     getFilters(): Promise<Filters> {
@@ -79,7 +86,7 @@ export class AceBaseClient implements Database {
         const entriesSkipped = (requestFilter.page - 1) * elementPerPage;
         const data = await query.skip(entriesSkipped).take(elementPerPage).get();
         const mapped = data.reduce((total, indexedOrder) => {
-            const mapped = this.datarefToRecord(indexedOrder.val());
+            const mapped = this.datarefToRecord(indexedOrder.val());           
             return { ...total, ...mapped };
         }, {});
         const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
@@ -120,7 +127,7 @@ export class AceBaseClient implements Database {
             .get();
         const serializedOrder = query.values()?.next()?.value?.val();
         if (!serializedOrder) {
-            return Promise.resolve(new OrderResponse({}, computePagination(elementPerPage, 0), 1));
+            return Promise.resolve(new OrderResponse({}, computePagination(elementPerPage, 0), 0));
         }
         const result: Record<string, IndexedOrder> = {};
         result[hash] = this.datarefToRecord(serializedOrder)[hash];
@@ -157,9 +164,9 @@ export class AceBaseClient implements Database {
     generateHash(indexedOrder: IndexedOrder) {
         const lightenOrder = { ...indexedOrder.order };
         //@ts-ignore
-        delete lightenOrder.approximatedSenderAmount
+        delete lightenOrder.approximatedSenderAmount;
         //@ts-ignore
-        delete lightenOrder.approximatedSignerAmount
+        delete lightenOrder.approximatedSignerAmount;
         const stringObject = JSON.stringify(lightenOrder);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
         return hashed.digest("hex");

@@ -10,28 +10,27 @@
 			"name": "orders",
 			"item": [
 				{
-					"name": "Delete an order",
+					"name": "Get orders wtih filters",
 					"request": {
-						"method": "DELETE",
-						"header": [],
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"status\": \"done\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\r\n    \"jsonrpc\": \"2.0\",\r\n    \"id\": \"1\",\r\n    \"method\": \"getOrders\",\r\n    \"params\": [{\r\n        \"sortField\": \"SIGNER_AMOUNT\",\r\n        \"page\": 1,\r\n        \"sortOrder\": \"DESC\"\r\n    }]\r\n}"
 						},
 						"url": {
-							"raw": "http://{{node_url}}/orders/bb22096b18182424888fcdf5ed3a94160271d8a9266590d1bc832cbe642bf337",
+							"raw": "http://{{node_url}}/",
 							"protocol": "http",
 							"host": [
 								"{{node_url}}"
 							],
 							"path": [
-								"orders",
-								"bb22096b18182424888fcdf5ed3a94160271d8a9266590d1bc832cbe642bf337"
+								""
 							]
 						}
 					},
@@ -44,7 +43,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"nonce\": \"nonce\",\r\n    \"expiry\": \"1653807874951\",\r\n    \"signerWallet\": \"signerWallet\",\r\n    \"signerToken\": \"0x0000000000000000000000000000000000000000\",\r\n    \"signerAmount\": \"40\",\r\n    \"senderWallet\": \"senderWallet\",\r\n    \"senderToken\": \"senderToken\",\r\n    \"senderAmount\": \"140\",\r\n    \"r\": \"r\",\r\n    \"s\": \"s\",\r\n    \"v\": \"v\"\r\n}",
+							"raw": "{\r\n    \"jsonrpc\": \"2.0\",\r\n    \"id\": \"1\",\r\n    \"method\": \"addOrder\",\r\n    \"params\": [{\r\n        \"nonce\": \"nonce\",\r\n        \"expiry\": \"1653807874951\",\r\n        \"signerWallet\": \"signerWallet\",\r\n        \"signerToken\": \"0x0000000000000000000000000000000000000000\",\r\n        \"signerAmount\": \"40\",\r\n        \"senderWallet\": \"senderWallet\",\r\n        \"senderToken\": \"senderToken\",\r\n        \"senderAmount\": \"142\",\r\n        \"r\": \"r\",\r\n        \"s\": \"s\",\r\n        \"v\": \"v\"\r\n    }]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -52,80 +51,13 @@
 							}
 						},
 						"url": {
-							"raw": "http://{{node_url}}/orders",
+							"raw": "http://{{node_url}}/",
 							"protocol": "http",
 							"host": [
 								"{{node_url}}"
 							],
 							"path": [
-								"orders"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get order with filters",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://{{node_url}}/orders?sortField=SIGNER_AMOUNT&page=2&sortOrder=ASC",
-							"protocol": "http",
-							"host": [
-								"{{node_url}}"
-							],
-							"path": [
-								"orders"
-							],
-							"query": [
-								{
-									"key": "sortField",
-									"value": "SIGNER_AMOUNT"
-								},
-								{
-									"key": "senderTokens",
-									"value": "0x0000000000000000000000000000000000000000",
-									"disabled": true
-								},
-								{
-									"key": "page",
-									"value": "2"
-								},
-								{
-									"key": "sortOrder",
-									"value": "ASC"
-								},
-								{
-									"key": "signerTokens",
-									"value": "0x0000000000000000000000000000000000000000",
-									"disabled": true
-								},
-								{
-									"key": "minSignerAmount",
-									"value": "5",
-									"disabled": true
-								},
-								{
-									"key": "maxSignerAmount",
-									"value": "10",
-									"disabled": true
-								},
-								{
-									"key": "minSenderAmount",
-									"value": "1",
-									"disabled": true
-								},
-								{
-									"key": "maxSenderAmount",
-									"value": "10",
-									"disabled": true
-								},
-								{
-									"key": "maxAddedDate",
-									"value": "1655233391573",
-									"disabled": true
-								}
+								""
 							]
 						}
 					},
@@ -134,22 +66,25 @@
 				{
 					"name": "Get orders",
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"jsonrpc\": \"2.0\",\r\n    \"id\": \"1\",\r\n    \"method\": \"getOrders\",\r\n    \"params\": [{\r\n        \"filters\": true\r\n    }]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "http://{{node_url}}/orders?filters=true",
+							"raw": "http://{{node_url}}/",
 							"protocol": "http",
 							"host": [
 								"{{node_url}}"
 							],
 							"path": [
-								"orders"
-							],
-							"query": [
-								{
-									"key": "filters",
-									"value": "true"
-								}
+								""
 							]
 						}
 					},

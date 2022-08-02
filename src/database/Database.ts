@@ -1,4 +1,4 @@
-import { OrderResponse } from './../model/OrderResponse.js';
+import { OrderResponse } from './../model/response/OrderResponse.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Filters } from './filter/Filters.js';
 import { RequestFilter } from './filter/RequestFilter.js';
@@ -21,4 +21,9 @@ export interface Database {
     generateHash(indexedOrder: IndexedOrder): string;
 
     getFilters(): Promise<Filters>;
+
+    connect(databaseName: string, deleteOnStart: boolean): Promise<void>;
+    
+    close(): Promise<void>;
+
 }

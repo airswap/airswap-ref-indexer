@@ -17,7 +17,7 @@ export class RegistryClient {
     return axios.post(`${this.registry}`, { ip });
   }
 
-  removeIpFromRegistry(ip: string) {
+  async removeIpFromRegistry(ip: string) {
     console.log("S---> DELETE", `${this.registry}/` + ip);
     return axios.delete(`${this.registry}/` + ip);
   }
