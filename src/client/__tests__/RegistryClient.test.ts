@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { RegistryClient } from './../RegistryClient';
+import { HttpRegistryClient } from '../HttpRegistryClient';
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
@@ -20,7 +20,7 @@ describe("Registry client", () => {
             expect(data).toBeUndefined()
             return Promise.resolve(axios200Response({}));
         });
-        const response = await new RegistryClient("registry_url").getPeersFromRegistry();
+        const response = await new HttpRegistryClient("registry_url").getPeersFromRegistry();
         expect(response).toBeDefined();
     });
 
@@ -30,7 +30,7 @@ describe("Registry client", () => {
             expect(data).toEqual({ ip: "my_ip" })
             return Promise.resolve(axios200Response({}));
         });
-        const response = await new RegistryClient("registry_url").sendIpToRegistry("my_ip");
+        const response = await new HttpRegistryClient("registry_url").sendIpToRegistry("my_ip");
         expect(response).toBeDefined();
     });
 
@@ -40,7 +40,7 @@ describe("Registry client", () => {
             expect(data).toBeUndefined()
             return Promise.resolve(axios200Response({}));
         });
-        const response = await new RegistryClient("registry_url").removeIpFromRegistry("my_ip");
+        const response = await new HttpRegistryClient("registry_url").removeIpFromRegistry("my_ip");
         expect(response).toBeDefined();
     });
 });  
