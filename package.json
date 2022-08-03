@@ -13,6 +13,7 @@
   "type": "module",
   "license": "MIT",
   "dependencies": {
+    "@airswap/indexers": "^3.0.0",
     "@airswap/libraries": "^3.0.3",
     "@airswap/typescript": "^3.0.0",
     "@airswap/utils": "^3.0.0",

@@ -1,5 +1,5 @@
-import { ContractInterface } from 'ethers';
 import "dotenv/config";
+import { ContractInterface } from 'ethers';
 import publicIp from "public-ip";
 import { BroadcastClient } from './client/BroadcastClient.js';
 import { HttpRegistryClient } from './client/HttpRegistryClient.js';
@@ -18,11 +18,17 @@ import { RootService } from './service/RootService.js';
 import { Webserver } from "./webserver/index.js";
 import { RequestForQuote } from "./webserver/RequestForQuote.js";
 
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const Indexers = require('@airswap/indexers/build/contracts/Indexers.sol/Indexers.json');
+
 // Env Variables
 if (!process.env.EXPRESS_PORT) {
   console.error("No express port defined");
   process.exit(2);
 }
+
+const useSmartContract: boolean = process.env.USE_SMART_CONTRACT == "1";
 
 // Configure host value 
 const EXPRESS_PORT = process.env.EXPRESS_PORT!;
@@ -37,14 +43,15 @@ const broadcastClient = new BroadcastClient();
 const database = await getDatabase();
 
 const orderService = new OrderService(database);
-const peers = new Peers(database, host, peersClient, broadcastClient);
+const peers = new Peers(database, host, peersClient, broadcastClient, useSmartContract);
 
 const peersController = new PeersController(peers);
-const registryClient = getRegistry(process.env, peers);
+const registryClient = getRegistry(useSmartContract, process.env, peers);
 const rootController = new RootService(peers, database, process.env.REGISTRY!);
 
 // Network register & synchronization 
-const peersFromRegistry = await registryClient.getPeersFromRegistry();
+let peersFromRegistry = await registryClient.getPeersFromRegistry();
+console.log("Available peers:", peersFromRegistry);
 
 await requestDataFromOtherPeer(peersFromRegistry);
 const webserver = new Webserver(+EXPRESS_PORT, peersController);
@@ -62,13 +69,17 @@ process.on("SIGINT", () => {
 
 async function requestDataFromOtherPeer(peersFromRegistry: string[]) {
   if (peersFromRegistry.length > 0) {
-    peers.addPeers(peersFromRegistry);
-    const peerUrl = "http://" + peers.getConnectablePeers()[0];
-    console.log("Configure client");
-    const { data } = await orderClient.getOrders_JSON_RPC(peerUrl);
-    console.log(data.orders);
-    database.addAll(data.orders);
-    console.log("Asked all queries to", peerUrl);
+    try {
+      peers.addPeers(peersFromRegistry);
+      const peerUrl = peers.getConnectablePeers()[0];
+      console.log("Configure client");
+      const { data } = await orderClient.getOrders(peerUrl);
+      console.log(data.orders);
+      database.addAll(data.orders);
+      console.log("Asked all queries to", peerUrl);
+    } catch (err) {
+      console.log("Could not connect to peer...");
+    }
   } else {
     console.log("/!\\ FIRST NODE AVAILABLE !");
   }
@@ -78,7 +89,6 @@ function registerInNetwork() {
   registryClient.sendIpToRegistry(host)
     .then(() => {
       peers.broadcastMyHostToOtherPeer();
-      console.log("Ip sent to registry + broadcasted my host to other peers");
     })
     .catch((error) => {
       console.log("Could not send ip to registry", error);
@@ -114,10 +124,8 @@ async function getDatabase(): Promise<Database> {
   process.exit(5);
 }
 
-function getRegistry(conf: any, peers: Peers): RegistryClient {
+function getRegistry(useSmartContract: boolean, conf: any, peers: Peers): RegistryClient {
   const address: string = conf.REGISTRY;
-  const useSmartContract: boolean = conf.USE_SMART_CONTRACT == "1";
-  const abiDeclaration: string = conf.ABI;
   const apiKey: string = conf.API_KEY;
   const network: string = conf.NETWORK;
 
@@ -127,17 +135,11 @@ function getRegistry(conf: any, peers: Peers): RegistryClient {
   }
 
   if (useSmartContract) {
-    if (!abiDeclaration || !apiKey || !network) {
-      console.error("Invalid registry configuration, abi, apiKey, or network are incorrect, check env file !")
+    if (!apiKey || !network) {
+      console.error("Invalid registry configuration, apiKey, or network are incorrect, check env file !")
       process.exit(7);
     }
-    try {
-      const parsedAbi = JSON.parse(abiDeclaration) as unknown as ContractInterface;
-      return new Web3RegistryClient(apiKey, address, parsedAbi, network, peers);
-    } catch (err) {
-      console.error("Json parsing has failed, could not parse abi, check env file !")
-      process.exit(8);
-    }
+    return new Web3RegistryClient(apiKey, address, Indexers.abi as unknown as ContractInterface, network, peers);
   } else {
     return new HttpRegistryClient(address);
   }

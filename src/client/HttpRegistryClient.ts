@@ -16,6 +16,7 @@ export class HttpRegistryClient implements RegistryClient {
 
   async sendIpToRegistry(ip: string): Promise<void> {
     console.log("S---> POST", `${this.registry}`, { ip });
+    console.log("Ip sent to registry");
     return await axios.post(`${this.registry}`, { ip });
   }
 
