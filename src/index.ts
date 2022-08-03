@@ -32,7 +32,10 @@ const useSmartContract: boolean = process.env.USE_SMART_CONTRACT == "1";
 
 // Configure host value 
 const EXPRESS_PORT = process.env.EXPRESS_PORT!;
-const host = process.env.LOCAL_ONLY === "1" ? getLocalIp() + ":" + EXPRESS_PORT : (await publicIp.v4()) + ":" + EXPRESS_PORT;
+const hostname = process.env.LOCAL_ONLY === "1"
+  ? `${getLocalIp()}:${EXPRESS_PORT}`
+  : `${await publicIp.v4()}:${EXPRESS_PORT}`
+const host = `http://${hostname}/`;
 console.log("HOST is", host);
 
 // Injection

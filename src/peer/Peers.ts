@@ -1,8 +1,7 @@
+import { AxiosResponse } from 'axios';
 import { PeersClient } from '../client/PeersClient.js';
 import { Database } from '../database/Database.js';
 import { BroadcastClient } from './../client/BroadcastClient';
-
-const HTTP_PREFIX = "http://";
 
 export class Peers {
 
@@ -13,7 +12,7 @@ export class Peers {
   broadcastClient: BroadcastClient;
   isSmartContract: boolean;
 
-  constructor(database: Database, host: string, peersClient: PeersClient, broadcastClient: BroadcastClient, isSmartContract: boolean=false) {
+  constructor(database: Database, host: string, peersClient: PeersClient, broadcastClient: BroadcastClient, isSmartContract: boolean) {
     this.peers = [];
     this.database = database;
     this.host = host;
@@ -43,7 +42,7 @@ export class Peers {
   };
 
   getConnectablePeers = () => {
-    return this.peers.filter((ip) => ip != this.host);
+    return this.peers.filter((host) => host != this.host);
   };
 
   containsUnknownPeers = (peersUrl: string[]) => {
@@ -53,13 +52,16 @@ export class Peers {
   broadcast = (method: string, path: string, body?: any) => {
     this.peers.forEach((clientUrl) => {
       if (clientUrl && clientUrl != this.host) {
-        this.broadcastClient.broadcastTo(method,  + clientUrl + path, body);
+        if (clientUrl.slice(-1) === "/") {
+          clientUrl = clientUrl.slice(0, -1);
+        }
+        this.broadcastClient.broadcastTo(method, clientUrl + path, body);
       }
     });
   }
 
   broadcastMyHostToOtherPeer = () => {
-    if(this.isSmartContract) return;
+    if (this.isSmartContract) return;
     console.log("Broadcasted my host to other peers");
 
     this.peers.forEach((clientUrl) => {
@@ -70,9 +72,9 @@ export class Peers {
   };
 
   broadcastDisconnectionToOtherPeer = async () => {
-    if(this.isSmartContract) return;
+    if (this.isSmartContract) return;
 
-    const promises: Promise<any>[] = [];
+    const promises: Promise<AxiosResponse<any, any>>[] = [];
     this.peers.forEach((clientUrl) => {
       if (clientUrl && clientUrl != this.host) {
         promises.push(this.peersClient.removePeer(clientUrl, this.host));
