@@ -91,7 +91,7 @@ describe("Peers", () => {
             peer.addPeer("http://localhost/");
             peer.addPeer("http://a_url/");
             peer.addPeer("http://another_one/");
-            expect(peer.getConnectablePeers()).toEqual(["http://a_url/", "http://another_one/"]);
+            expect(peer.getConnectablePeers()).toEqual(["http://a_url", "http://another_one"]);
         });
     });
 
@@ -147,11 +147,11 @@ describe("Peers", () => {
             });
 
             test("broadcast method to others", () => {
-                const peers = new Peers(fakeDb as Database, "http://localhost/", fakePeersClient as PeersClient, fakeBroadcastClient as BroadcastClient, false);
+                const peers = new Peers(fakeDb as Database, "http://localhost", fakePeersClient as PeersClient, fakeBroadcastClient as BroadcastClient, false);
                 peers.addPeers(["http://localhost/", "http://another/", "http://a_third/"]);
                 peers.broadcastMyHostToOtherPeer();
-                expect(fakePeersClient.addPeer).toHaveBeenNthCalledWith(1, "http://another/", "http://localhost/");
-                expect(fakePeersClient.addPeer).toHaveBeenNthCalledWith(2, "http://a_third/", "http://localhost/");
+                expect(fakePeersClient.addPeer).toHaveBeenNthCalledWith(1, "http://another", "http://localhost");
+                expect(fakePeersClient.addPeer).toHaveBeenNthCalledWith(2, "http://a_third", "http://localhost");
             });
         });
 
@@ -164,11 +164,11 @@ describe("Peers", () => {
             });
 
             test("broadcast method to others", () => {
-                const peers = new Peers(fakeDb as Database, "http://localhost/", fakePeersClient as PeersClient, fakeBroadcastClient as BroadcastClient, false);
-                peers.addPeers(["http://localhost/", "http://another/", "http://a_third/"]);
+                const peers = new Peers(fakeDb as Database, "http://localhost", fakePeersClient as PeersClient, fakeBroadcastClient as BroadcastClient, false);
+                peers.addPeers(["http://localhost/", "http://another", "http://a_third/"]);
                 peers.broadcastDisconnectionToOtherPeer();
-                expect(fakePeersClient.removePeer).toHaveBeenNthCalledWith(1, "http://another/", "http://localhost/");
-                expect(fakePeersClient.removePeer).toHaveBeenNthCalledWith(2, "http://a_third/", "http://localhost/");
+                expect(fakePeersClient.removePeer).toHaveBeenNthCalledWith(1, "http://another", "http://localhost");
+                expect(fakePeersClient.removePeer).toHaveBeenNthCalledWith(2, "http://a_third", "http://localhost");
             });
         });
     });

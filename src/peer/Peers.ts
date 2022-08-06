@@ -15,7 +15,7 @@ export class Peers {
   constructor(database: Database, host: string, peersClient: PeersClient, broadcastClient: BroadcastClient, isSmartContract: boolean) {
     this.peers = [];
     this.database = database;
-    this.host = host;
+    this.host = this.sanitizeUrl(host);
     this.peersClient = peersClient;
     this.broadcastClient = broadcastClient;
     this.isSmartContract = isSmartContract;
@@ -26,7 +26,10 @@ export class Peers {
   }
 
   addPeers = (urls: string[]) => {
-    this.peers = [...new Set([...this.peers, ...urls])]
+    const sanitizedUrls = urls.map((url) => {
+      return this.sanitizeUrl(url);
+    });
+    this.peers = [...new Set([...this.peers, ...sanitizedUrls])];
   }
 
   removePeer = (address: string) => {
@@ -50,11 +53,9 @@ export class Peers {
   }
 
   broadcast = (method: string, path: string, body?: any) => {
+    console.log(this.peers, this.host)
     this.peers.forEach((clientUrl) => {
       if (clientUrl && clientUrl != this.host) {
-        if (clientUrl.slice(-1) === "/") {
-          clientUrl = clientUrl.slice(0, -1);
-        }
         this.broadcastClient.broadcastTo(method, clientUrl + path, body);
       }
     });
@@ -86,4 +87,8 @@ export class Peers {
   getPeers = () => {
     return this.peers;
   };
+
+  private sanitizeUrl(url: string): string {
+    return url.slice(-1) === "/" ? url.slice(0, -1) : url;
+  }
 }
