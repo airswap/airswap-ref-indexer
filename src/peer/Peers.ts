@@ -53,7 +53,6 @@ export class Peers {
   }
 
   broadcast = (method: string, path: string, body?: any) => {
-    console.log(this.peers, this.host)
     this.peers.forEach((clientUrl) => {
       if (clientUrl && clientUrl != this.host) {
         this.broadcastClient.broadcastTo(method, clientUrl + path, body);
