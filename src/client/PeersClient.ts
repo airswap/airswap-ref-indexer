@@ -12,7 +12,8 @@ export class PeersClient {
         return axios.post(url + peersPath, { urls: [peer] })
     }
     async removePeer(url: string, peerUrl: string) {
-        console.log("S---> DELETE", url + peersPath + peerUrl);
-        return axios.delete(url + peersPath + peerUrl);
+        const encodedPeer = Buffer.from(peerUrl, 'ascii').toString('base64');
+        console.log("S---> DELETE", url + peersPath + encodedPeer);
+        return axios.delete(url + peersPath + encodedPeer);
     }
 }

@@ -35,7 +35,7 @@ describe("Peers client", () => {
 
     it("remove peers", async () => {
         mockedAxios.delete.mockImplementation((url: string, data: any) => {
-            expect(url).toBe("url_to/peers/peer_id")
+            expect(url).toBe("url_to/peers/cGVlcl9pZA==") // peer_id to b64 cGVlcl9pZA==
             expect(data).toBeUndefined()
             return Promise.resolve(axios200Response({}));
         });
