@@ -23,7 +23,9 @@ When ^C is fired, the node send a delete to the registry and others peers to not
 Then :
 ## Prod
 The .env should be like this : 
->########### server configuration
+
+<pre>
+########### server configuration
 EXPRESS_PORT=3000
 NODE_URL="http://localhost:3000/"
 DELETE_DB_ON_START=1
@@ -33,6 +35,7 @@ USE_SMART_CONTRACT=1
 REGISTRY="0xC32a3c867aBAd28d977e1724f92D9684fF3d2976"
 NETWORK="goerli"
 API_KEY="<add your api key>"
+</pre>
 
 > $ yarn start
 
@@ -40,7 +43,8 @@ API_KEY="<add your api key>"
 If you want to start mutliple nodes on the same machine, you need to start the http registry.
 The .env should be like this : 
 
-> ########### server configuration
+<pre>
+########### server configuration
 EXPRESS_PORT=4001
 LOCAL_ONLY=1
 DELETE_DB_ON_START=1 #1/0
@@ -49,6 +53,7 @@ DATABASE_TYPE="ACEBASE" #IN_MEMORY,ACEBASE
 ########### smartcontract definition
 USE_SMART_CONTRACT=0
 REGISTRY="http://localhost:4000"  
+</pre>
 
 Find ethernet card names: ifconfig/ipconfig/ip address and paste it in LOCAL_INTERFACES
 
