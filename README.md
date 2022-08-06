@@ -6,6 +6,7 @@ This repository holds a registry server (for development) and a node server.
 When a node starts up, it gets all nodes ip from the registry.
 
 Development with http server:
+
 When ^C is fired, the node send a delete to the registry and others peers to notify that the node won't be responding.
 
 # Prerequisite
