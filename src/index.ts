@@ -77,7 +77,6 @@ async function requestDataFromOtherPeer(peersFromRegistry: string[]) {
       const peerUrl = peers.getConnectablePeers()[0];
       console.log("Configure client");
       const { data } = await orderClient.getOrders(peerUrl);
-      console.log(data.orders);
       database.addAll(data.orders);
       console.log("Asked all queries to", peerUrl);
     } catch (err) {

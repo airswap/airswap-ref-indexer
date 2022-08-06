@@ -14,17 +14,18 @@ app.get("/", (req, res) => {
 });
 
 app.post("/", (req, res) => {
-  if (req?.body?.ip && peers.indexOf(req?.body?.ip) === -1) {
-    peers.push(req.body.ip);
+  if (req?.body?.url && peers.indexOf(req?.body?.url) === -1) {
+    peers.push(req.body.url);
     res.sendStatus(204);
   } else {
     res.sendStatus(403);
   }
 });
 
-app.delete("/:ip", (req, res) => {
-  if (req?.params?.ip) {
-    peers = peers.filter((ip) => ip != req.params.ip);
+app.delete("/:url", (req, res) => {
+  if (req?.params?.url) {
+    const decodedUrl = Buffer.from(req?.params?.url, 'base64').toString('ascii');
+    peers = peers.filter((url) => url != decodedUrl);
     res.sendStatus(204);
   } else {
     res.sendStatus(403);

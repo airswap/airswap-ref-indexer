@@ -14,14 +14,15 @@ export class HttpRegistryClient implements RegistryClient {
     return Promise.resolve(response.data?.peers || [])
   }
 
-  async sendIpToRegistry(ip: string): Promise<void> {
-    console.log("S---> POST", `${this.registry}`, { ip });
+  async sendIpToRegistry(url: string): Promise<void> {
+    console.log("S---> POST", `${this.registry}`, { url: url });
     console.log("Ip sent to registry");
-    return await axios.post(`${this.registry}`, { ip });
+    return await axios.post(`${this.registry}`, { url: url });
   }
 
-  async removeIpFromRegistry(ip: string): Promise<void> {
-    console.log("S---> DELETE", `${this.registry}/` + ip);
-    return await axios.delete(`${this.registry}/` + ip);
+  async removeIpFromRegistry(url: string): Promise<void> {
+    const encodedPeer = Buffer.from(url, 'ascii').toString('base64');
+    console.log("S---> DELETE", `${this.registry}/` + encodedPeer);
+    return await axios.delete(`${this.registry}/` + encodedPeer);
   }
 }

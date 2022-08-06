@@ -49,7 +49,7 @@ export class Peers {
   };
 
   containsUnknownPeers = (peersUrl: string[]) => {
-    return peersUrl.filter((ip) => this.peers.indexOf(ip) == -1).length > 0;
+    return peersUrl.filter((url) => this.peers.indexOf(url) == -1).length > 0;
   }
 
   broadcast = (method: string, path: string, body?: any) => {
