@@ -1,7 +1,5 @@
 import axios from 'axios';
-import { IndexedOrder } from '../model/IndexedOrder.js';
 
-const orderPath = "/orders/";
 export class OrderClient {
     async getOrders(url: string) {
         const body = {

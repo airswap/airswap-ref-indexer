@@ -32,10 +32,7 @@ const useSmartContract: boolean = process.env.USE_SMART_CONTRACT == "1";
 
 // Configure host value 
 const EXPRESS_PORT = process.env.EXPRESS_PORT!;
-const hostname = process.env.LOCAL_ONLY === "1"
-  ? `${getLocalIp()}:${EXPRESS_PORT}`
-  : `${await publicIp.v4()}:${EXPRESS_PORT}`
-const host = `http://${hostname}/`;
+const host = await getNodeUrl();
 console.log("HOST is", host);
 
 // Injection
@@ -70,10 +67,23 @@ process.on("SIGINT", () => {
   gracefulShutdown(webserver);
 });
 
+async function getNodeUrl(): Promise<string> {
+  if (process.env.NODE_URL == undefined || process.env.NODE_URL === "") {
+    const hostname = process.env.LOCAL_ONLY === "1"
+      ? `${getLocalIp()}:${EXPRESS_PORT}`
+      : `${await publicIp.v4()}:${EXPRESS_PORT}`;
+    return Promise.resolve(`http://${hostname}/`);
+  }
+  return Promise.resolve(process.env.NODE_URL as string);
+}
+
 async function requestDataFromOtherPeer(peersFromRegistry: string[]) {
   if (peersFromRegistry.length > 0) {
+    peers.addPeers(peersFromRegistry);
+  }
+  
+  if (peers.getConnectablePeers().length > 0) {
     try {
-      peers.addPeers(peersFromRegistry);
       const peerUrl = peers.getConnectablePeers()[0];
       console.log("Configure client");
       const { data } = await orderClient.getOrders(peerUrl);
