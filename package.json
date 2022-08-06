@@ -8,7 +8,8 @@
     "registry": "node ./dist/registry.js",
     "compile": "npx tsc",
     "test": "jest --verbose --coverage --no-cache",
-    "bench": "node benchmarking/bench.js"
+    "bench": "node benchmarking/bench.js",
+    "date": "node benchmarking/generateDateInRange.js"
   },
   "type": "module",
   "license": "MIT",
