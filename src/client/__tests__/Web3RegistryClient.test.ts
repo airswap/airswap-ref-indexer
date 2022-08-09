@@ -8,7 +8,7 @@ const mockedEther = ethers as jest.Mocked<typeof ethers>;
 
 describe("Web3RegistryClient", () => {
     const apiKey = "apikey";
-    const registryAddress = "registryAddres";
+    const registryAddress = "registryAddress";
     const network = "rinkeby";
     const abi = [] as ContractInterface;
     let fakePeers: Partial<Peers>;

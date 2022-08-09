@@ -60,7 +60,7 @@ Find ethernet card names: ifconfig/ipconfig/ip address and paste it in LOCAL_INT
 In a first terminal
 > $ yarn registry
 
-Then in anoter one:
+Then in another one:
 > $ yarn start
 
 # Commands
