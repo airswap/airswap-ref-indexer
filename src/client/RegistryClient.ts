@@ -1,24 +1,9 @@
 import axios from "axios";
 
-export class RegistryClient {
-  registry: string;
+export interface RegistryClient {
+  getPeersFromRegistry(): Promise<string[]>;
 
-  constructor(registry: string) {
-    this.registry = registry;
-  }
+  sendIpToRegistry(ip: string): Promise<void>;
 
-  async getPeersFromRegistry(): Promise<any> {
-    console.log("S---> GET", this.registry);
-    return await axios.get(this.registry);
-  }
-
-  sendIpToRegistry(ip: string) {
-    console.log("S---> POST", `${this.registry}`, { ip });
-    return axios.post(`${this.registry}`, { ip });
-  }
-
-  async removeIpFromRegistry(ip: string) {
-    console.log("S---> DELETE", `${this.registry}/` + ip);
-    return axios.delete(`${this.registry}/` + ip);
-  }
+  removeIpFromRegistry(ip: string): Promise<void>;
 }

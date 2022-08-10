@@ -38,8 +38,9 @@ export class PeersController {
       response.sendStatus(400);
       return;
     }
-    if (this.peers.peerExists(peerUrl)) {
-      this.peers.removePeer(peerUrl);
+    const decodedPeer = Buffer.from(peerUrl, 'base64').toString('ascii');
+    if (this.peers.peerExists(decodedPeer)) {
+      this.peers.removePeer(decodedPeer);
       this.peers.broadcast(request.method, request.url, request.body);
     }
     response.sendStatus(204);

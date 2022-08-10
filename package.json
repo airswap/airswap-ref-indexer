@@ -8,11 +8,13 @@
     "registry": "node ./dist/registry.js",
     "compile": "npx tsc",
     "test": "jest --verbose --coverage --no-cache",
-    "bench": "node benchmarking/bench.js"
+    "bench": "node benchmarking/bench.js",
+    "date": "node benchmarking/generateDateInRange.js"
   },
   "type": "module",
   "license": "MIT",
   "dependencies": {
+    "@airswap/indexers": "^3.0.0",
     "@airswap/libraries": "^3.0.3",
     "@airswap/typescript": "^3.0.0",
     "@airswap/utils": "^3.0.0",
@@ -22,6 +24,7 @@
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
+    "ethers": "^5.6.9",
     "express": "^4.17.3",
     "public-ip": "^5.0.0",
     "supertest": "^6.2.4"

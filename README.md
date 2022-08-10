@@ -2,28 +2,70 @@
 The purpose of a node is to hold a database containing the latest OTC order available for users.
 Each time an entry is added to a node, the entry is broadcasted to others nodes.
 
-This repository holds a registry server and a node server.
-When a node starts up, it gets all nodes ip from the registry, then send its own.
+This repository holds a registry server (for development) and a node server.
+When a node starts up, it gets all nodes ip from the registry.
+
+Development with http server:
+
 When ^C is fired, the node send a delete to the registry and others peers to notify that the node won't be responding.
-For now the registry is http only, it will be in smart contract in a near future.
+
 # Prerequisite
 - NodeJs 14.X
 - yarn
+- Infura API key : https://infura.io/
 
 # How to start ?
 > $ cp .env.example .env
-
-Edit the file with the correct values. If you are running the registry on the same machine <ip> should be replaced by localhost.
-
-If you want to use your local ip, "LOCAL_ONLY=1", You need to find ethernet card name : ifconfig/ipconfig/ip address and paste it in LOCAL_INTERFACES
-
-Then
+- Edit the file with the correct values.
+- Add Infura api key
 > $ yarn && yarn compile
 
-> $ yarn registry
+Then :
+## Prod
+The .env should be like this : 
 
-Finally in antoher terminal
+<pre>
+########### server configuration
+EXPRESS_PORT=3000
+NODE_URL="http://localhost:3000/"
+DELETE_DB_ON_START=1
+DATABASE_TYPE="ACEBASE"
+########### smartcontract definition
+USE_SMART_CONTRACT=1
+REGISTRY="0xC32a3c867aBAd28d977e1724f92D9684fF3d2976"
+NETWORK="goerli"
+API_KEY="<add your api key>"
+</pre>
+
 > $ yarn start
 
-# Benchmarking node or create fake data:
-> $ node benchmarking/bench.js
+## Debug
+If you want to start mutliple nodes on the same machine, you need to start the http registry.
+The .env should be like this : 
+
+<pre>
+########### server configuration
+EXPRESS_PORT=4001
+LOCAL_ONLY=1
+DELETE_DB_ON_START=1 #1/0
+LOCAL_INTERFACES="Ethernet,ens160"
+DATABASE_TYPE="ACEBASE" #IN_MEMORY,ACEBASE 
+########### smartcontract definition
+USE_SMART_CONTRACT=0
+REGISTRY="http://localhost:4000"  
+</pre>
+
+Find ethernet card names: ifconfig/ipconfig/ip address and paste it in LOCAL_INTERFACES
+
+In a first terminal
+> $ yarn registry
+
+Then in another one:
+> $ yarn start
+
+# Commands
+## Benchmarking node or create fake data:
+> $ yarn bench
+## Get a valid expiry timestamp for postman collection 
+> $ yarn date
+

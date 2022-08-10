@@ -112,9 +112,9 @@ describe("IndexedOrder controller", () => {
         test("Remove peer nominal & broadcast", () => {
             const mockRequest = {
                 body: undefined,
-                params: { peerUrl: "to_remove" } as Record<string, any>,
+                params: { peerUrl: "dG9fcmVtb3Zl" } as Record<string, any>,
                 method: "DELETE",
-                url: "/peers/to_remove"
+                url: "/peers/dG9fcmVtb3Zl" // dG9fcmVtb3Zl = to_remove
             } as Request;
 
             const mockResponse = {
@@ -131,16 +131,16 @@ describe("IndexedOrder controller", () => {
 
             expect(fakePeers.peerExists).toHaveBeenCalledWith(expected);
             expect(fakePeers.removePeer).toHaveBeenCalledWith(expected);
-            expect(fakePeers.broadcast).toHaveBeenCalledWith("DELETE", "/peers/to_remove", undefined);
+            expect(fakePeers.broadcast).toHaveBeenCalledWith("DELETE", "/peers/dG9fcmVtb3Zl", undefined);
             expect(mockResponse.sendStatus).toHaveBeenCalledWith(204);
         });
 
         test("Add: unknonwn hash", () => {
             const mockRequest = {
                 body: undefined,
-                params: { peerUrl: "to_remove" } as Record<string, any>,
+                params: { peerUrl: "dG9fcmVtb3Zl" } as Record<string, any>,
                 method: "DELETE",
-                url: "/peers/to_remove"
+                url: "/peers/dG9fcmVtb3Zl"
             } as Request;
 
             const mockResponse = {
