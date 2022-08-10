@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { ContractInterface } from 'ethers';
+import { getIndexersAbi } from "./indexers/index.js";
 import publicIp from "public-ip";
 import { BroadcastClient } from './client/BroadcastClient.js';
 import { HttpRegistryClient } from './client/HttpRegistryClient.js';
@@ -17,10 +17,6 @@ import { OrderService } from './service/OrderService.js';
 import { RootService } from './service/RootService.js';
 import { Webserver } from "./webserver/index.js";
 import { RequestForQuote } from "./webserver/RequestForQuote.js";
-
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const Indexers = require('@airswap/indexers/build/contracts/Indexers.sol/Indexers.json');
 
 // Env Variables
 if (!process.env.EXPRESS_PORT) {
@@ -81,7 +77,7 @@ async function requestDataFromOtherPeer(peersFromRegistry: string[]) {
   if (peersFromRegistry.length > 0) {
     peers.addPeers(peersFromRegistry);
   }
-  
+
   if (peers.getConnectablePeers().length > 0) {
     try {
       const peerUrl = peers.getConnectablePeers()[0];
@@ -151,7 +147,7 @@ function getRegistry(useSmartContract: boolean, conf: any, peers: Peers): Regist
       console.error("Invalid registry configuration, apiKey, or network are incorrect, check env file !")
       process.exit(7);
     }
-    return new Web3RegistryClient(apiKey, address, Indexers.abi as unknown as ContractInterface, network, peers);
+    return new Web3RegistryClient(apiKey, address, getIndexersAbi(), network, peers);
   } else {
     return new HttpRegistryClient(address);
   }

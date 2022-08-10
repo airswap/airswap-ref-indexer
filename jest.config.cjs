@@ -18,6 +18,7 @@ module.exports = {
     testPathIgnorePatterns: ["node_modules", "dist"],
     collectCoverageFrom: [
         "**/src/**/*.{js,ts}",
+        "!**/src/indexers/index.ts",
         "!**/node_modules/**",
         "!**/src/types/**",
         "!**/dist/**",
