@@ -10,8 +10,8 @@ describe("mapAnyToRequestFilter", () => {
             minSenderAmount: "2",
             minSignerAmount: "200",
             page: "3",
-            senderTokens: "dai,btc",
-            signerTokens: "eth,ast",
+            senderTokens: ["dai","btc"],
+            signerTokens: ["eth","ast"],
             sortField: "SENDER_AMOUNT",
             sortOrder: "DESC",
             maxAddedDate: "321546"
@@ -35,8 +35,8 @@ describe("mapAnyToRequestFilter", () => {
             maxSignerAmount: "200",
             minSenderAmount: "2",
             minSignerAmount: "200",
-            senderTokens: "dai",
-            signerTokens: "eth",
+            senderTokens: ["dai"],
+            signerTokens: ["eth"],
             sortField: "SENDER_AMOUNT",
             sortOrder: "DESC",
             maxAddedDate: "321546"

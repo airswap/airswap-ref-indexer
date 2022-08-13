@@ -1,4 +1,4 @@
-import { toNumber, toStrings } from '../index'
+import { toNumber, toArray } from '../index'
 
 describe("converter", () => {
 
@@ -25,24 +25,26 @@ describe("converter", () => {
             expect(toNumber(2)).toEqual(2);
         });
     });
-    
-    describe("toStrings", () => {
+
+    describe("toArray", () => {
         test("should return undefined", () => {
-            expect(toStrings("")).toBeUndefined();
-            expect(toStrings(" ")).toBeUndefined();
             //@ts-ignore
-            expect(toStrings(null)).toBeUndefined();
+            expect(toArray("")).toBeUndefined();
             //@ts-ignore
-            expect(toStrings(undefined)).toBeUndefined();
+            expect(toArray(1)).toBeUndefined();
             //@ts-ignore
-            expect(toStrings({})).toBeUndefined();
+            expect(toArray(null)).toBeUndefined();
             //@ts-ignore
-            expect(toStrings([])).toBeUndefined();
+            expect(toArray(undefined)).toBeUndefined();
+            //@ts-ignore
+            expect(toArray({})).toBeUndefined();
         });
 
-        test("should map to array", () => {
-            expect(toStrings("a")).toEqual(["a"]);
-            expect(toStrings("a,b")).toEqual(["a", "b"]);
+        test("should map to array", () => {            
+            expect(toArray([])).toEqual([]);
+            expect(toArray(["a"])).toEqual(["a"]);
+            //@ts-ignore
+            expect(toArray(["a", 1, "", " "])).toEqual(["a"]);
         });
 
     });
