@@ -22,7 +22,7 @@ export class AceBaseClient implements Database {
     private ref!: DataReference;
 
     public async connect(databaseName: string, deleteOnStart = false): Promise<void> {        
-        const options = { storage: { path: '.' }, logLevel: 'log' } as AceBaseLocalSettings;
+        const options = { storage: { path: '.' }, logLevel: 'error' } as AceBaseLocalSettings;
         const dbName = `${databaseName}.acebase`;
         if (deleteOnStart && fs.existsSync(dbName)) {            
             await fs.promises.rm(dbName, { recursive: true });
