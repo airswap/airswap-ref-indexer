@@ -8,7 +8,7 @@ export interface Database {
 
     addAll(orders: Record<string, IndexedOrder>): Promise<void>;
 
-    deleteOrder(hash: String): Promise<void>;
+    deleteOrder(nonce: String, signerWallet: string): Promise<void>;
 
     getOrder(hash: string): Promise<OrderResponse>;
 

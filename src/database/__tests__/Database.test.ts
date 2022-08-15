@@ -238,7 +238,7 @@ describe("Database implementations", () => {
         const indexedOrder = forgeIndexedOrder();
         await db.addOrder(indexedOrder);
 
-        await db.deleteOrder("hash");
+        await db.deleteOrder("nonce", "signerWallet");
         const orders = await db.getOrders();
 
         expect(orders).toEqual(new OrderResponse({}, new Pagination("1", "1"), 0));
