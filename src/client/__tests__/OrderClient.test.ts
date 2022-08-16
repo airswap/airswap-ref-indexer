@@ -1,4 +1,3 @@
-import { forgeIndexedOrder } from '../../Fixtures';
 import axios, { AxiosResponse } from "axios";
 import { OrderClient } from '../OrderClient';
 jest.mock('axios');

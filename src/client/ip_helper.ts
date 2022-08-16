@@ -1,4 +1,5 @@
 import { networkInterfaces } from "os";
+import publicIp from "public-ip";
 
 export function getLocalIp(): string | undefined {
   const nets = networkInterfaces() || {};
@@ -26,4 +27,8 @@ export function getLocalIp(): string | undefined {
     .filter(inet => inet != undefined);
 
   return localIp ? localIp[0] : undefined;
+}
+
+export async function getPublicIp() {
+  return publicIp.v4();
 }
