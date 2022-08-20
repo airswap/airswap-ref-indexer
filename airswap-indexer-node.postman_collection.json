@@ -24,12 +24,10 @@
 							"raw": "{\r\n    \"jsonrpc\": \"2.0\",\r\n    \"id\": \"1\",\r\n    \"method\": \"getOrders\",\r\n    \"params\": [\r\n        {\r\n            \"sortField\": \"SIGNER_AMOUNT\",\r\n            \"senderTokens\": [\r\n                \"0x6b175474e89094c44da98b954eedeac495271d0f\",\r\n                \"0x0000000000000000000000000000000000000000\"\r\n            ],\r\n            \"page\": 1,\r\n            \"filters\": true,\r\n            \"sortOrder\": \"DESC\"\r\n        }\r\n    ]\r\n}"
 						},
 						"url": {
-							"raw": "http://airswap.mitsi.ovh/",
+							"raw": "http://{{node_url}}/",
 							"protocol": "http",
 							"host": [
-								"airswap",
-								"mitsi",
-								"ovh"
+								"{{node_url}}"
 							],
 							"path": [
 								""
