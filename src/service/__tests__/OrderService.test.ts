@@ -69,8 +69,8 @@ describe("Order service", () => {
                 maxSignerAmount: 200,
                 minSenderAmount: 2,
                 maxSenderAmount: 20,
-                signerTokens: "eth",
-                senderTokens: "dai"
+                signerTokens: ["eth"],
+                senderTokens: ["dai"]
             };
 
             const expected = forgeOrderResponse();
