@@ -1,8 +1,8 @@
 export class AmountLimitFilter {
-    min: number;
-    max: number;
+    min: BigInt;
+    max: BigInt;
 
-    constructor(min: number, max: number ) {
+    constructor(min: BigInt, max: BigInt ) {
         this.min = min;
         this.max = max;
     }

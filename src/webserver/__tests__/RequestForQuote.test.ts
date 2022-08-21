@@ -118,6 +118,7 @@ describe("Order controller", () => {
             fakeOrderService.getOrders = jest.fn().mockResolvedValue(forgeOrderResponse());
 
             new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
+            
             supertest(webserver)
                 .post("/")
                 .type("json")

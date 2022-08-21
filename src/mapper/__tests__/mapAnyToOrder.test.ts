@@ -1,7 +1,7 @@
-import { mapAnyToDbOrder } from "../mapAnyToOrder";
+import { mapAnyToDbOrder } from "../mapAnyToDbOrder";
 import { AddressZero } from '@ethersproject/constants';
 
-describe("mapAnyToOrder", () => {
+describe("mapAnyToDbOrder", () => {
     test("should map all string values", () => {
         expect(mapAnyToDbOrder({
             expiry: "1653900784706",
@@ -28,8 +28,8 @@ describe("mapAnyToOrder", () => {
             signerWallet: "signerWallet",
             protocolFee: "4",
             senderWallet: "senderWallet",
-            approximatedSenderAmount: 10,
-            approximatedSignerAmount: 5,
+            approximatedSenderAmount: BigInt(10),
+            approximatedSignerAmount: BigInt(5),
             r: "r",
             s: "s",
             v: "v",

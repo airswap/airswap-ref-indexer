@@ -1,6 +1,8 @@
 import crypto from "crypto";
+import { mapAnyToOrder } from '../mapper/mapAnyToOrder.js';
 import { computePagination } from '../controller/pagination/index.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
+import { IndexedOrderResponse } from './../model/response/IndexedOrderResponse.js';
 import { OrderResponse } from './../model/response/OrderResponse.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
@@ -39,22 +41,26 @@ export class InMemoryDatabase implements Database {
       .sort((a: IndexedOrder, b: IndexedOrder) => {
         if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
           if (requestFilter.sortOrder == SortOrder.ASC) {
-            return a.order.approximatedSignerAmount - b.order.approximatedSignerAmount
+            //@ts-ignore
+            return Number(a.order.approximatedSignerAmount - b.order.approximatedSignerAmount)
           }
-          return b.order.approximatedSignerAmount - a.order.approximatedSignerAmount
+          //@ts-ignore
+          return Number(b.order.approximatedSignerAmount - a.order.approximatedSignerAmount)
         }
         if (requestFilter.sortOrder == SortOrder.ASC) {
-          return a.order.approximatedSenderAmount - b.order.approximatedSenderAmount
+          //@ts-ignore
+          return Number(a.order.approximatedSenderAmount - b.order.approximatedSenderAmount)
         }
-        return b.order.approximatedSenderAmount - a.order.approximatedSenderAmount
+        //@ts-ignore
+        return Number(b.order.approximatedSenderAmount - a.order.approximatedSenderAmount)
       });
     const totalResultsCount = totalResults.length;
-    const orders: Record<string, IndexedOrder> = totalResults
+    const orders: Record<string, IndexedOrderResponse> = totalResults
       .slice((requestFilter.page - 1) * elementPerPage, requestFilter.page * elementPerPage)
       .reduce((total, indexedOrder) => {
         const orderId = indexedOrder['hash'];
         if (orderId) {
-          return { ...total, [orderId]: indexedOrder };
+          return { ...total, [orderId]: this.mapToIndexedOrderResponse(indexedOrder) };
         }
         console.warn("InMemoryDb - Defect Object:", indexedOrder);
         return { ...total };
@@ -98,9 +104,9 @@ export class InMemoryDatabase implements Database {
   }
 
   getOrder(hash: string): Promise<OrderResponse> {
-    const result: Record<string, IndexedOrder> = {};
+    const result: Record<string, IndexedOrderResponse> = {};
     if (this.database[hash]) {
-      result[hash] = this.database[hash];
+      result[hash] = this.mapToIndexedOrderResponse(this.database[hash]);
       return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1), 1));
     }
     return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 0), 0));
@@ -108,7 +114,11 @@ export class InMemoryDatabase implements Database {
 
   async getOrders(): Promise<OrderResponse> {
     const size = Object.keys(this.database).length;
-    return Promise.resolve(new OrderResponse(this.database, computePagination(size, size), size));
+    const results: Record<string, IndexedOrderResponse> = {};
+    Object.keys(this.database).forEach(key => {
+      results[key] = this.mapToIndexedOrderResponse(this.database[key])
+    })
+    return Promise.resolve(new OrderResponse(results, computePagination(size, size), size));
   }
 
   getFilters(): Promise<Filters> {
@@ -138,5 +148,9 @@ export class InMemoryDatabase implements Database {
 
   close() {
     return Promise.resolve();
+  }
+
+  private mapToIndexedOrderResponse(indexedOrder: IndexedOrder): IndexedOrderResponse {
+    return new IndexedOrderResponse(mapAnyToOrder(indexedOrder.order), indexedOrder.addedOn, indexedOrder.hash);
   }
 }

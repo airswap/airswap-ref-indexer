@@ -1,7 +1,8 @@
 import { Order } from '@airswap/typescript';
 import { isValidFullOrder } from '@airswap/utils';
+import { FiltersResponse } from '../database/filter/FiltersResponse.js';
 import { Database } from '../database/Database.js';
-import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
+import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
 import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
 import { isDateInRange, isNumeric } from '../validator/index.js';
 import { AlreadyExistsError } from './../model/error/AlreadyExists.js';
@@ -53,7 +54,7 @@ export class OrderService {
         return Promise.resolve();
     }
 
-    public async getOrders(query: Record<string, any>): Promise<any> {
+    public async getOrders(query: Record<string, any>): Promise<OrderResponse> {
         if (query === undefined || query === null) {
             throw new ClientError("Incorrect query");
         }
@@ -67,12 +68,12 @@ export class OrderService {
         else {
             orders = await this.database.getOrderBy(mapAnyToRequestFilter(query));
         }
-        let result = { ...orders };
+        
         if (query.filters) {
             const filters = await this.database.getFilters();
-            result.filters = filters;
+            orders.filters = new FiltersResponse(filters);
         }
-        return Promise.resolve(result);
+        return Promise.resolve(orders);
     }
 }
 

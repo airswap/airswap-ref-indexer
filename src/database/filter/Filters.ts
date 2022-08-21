@@ -9,16 +9,16 @@ export class Filters {
         this.senderToken = {}
     }
 
-    addSignerToken(token: string, amount: number): void {
+    addSignerToken(token: string, amount: BigInt): void {
         this.editTokenMap(this.signerToken, token.toLowerCase(), amount);
     }
 
-    addSenderToken(token: string, amount: number): void {
+    addSenderToken(token: string, amount: BigInt): void {
         this.editTokenMap(this.senderToken, token.toLowerCase(), amount);
     }
 
-    private editTokenMap(map: Record<string, AmountLimitFilter>, token: string, amount: number): void {
-        if (amount < 0) {
+    private editTokenMap(map: Record<string, AmountLimitFilter>, token: string, amount: BigInt): void {
+        if (amount < BigInt(0)) {
             return;
         }
         

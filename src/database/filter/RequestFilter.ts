@@ -4,10 +4,10 @@ import { SortOrder } from './SortOrder';
 export class RequestFilter {
     signerTokens?: string[];
     senderTokens?: string[];
-    minSignerAmount?: number;
-    maxSignerAmount?: number;
-    minSenderAmount?: number;
-    maxSenderAmount?: number;
+    minSignerAmount?: BigInt;
+    maxSignerAmount?: BigInt;
+    minSenderAmount?: BigInt;
+    maxSenderAmount?: BigInt;
     page!: number;
     sortField?: SortField;
     sortOrder?: SortOrder;
