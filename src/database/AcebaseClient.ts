@@ -121,6 +121,13 @@ export class AceBaseClient implements Database {
         return Promise.resolve();
     }
 
+    async deleteExpiredOrder(timestamp: number) {
+        await this.ref.query()
+            .filter('expiry', '<', timestamp)
+            .remove();
+        return Promise.resolve();
+      }
+
     async getOrder(hash: string): Promise<OrderResponse> {
         const query = await this.ref.query()
             .filter('hash', '==', hash)

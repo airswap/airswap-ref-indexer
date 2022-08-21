@@ -39,12 +39,18 @@ if (!database) {
   process.exit(5);
 }
 
+const intervalId = setInterval(async () => {
+  const currentTimestamp = new Date().getTime();
+  console.log("Cleaning orders that have an expired date inferior to", currentTimestamp);
+  await database.deleteExpiredOrder(currentTimestamp);
+}, 1 * 1000 * 60);
+
 const orderService = new OrderService(database);
 const peers = new Peers(database, host, peersClient, broadcastClient, useSmartContract);
 
 const peersController = new PeersController(peers);
 const registryClient = getRegistry(useSmartContract, process.env, peers);
-if(registryClient === null){
+if (registryClient === null) {
   process.exit(3);
 }
 const rootController = new RootService(peers, database, process.env.REGISTRY!);
@@ -67,14 +73,15 @@ try {
 
 // Shutdown signals
 process.on("SIGTERM", () => {
-  gracefulShutdown(webserver, database);
+  gracefulShutdown(webserver, database, intervalId);
 });
 process.on("SIGINT", () => {
-  gracefulShutdown(webserver, database);
+  gracefulShutdown(webserver, database, intervalId);
 });
 
-async function gracefulShutdown(webserver: Webserver, database: Database) {
+async function gracefulShutdown(webserver: Webserver, database: Database, intervalId: NodeJS.Timer) {
   try {
+    clearInterval(intervalId);
     await registryClient!.removeIpFromRegistry(host);
     await database.close();
     webserver.stop()
