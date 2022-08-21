@@ -1,7 +1,7 @@
-import { Contract, ContractInterface, ethers, utils } from 'ethers';
+import { Contract, ContractInterface, ethers } from 'ethers';
 import { Database } from './../database/Database';
 
-export class Web3RegistryClient {
+export class Web3SwapClient {
     private contract: Contract;
     private database: Database;
 
@@ -12,16 +12,18 @@ export class Web3RegistryClient {
 
         this.contract.on("Swap", (from, to, value) => {
             console.log("Swap", value);
-            if (value?.args?.nonce && value?.args?.signerWallet) {
-                this.database.deleteOrder(value.args.nonce, value.args.signerWallet);
-            }
+            this.onEvent(value);
         });
         
         this.contract.on("Cancel", (from, to, value) => {
             console.log("Cancel", value);
-            if (value?.args?.nonce && value?.args?.signerWallet) {
-                this.database.deleteOrder(value.args.nonce, value.args.signerWallet);
-            }
+            this.onEvent(value);
         });
+    }
+
+    private onEvent(value: any) {        
+        if (value?.args?.nonce && value?.args?.signerWallet) {
+            this.database.deleteOrder(value.args.nonce, value.args.signerWallet);
+        }
     }
 }
