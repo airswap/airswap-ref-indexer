@@ -16,20 +16,21 @@ describe("Web3RegistryClient", () => {
     beforeEach(() => {
         fakePeers = {
             addPeer: jest.fn(),
+            addPeers: jest.fn(),
+            clear: jest.fn()
         };
     });
 
-    it("Should get other peers", async () => {
-        mockedEther.providers = {
-            //@ts-ignore
-            InfuraProvider: jest.fn(() => ({
-                on: jest.fn()
-            }))
+    it("Should get other peers and ignore empty ones", async () => {
+        //@ts-ignore
+        mockedEther.providers.InfuraProvider = {
+            getWebSocketProvider: jest.fn()
         };
         //@ts-ignore
         mockedEther.Contract = function () {
             return ({
-                getURLs: () => ["peer1"]
+                getURLs: () => ["peer1", ''],
+                on: jest.fn(),
             });
         }
         const web3Client = new Web3RegistryClient(apiKey, registryAddress, abi as ContractInterface, network, fakePeers as Peers);
@@ -40,16 +41,15 @@ describe("Web3RegistryClient", () => {
     });
 
     it("Should return empty if result is undefined", async () => {
-        mockedEther.providers = {
-            //@ts-ignore
-            InfuraProvider: jest.fn(() => ({
-                on: jest.fn()
-            }))
+        //@ts-ignore
+        mockedEther.providers.InfuraProvider = {
+            getWebSocketProvider: jest.fn()
         };
         //@ts-ignore
         mockedEther.Contract = function () {
             return ({
-                getURLs: () => undefined
+                getURLs: () => undefined,
+                on: jest.fn(),
             });
         }
         const web3Client = new Web3RegistryClient(apiKey, registryAddress, abi as ContractInterface, network, fakePeers as Peers);
@@ -60,23 +60,57 @@ describe("Web3RegistryClient", () => {
     });
 
     it("Should add peer on event", async () => {
-        const mockedOn = jest.fn((filter, callback) => {
-            callback("sender", "url");
+        const mockedOn = jest.fn((eventName, callback) => {
+            callback("from", "to", {
+                args: {
+                    account: 'an_account',
+                    url: 'http://localhost/'
+                }
+            });
         });
-        mockedEther.providers = {
-            //@ts-ignore
-            InfuraProvider: jest.fn(() => ({
-                on: mockedOn
-            }))
+        //@ts-ignore
+        mockedEther.providers.InfuraProvider = {
+            getWebSocketProvider: jest.fn()
         };
         //@ts-ignore
         mockedEther.Contract = function () {
             return ({
-                getURLs: () => []
+                getURLs: () => [],
+                on: mockedOn,
             });
         }
         new Web3RegistryClient(apiKey, registryAddress, abi as ContractInterface, network, fakePeers as Peers);
         expect(mockedOn).toHaveBeenCalledTimes(1);
-        expect(fakePeers.addPeer).toHaveBeenCalledWith("url");
+        expect(fakePeers.addPeer).toHaveBeenCalledWith('http://localhost/');
+    });
+
+    it("Should remove peer on event", async () => {
+        const mockedOn = jest.fn();
+        const mockGetUrl = jest.fn(() => ['a_first_one', '']);
+        //@ts-ignore
+        mockedEther.providers.InfuraProvider = {
+            getWebSocketProvider: jest.fn()
+        };
+        //@ts-ignore
+        mockedEther.Contract = function () {
+            return ({
+                getURLs: mockGetUrl,
+                on: mockedOn,
+            });
+        }
+
+        await new Web3RegistryClient(apiKey, registryAddress, abi as ContractInterface, network, fakePeers as Peers)
+            .onSetURLEvent("from", "to", {
+                args: {
+                    account: "an_account",
+                    url: ''
+                }
+            });
+
+        expect(mockedOn).toHaveBeenCalledTimes(1);
+        expect(mockGetUrl).toHaveBeenCalledTimes(1);
+        expect(fakePeers.clear).toHaveBeenCalledTimes(1);
+        expect(fakePeers.addPeers).toHaveBeenCalledWith(['a_first_one']);
+        expect(fakePeers.addPeer).not.toHaveBeenCalled();
     });
 });

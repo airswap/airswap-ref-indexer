@@ -40,6 +40,10 @@ export class Peers {
     this.peers = this.peers.filter((client) => client != peerToRemove);
   };
 
+  clear = () => {
+    this.peers = [];
+  };
+
   peerExists = (address: string) => {
     return !!this.peers.filter((peerUrl) => peerUrl === address)[0];
   };
