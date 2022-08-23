@@ -35,9 +35,13 @@ async function bench() {
                     senderWallet: "senderWallet",
                     senderToken: senderToken,
                     senderAmount: "10",
+                    protocolFee: "4",
+                    senderWallet: "senderWallet",
                     r: "r",
                     s: "s",
                     v: "v",
+                    chainId: "5",
+                    swapContract: "0x0000000000000000000000000000000000000000"
                 }],
             });
         } catch (error) {
