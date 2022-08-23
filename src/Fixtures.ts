@@ -1,5 +1,5 @@
 import { JsonRpcResponse } from './model/response/JsonRpcResponse';
-import { Order } from '@airswap/typescript';
+import { FullOrder } from '@airswap/typescript';
 import { DbOrder } from './model/DbOrder.js';
 import { Pagination } from './model/Pagination.js';
 import { Filters } from './database/filter/Filters';
@@ -19,7 +19,9 @@ export function forgeDbOrder(expiryDate: number): DbOrder {
         signerAmount: "5",
         approximatedSignerAmount: 5,
         senderToken: "ETH",
-        senderAmount: "10",
+        senderAmount: "10",        
+        protocolFee: "4",
+        senderWallet: "senderWallet",
         approximatedSenderAmount: 10,
         v: "v",
         r: "r",
@@ -30,7 +32,7 @@ export function forgeDbOrder(expiryDate: number): DbOrder {
 }
 
 
-export function forgeOrder(expiryDate: number): Order {
+export function forgeFullOrder(expiryDate: number): FullOrder {
     return {
         nonce: "nonce",
         expiry: `${expiryDate}`,
@@ -39,9 +41,13 @@ export function forgeOrder(expiryDate: number): Order {
         signerAmount: "5",
         senderToken: "ETH",
         senderAmount: "10",
+        protocolFee: "4",
+        senderWallet: "senderWallet",
         v: "v",
         r: "r",
-        s: "s"
+        s: "s",
+        chainId: "5",
+        swapContract: "0x0000000000000000000000000000000000000000"
     };
 }
 

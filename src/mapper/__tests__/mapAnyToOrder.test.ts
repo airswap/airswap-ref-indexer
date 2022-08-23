@@ -12,7 +12,11 @@ describe("mapAnyToOrder", () => {
             signerAmount: "5",
             signerToken: "dai",
             signerWallet: "signerWallet",
+            protocolFee: "4",
+            senderWallet: "senderWallet",
             v: "v",
+            chainId: "5",
+            swapContract: "0x0000000000000000000000000000000000000000"
         })).toEqual({
             expiry: 1653900784706,
             nonce: "nonce",
@@ -21,11 +25,15 @@ describe("mapAnyToOrder", () => {
             signerAmount: "5",
             signerToken: "dai",
             signerWallet: "signerWallet",
+            protocolFee: "4",
+            senderWallet: "senderWallet",
             approximatedSenderAmount: 10,
             approximatedSignerAmount: 5,
             r: "r",
             s: "s",
             v: "v",
+            chainId: "5",
+            swapContract: "0x0000000000000000000000000000000000000000"
         });
     });
 });

@@ -9,13 +9,15 @@ import { toNumber } from '../converter/index.js';
 export function mapAnyToDbOrder(data: any): DbOrder {
     return {
         nonce: String(data.nonce),
-        expiry: toNumber(data.expiry)!,
         signerWallet: String(data.signerWallet),
         signerToken: String(data.signerToken),
         signerAmount: String(data.signerAmount),
-        approximatedSignerAmount: toNumber(data.signerAmount)!,
+        protocolFee: String(data.protocolFee),
+        senderWallet: String(data.senderWallet),
         senderToken: String(data.senderToken),
         senderAmount: String(data.senderAmount),
+        expiry: toNumber(data.expiry)!,
+        approximatedSignerAmount: toNumber(data.signerAmount)!,
         approximatedSenderAmount: toNumber(data.senderAmount)!,
         r: String(data.r),
         s: String(data.s),
