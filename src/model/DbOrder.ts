@@ -8,10 +8,15 @@ export declare type DbOrder = {
     senderAmount: string;
     approximatedSignerAmount: number;
     approximatedSenderAmount: number;
-} & Signature;
+} & Signature & Settlement;
 
 export declare type Signature = {
     v: string;
     r: string;
     s: string;
 };
+
+export type Settlement = {
+    chainId: string
+    swapContract: string
+}

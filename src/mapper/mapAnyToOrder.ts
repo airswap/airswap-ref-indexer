@@ -19,6 +19,8 @@ export function mapAnyToDbOrder(data: any): DbOrder {
         approximatedSenderAmount: toNumber(data.senderAmount)!,
         r: String(data.r),
         s: String(data.s),
-        v: String(data.v)
+        v: String(data.v),
+        chainId: String(data.chainId),
+        swapContract: String(data.swapContract)
     }
 }

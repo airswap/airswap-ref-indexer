@@ -23,7 +23,9 @@ export function forgeDbOrder(expiryDate: number): DbOrder {
         approximatedSenderAmount: 10,
         v: "v",
         r: "r",
-        s: "s"
+        s: "s",
+        chainId: "5",
+        swapContract: "0x0000000000000000000000000000000000000000"
     };
 }
 

@@ -40,9 +40,9 @@ export class OrderService {
             throw new ClientError("Invalid expiry date");
         }
 
-        const order = mapAnyToDbOrder(body);
+        const dbOrder = mapAnyToDbOrder(body);
         const addedTimestamp = isNumeric(body.addedOn) ? +body.addedOn : new Date().getTime();
-        const indexedOrder = new IndexedOrder(order, addedTimestamp);
+        const indexedOrder = new IndexedOrder(dbOrder, addedTimestamp);
         const hash = this.database.generateHash(indexedOrder);
         const orderExists = await this.database.orderExists(hash);        
         if (orderExists) {
