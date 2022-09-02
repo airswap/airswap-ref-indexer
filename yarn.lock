@@ -67,7 +67,7 @@
     "@airswap/constants" "3.0.0"
     "@uniswap/token-lists" "^1.0.0-beta.26"
 
-"@airswap/typescript@^3.0.1":
+"@airswap/typescript@3.0.1", "@airswap/typescript@^3.0.1":
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/@airswap/typescript/-/typescript-3.0.1.tgz#2b936fe95196de42c2c1f8d2ddd6a9357540112c"
   integrity sha512-kN6ScCiMMFNGegVSs+n+6X3UDis2YqX1lXriIQyDE8DVqI3l7oJU6/RIPOLdg8iRFU6Z0IUgSInyoiVxhvY5ig==
@@ -75,7 +75,7 @@
     "@airswap/constants" "3.0.1"
     "@uniswap/token-lists" "^1.0.0-beta.26"
 
-"@airswap/utils@3.0.0", "@airswap/utils@^3.0.0":
+"@airswap/utils@3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-3.0.0.tgz#97ed3c4767c23a91c859ff7fba01b47878d07134"
   integrity sha512-lx8SBOULVntiAmTAcWkJIFWOcD/M7N1ztwQ+dPmN4yQ164iEa0fSbM6A+VyWj1nf2b6Uk3FbxSviWktTymZM2w==
@@ -87,6 +87,20 @@
     eth-sig-util "^3.0.0"
     ethereumjs-util "^6.2.0"
     ethers "^5.5.4"
+
+"@airswap/utils@^3.0.4":
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-3.0.4.tgz#56e1065ee3df2c86b9e8fb28e1568e044b3cf8fa"
+  integrity sha512-sp2BHnHlnpDtKmAXm7iSXR3796O+CccEfHhF+44b05LZrWX8RP44GEGxYOXM2VFj23+E4eTvubwowKcYQ2fbDQ==
+  dependencies:
+    "@airswap/constants" "3.0.1"
+    "@airswap/typescript" "3.0.1"
+    "@types/ethereumjs-util" "^6.1.0"
+    bignumber.js "^9.0.1"
+    eth-sig-util "^3.0.0"
+    ethereumjs-util "^6.2.0"
+    ethers "^5.6.9"
+    lz-string "^1.4.4"
 
 "@airswap/wrapper@3.0.1":
   version "3.0.1"
@@ -3474,6 +3488,11 @@ lru-cache@^6.0.0:
   integrity sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
   dependencies:
     yallist "^4.0.0"
+
+lz-string@^1.4.4:
+  version "1.4.4"
+  resolved "https://registry.yarnpkg.com/lz-string/-/lz-string-1.4.4.tgz#c0d8eaf36059f705796e1e344811cf4c498d3a26"
+  integrity sha512-0ckx7ZHRPqb0oUm8zNr+90mtf9DQB60H1wMCjBtfi62Kl3a7JbHob6gA2bC+xRvZoOL+1hzUK8jeuEIQE8svEQ==
 
 make-dir@^3.0.0:
   version "3.1.0"

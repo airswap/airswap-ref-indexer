@@ -228,8 +228,8 @@ describe("Database implementations", () => {
         const filters = await db.getFilters();
 
         expect(filters).toEqual({
-            senderToken: { "eth": { max: 15, min: 10 } },
-            signerToken: { "dai": { max: 50, min: 5 } }
+            senderToken: { "0x0000000000000000000000000000000000000000": { max: 15, min: 10 } },
+            signerToken: { "0x0000000000000000000000000000000000000000": { max: 50, min: 5 } }
         });
         return Promise.resolve();
     }
@@ -290,7 +290,7 @@ describe("Database implementations", () => {
 
         const hash = db.generateHash(indexedOrder);
 
-        expect(hash).toBe("4b56f98b5f0263e206469b161c6dad6f13ac55e7c0d1e5846cbc2f94fadc050d");
+        expect(hash).toBe("d71f51fa93d8bc7bd479ab3a9a36e93154c68f9c221433067c63231720645af7");
         return Promise.resolve();
     }
 });

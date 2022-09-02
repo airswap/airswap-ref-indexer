@@ -1,6 +1,5 @@
 import { Order } from '@airswap/typescript';
-import { isValidOrder } from '@airswap/utils';
-import { SuccessResponse } from 'model/response/SuccessResponse.js';
+import { isValidFullOrder } from '@airswap/utils';
 import { Database } from '../database/Database.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
 import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
@@ -30,7 +29,7 @@ export class OrderService {
         if (!body || Object.keys(body).length == 0) {
             throw new ClientError("No body");
         }
-        if (!isValidOrder(body)) {
+        if (!isValidFullOrder(body)) {
             throw new ClientError("Missing fields");
         }
         if (!areNumberFieldsValid(body)) {
