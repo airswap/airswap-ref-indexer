@@ -10,6 +10,8 @@ export interface Database {
 
     deleteOrder(nonce: String, signerWallet: string): Promise<void>;
 
+    deleteExpiredOrder(timestamp: number): Promise<void>;
+
     getOrder(hash: string): Promise<OrderResponse>;
 
     getOrders(): Promise<OrderResponse>;
@@ -23,7 +25,7 @@ export interface Database {
     getFilters(): Promise<Filters>;
 
     connect(databaseName: string, deleteOnStart: boolean): Promise<void>;
-    
+
     close(): Promise<void>;
 
 }

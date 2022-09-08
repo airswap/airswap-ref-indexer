@@ -87,6 +87,16 @@ export class InMemoryDatabase implements Database {
     }
     return Promise.resolve();
   }
+  
+  deleteExpiredOrder(timestamp: number) {
+    const hashToDelete: string[] = Object.keys(this.database).filter((key: string) => {
+      return this.database[key].order.expiry < timestamp;
+    });
+    hashToDelete.forEach(hash => {
+      delete this.database[hash];
+    })
+    return Promise.resolve();
+  }
 
   getOrder(hash: string): Promise<OrderResponse> {
     const result: Record<string, IndexedOrder> = {};

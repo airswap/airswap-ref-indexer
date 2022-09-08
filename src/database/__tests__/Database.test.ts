@@ -53,6 +53,11 @@ describe("Database implementations", () => {
     describe("Should delete IndexedOrder", () => {
         test("inMemoryDb", async () => { await shouldDeleteOtcOrder(inMemoryDatabase); });
         test("acebaseDb", async () => { await shouldDeleteOtcOrder(acebaseClient); });
+    });    
+    
+    describe("Should delete expired IndexedOrder", () => {
+        test("inMemoryDb", async () => { await shouldDeleteExpiredOtcOrder(inMemoryDatabase); });
+        test("acebaseDb", async () => { await shouldDeleteExpiredOtcOrder(acebaseClient); });
     });
 
     describe("Should return true if IndexedOrder exists", () => {
@@ -242,6 +247,21 @@ describe("Database implementations", () => {
         const orders = await db.getOrders();
 
         expect(orders).toEqual(new OrderResponse({}, new Pagination("1", "1"), 0));
+        return Promise.resolve();
+    }
+
+    async function shouldDeleteExpiredOtcOrder(db: Database) {
+        const indexedOrder = forgeIndexedOrder(100, 200);
+        const indexedOrder2 = forgeIndexedOrder(100, 100);
+        const indexedOrder3 = forgeIndexedOrder(100, 500);
+        await db.addOrder(indexedOrder);
+        await db.addOrder(indexedOrder2);
+        await db.addOrder(indexedOrder3);
+
+        await db.deleteExpiredOrder(300);
+        const orders = await db.getOrders();
+
+        expect(orders).toEqual(new OrderResponse({"hash": indexedOrder3}, new Pagination("1", "1"), 1));
         return Promise.resolve();
     }
 
