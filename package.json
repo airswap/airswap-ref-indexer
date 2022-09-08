@@ -16,8 +16,8 @@
   "dependencies": {
     "@airswap/indexers": "^3.0.0",
     "@airswap/libraries": "^3.0.3",
-    "@airswap/typescript": "^3.0.0",
-    "@airswap/utils": "^3.0.0",
+    "@airswap/typescript": "^3.0.1",
+    "@airswap/utils": "^3.0.4",
     "@types/supertest": "^2.0.12",
     "acebase": "1.21.7",
     "axios": "^0.27.2",

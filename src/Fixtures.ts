@@ -1,5 +1,5 @@
 import { JsonRpcResponse } from './model/response/JsonRpcResponse';
-import { Order } from '@airswap/typescript';
+import { FullOrder } from '@airswap/typescript';
 import { DbOrder } from './model/DbOrder.js';
 import { Pagination } from './model/Pagination.js';
 import { Filters } from './database/filter/Filters';
@@ -14,32 +14,40 @@ export function forgeDbOrder(expiryDate: number): DbOrder {
     return {
         nonce: "nonce",
         expiry: expiryDate,
-        signerWallet: "signerWallet",
-        signerToken: "dai",
+        signerWallet: "0x0000000000000000000000000000000000000000",
+        signerToken: "0x0000000000000000000000000000000000000000",
         signerAmount: "5",
         approximatedSignerAmount: 5,
-        senderToken: "ETH",
-        senderAmount: "10",
+        senderToken: "0x0000000000000000000000000000000000000000",
+        senderAmount: "10",        
+        protocolFee: "4",
+        senderWallet: "0x0000000000000000000000000000000000000000",
         approximatedSenderAmount: 10,
-        v: "v",
-        r: "r",
-        s: "s"
+        r: "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",
+        s: "0x5a12fdf12c2b966a98d238916a670bdfd83e207e54a9c7d0af923839582de79f",
+        v: "28",
+        chainId: "5",
+        swapContract: "0x0000000000000000000000000000000000000000"
     };
 }
 
 
-export function forgeOrder(expiryDate: number): Order {
+export function forgeFullOrder(expiryDate: number): FullOrder {
     return {
         nonce: "nonce",
         expiry: `${expiryDate}`,
-        signerWallet: "signerWallet",
-        signerToken: "dai",
+        signerWallet: "0x0000000000000000000000000000000000000000",
+        signerToken: "0x0000000000000000000000000000000000000000",
         signerAmount: "5",
-        senderToken: "ETH",
+        senderToken: "0x0000000000000000000000000000000000000000",
         senderAmount: "10",
-        v: "v",
-        r: "r",
-        s: "s"
+        protocolFee: "4",
+        senderWallet: "0x0000000000000000000000000000000000000000",
+        r: "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",
+        s: "0x5a12fdf12c2b966a98d238916a670bdfd83e207e54a9c7d0af923839582de79f",
+        v: "28",
+        chainId: "5",
+        swapContract: "0x0000000000000000000000000000000000000000"
     };
 }
 

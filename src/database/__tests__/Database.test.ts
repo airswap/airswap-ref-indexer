@@ -31,8 +31,8 @@ describe("Database implementations", () => {
     });
 
     describe('get IndexedOrder by filter', () => {
-        test("inMemoryDb", async () => { await getOtcOrderByFilter(inMemoryDatabase); });       
-         test("acebaseDb", async () => { await getOtcOrderByFilter(acebaseClient); });
+        test("inMemoryDb", async () => { await getOtcOrderByFilter(inMemoryDatabase); });
+        test("acebaseDb", async () => { await getOtcOrderByFilter(acebaseClient); });
     });
 
     describe("Should add & get IndexedOrder", () => {
@@ -81,7 +81,7 @@ describe("Database implementations", () => {
     });
 
     async function getOtcOrderByFilter(db: Database) {
-        const order1 = {
+        const order1: DbOrder = {
             nonce: "nonce",
             expiry: 1653138423537,
             signerWallet: "signerWallet",
@@ -93,9 +93,13 @@ describe("Database implementations", () => {
             approximatedSenderAmount: 1,
             v: "v",
             r: "r",
-            s: "s"
-        } as DbOrder;
-        const order2 = {
+            s: "s",
+            chainId: "5",
+            swapContract: "0x0000000000000000000000000000000000000000",
+            protocolFee: "4",
+            senderWallet: "senderWallet",
+        };
+        const order2: DbOrder = {
             nonce: "nonce",
             expiry: 1653138423537,
             signerWallet: "signerWallet",
@@ -107,9 +111,13 @@ describe("Database implementations", () => {
             approximatedSenderAmount: 10,
             v: "v",
             r: "r",
-            s: "s"
-        } as DbOrder;
-        const order3 = {
+            s: "s",
+            chainId: "5",
+            swapContract: "0x0000000000000000000000000000000000000000",
+            protocolFee: "4",
+            senderWallet: "senderWallet",
+        };
+        const order3: DbOrder = {
             nonce: "nonce",
             expiry: 1653138423537,
             signerWallet: "signerWallet",
@@ -121,8 +129,12 @@ describe("Database implementations", () => {
             approximatedSenderAmount: 100,
             v: "v",
             r: "r",
-            s: "s"
-        } as DbOrder;
+            s: "s",
+            chainId: "5",
+            swapContract: "0x0000000000000000000000000000000000000000",
+            protocolFee: "4",
+            senderWallet: "senderWallet",
+        };
 
         const otcOrder1 = new IndexedOrder(order1, 1653138423537, "id1");
         const otcOrder2 = new IndexedOrder(order2, 1653138423527, "id2");
@@ -159,8 +171,8 @@ describe("Database implementations", () => {
         expect(Object.keys(signerAmountAsc.orders)).toEqual(["id1", "id3", "id2"]);
 
         const signerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC, signerTokens: ["signerToken"] });
-        expect(Object.keys(signerAmountDesc.orders)).toEqual(["id3", "id1"]);        
-        
+        expect(Object.keys(signerAmountDesc.orders)).toEqual(["id3", "id1"]);
+
         const minSignerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC });
         expect(Object.keys(minSignerAmountDesc.orders)).toEqual(["id2", "id3", "id1"]);
 
@@ -216,8 +228,8 @@ describe("Database implementations", () => {
         const filters = await db.getFilters();
 
         expect(filters).toEqual({
-            senderToken: { "eth": { max: 15, min: 10 } },
-            signerToken: { "dai": { max: 50, min: 5 } }
+            senderToken: { "0x0000000000000000000000000000000000000000": { max: 15, min: 10 } },
+            signerToken: { "0x0000000000000000000000000000000000000000": { max: 50, min: 5 } }
         });
         return Promise.resolve();
     }
@@ -278,7 +290,7 @@ describe("Database implementations", () => {
 
         const hash = db.generateHash(indexedOrder);
 
-        expect(hash).toBe("5e2f80a0d08dfbfee6bf22dc0bb636694ab3a2ee59aeef1fffb1dc13b1bcc547");
+        expect(hash).toBe("d71f51fa93d8bc7bd479ab3a9a36e93154c68f9c221433067c63231720645af7");
         return Promise.resolve();
     }
 });

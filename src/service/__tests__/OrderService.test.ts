@@ -3,7 +3,7 @@ import { ClientError } from './../../model/error/ClientError';
 
 import { Order } from '@airswap/typescript';
 import { Database } from '../../database/Database';
-import { forgeDbOrder, forgeIndexedOrder, forgeOrderResponse } from '../../Fixtures';
+import { forgeDbOrder, forgeIndexedOrder, forgeFullOrder, forgeOrderResponse } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
 import { Pagination } from '../../model/Pagination.js';
 import { Filters } from './../../database/filter/Filters';
@@ -103,7 +103,7 @@ describe("Order service", () => {
 
     describe("Add Order", () => {
         test("Add order nominal & broadcast", async () => {
-            const order = forgeOrder(1653900784796);
+            const order = forgeFullOrder(1653900784796);
             const expectedForgeHash = new IndexedOrder(forgeDbOrder(1653900784796), 1653900784706, undefined);
             const expected = forgeIndexedOrder(1653900784706, 1653900784796);
             expected.hash = "a";
@@ -137,10 +137,10 @@ describe("Order service", () => {
         });
 
         test("Add order invalid data", async () => {
-            const orderBadValueSenderAmount = forgeOrder(1653900784696);
+            const orderBadValueSenderAmount = forgeFullOrder(1653900784696);
             orderBadValueSenderAmount.senderAmount = "a";
 
-            const orderBadValueSignerAmount = forgeOrder(1653900784696);
+            const orderBadValueSignerAmount = forgeFullOrder(1653900784696);
             orderBadValueSignerAmount.signerAmount = "a";
 
             await expect(async () => {
@@ -155,7 +155,7 @@ describe("Order service", () => {
         });
 
         test("Add order invalid date", async () => {
-            const orderDateNotInRange = forgeOrder(1653900784696);
+            const orderDateNotInRange = forgeFullOrder(1653900784696);
             orderDateNotInRange.expiry = `${new Date().getTime()}${1000 * 3600 * 24 * 100}`;
 
             await expect(async () => {
@@ -176,7 +176,7 @@ describe("Order service", () => {
         });
 
         test("Add: already added", async () => {
-            const order = forgeOrder(1653900784796);
+            const order = forgeFullOrder(1653900784796);
 
             //@ts-ignore
             fakeDb.generateHash.mockImplementation(() => "a");
@@ -198,18 +198,3 @@ describe("Order service", () => {
     });
 
 });
-
-function forgeOrder(expiryDate: number): Order {
-    return {
-        nonce: "nonce",
-        expiry: `${expiryDate}`,
-        signerWallet: "signerWallet",
-        signerToken: "dai",
-        signerAmount: "5",
-        senderToken: "ETH",
-        senderAmount: "10",
-        v: "v",
-        r: "r",
-        s: "s"
-    };
-}

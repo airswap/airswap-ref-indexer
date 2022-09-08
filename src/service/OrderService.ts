@@ -1,6 +1,5 @@
 import { Order } from '@airswap/typescript';
-import { isValidOrder } from '@airswap/utils';
-import { SuccessResponse } from 'model/response/SuccessResponse.js';
+import { isValidFullOrder } from '@airswap/utils';
 import { Database } from '../database/Database.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToOrder.js';
 import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
@@ -30,7 +29,7 @@ export class OrderService {
         if (!body || Object.keys(body).length == 0) {
             throw new ClientError("No body");
         }
-        if (!isValidOrder(body)) {
+        if (!isValidFullOrder(body)) {
             throw new ClientError("Missing fields");
         }
         if (!areNumberFieldsValid(body)) {
@@ -40,9 +39,9 @@ export class OrderService {
             throw new ClientError("Invalid expiry date");
         }
 
-        const order = mapAnyToDbOrder(body);
+        const dbOrder = mapAnyToDbOrder(body);
         const addedTimestamp = isNumeric(body.addedOn) ? +body.addedOn : new Date().getTime();
-        const indexedOrder = new IndexedOrder(order, addedTimestamp);
+        const indexedOrder = new IndexedOrder(dbOrder, addedTimestamp);
         const hash = this.database.generateHash(indexedOrder);
         const orderExists = await this.database.orderExists(hash);        
         if (orderExists) {
