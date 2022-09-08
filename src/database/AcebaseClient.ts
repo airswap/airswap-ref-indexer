@@ -35,8 +35,8 @@ export class AceBaseClient implements Database {
                 this.db.indexes.create(`${ENTRY_REF}`, 'addedOn');
                 this.db.indexes.create(`${ENTRY_REF}`, "approximatedSignerAmount");
                 this.db.indexes.create(`${ENTRY_REF}`, "approximatedSenderAmount");
-                // this.db.indexes.create(`${ENTRY_REF}`, "signerToken"); https://github.com/appy-one/acebase/issues/124
-                // this.db.indexes.create(`${ENTRY_REF}`, "senderToken");
+                this.db.indexes.create(`${ENTRY_REF}`, "signerToken");
+                this.db.indexes.create(`${ENTRY_REF}`, "senderToken");
                 resolve();
             });
         });

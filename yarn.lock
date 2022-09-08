@@ -1521,17 +1521,17 @@ accepts@~1.3.8:
     mime-types "~2.1.34"
     negotiator "0.6.3"
 
-acebase-core@^1.18.0:
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/acebase-core/-/acebase-core-1.18.0.tgz#e372895c9dd6967986885ef24c541fee572f07e9"
-  integrity sha512-kFHHlyDYJx/b/lo20udKOyAsF/QCcddBzXgeTvKoC4/PR9Ux91XvQ8Djq1nS4thY+K3LxPKphSm8voGdyPyEaQ==
+acebase-core@^1.22.1:
+  version "1.22.1"
+  resolved "https://registry.yarnpkg.com/acebase-core/-/acebase-core-1.22.1.tgz#215a6eb54c88b3c68053f5dca10865bcff6260ae"
+  integrity sha512-XvBg3x5//PUvJa/viV9OIkyTZqRN5+qVtrS/Glmqda94qdqUMJAfRH1nBrZeLqsZZfRIo7gdQvKJcqa/BXepYw==
 
-acebase@1.21.7:
-  version "1.21.7"
-  resolved "https://registry.yarnpkg.com/acebase/-/acebase-1.21.7.tgz#f459888f168be39efab48345f5b40581a9cdde96"
-  integrity sha512-+t6G87l5NiB8GfbwIekhlccJnRm/HbZNslmqsNhgcf8DVNKXwwcP1ATXz0DEEA7HBzWJH+JCkGL1cf3UMfZ22Q==
+acebase@1.24.0:
+  version "1.24.0"
+  resolved "https://registry.yarnpkg.com/acebase/-/acebase-1.24.0.tgz#100dd5f5a7c74ddbe9e4e9d21d6c91c03d27b439"
+  integrity sha512-kciEqjXI5yvCAYX6usIWMsSaaTZ2cFeDha2+CGYKKPiVo2HelFv5giLVGI8B+/dc97DzPn9O5NeuN+bZCfkMiw==
   dependencies:
-    acebase-core "^1.18.0"
+    acebase-core "^1.22.1"
     unidecode "^0.1.8"
 
 aes-js@3.0.0:

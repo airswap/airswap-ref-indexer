@@ -243,7 +243,7 @@ describe("Database implementations", () => {
         const indexedOrder = forgeIndexedOrder();
         await db.addOrder(indexedOrder);
 
-        await db.deleteOrder("nonce", "signerWallet");
+        await db.deleteOrder("nonce", "0x0000000000000000000000000000000000000000");
         const orders = await db.getOrders();
 
         expect(orders).toEqual(new OrderResponse({}, new Pagination("1", "1"), 0));
