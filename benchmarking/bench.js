@@ -9,6 +9,7 @@ const tokens = [
 
 async function bench() {
     let lastDate = new Date().getTime();
+    let shift = 0;
     for (let index = 1; index < 100; index++) {
         if (index % 100 === 0) {
             const now = new Date().getTime();
@@ -20,7 +21,8 @@ async function bench() {
         const senderToken = tokens.filter((name) => name !== signerToken)[
             Math.floor(Math.random() * (tokens.length - 1))
         ];
-        const expiry = `${new Date().setDate(new Date().getDate() + 1)}`;
+        shift++;
+        const expiry = `${new Date().getTime()+shift*60000}`;//`${new Date().setDate(new Date().getDate() + 1)}`;
         try {
             await axios.post("http://localhost:4001/", {
                 jsonrpc: "2.0",
