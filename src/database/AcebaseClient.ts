@@ -114,7 +114,7 @@ export class AceBaseClient implements Database {
         return Promise.resolve();
     }
 
-    async deleteOrder(nonce: String, signerWallet: string): Promise<void> {
+    async deleteOrder(nonce: string, signerWallet: string): Promise<void> {
         await this.ref.query()
             .filter('nonce', '==', nonce)
             .filter('signerWallet', '==', signerWallet)

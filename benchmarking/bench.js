@@ -22,7 +22,7 @@ async function bench() {
             Math.floor(Math.random() * (tokens.length - 1))
         ];
         shift++;
-        const expiry = `${new Date().getTime()+shift*60000}`;//`${new Date().setDate(new Date().getDate() + 1)}`;
+        const expiry = `${new Date().getTime()+shift*60000}`;
         try {
             await axios.post("http://localhost:4001/", {
                 jsonrpc: "2.0",

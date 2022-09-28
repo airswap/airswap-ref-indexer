@@ -39,11 +39,10 @@ if (!database) {
   process.exit(5);
 }
 
-const intervalId = setInterval(async () => {
+const intervalId = setInterval(() => {
   const currentTimestamp = new Date().getTime();
-  console.log("Cleaning orders that have an expired date inferior to", currentTimestamp);
-  await database.deleteExpiredOrder(currentTimestamp);
-}, 1 * 1000 * 60);
+  database.deleteExpiredOrder(currentTimestamp);
+}, 1000 * 60);
 
 const orderService = new OrderService(database);
 const peers = new Peers(database, host, peersClient, broadcastClient, useSmartContract);
