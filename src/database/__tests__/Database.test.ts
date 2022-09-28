@@ -1,3 +1,4 @@
+import { AddressZero } from '@ethersproject/constants';
 import { forgeDbOrder, forgeIndexedOrder } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
 import { AceBaseClient } from "../AcebaseClient";
@@ -100,7 +101,7 @@ describe("Database implementations", () => {
             r: "r",
             s: "s",
             chainId: "5",
-            swapContract: "0x0000000000000000000000000000000000000000",
+            swapContract: AddressZero,
             protocolFee: "4",
             senderWallet: "senderWallet",
         };
@@ -118,7 +119,7 @@ describe("Database implementations", () => {
             r: "r",
             s: "s",
             chainId: "5",
-            swapContract: "0x0000000000000000000000000000000000000000",
+            swapContract: AddressZero,
             protocolFee: "4",
             senderWallet: "senderWallet",
         };
@@ -136,7 +137,7 @@ describe("Database implementations", () => {
             r: "r",
             s: "s",
             chainId: "5",
-            swapContract: "0x0000000000000000000000000000000000000000",
+            swapContract: AddressZero,
             protocolFee: "4",
             senderWallet: "senderWallet",
         };
@@ -243,7 +244,7 @@ describe("Database implementations", () => {
         const indexedOrder = forgeIndexedOrder();
         await db.addOrder(indexedOrder);
 
-        await db.deleteOrder("nonce", "0x0000000000000000000000000000000000000000");
+        await db.deleteOrder("nonce", AddressZero);
         const orders = await db.getOrders();
 
         expect(orders).toEqual(new OrderResponse({}, new Pagination("1", "1"), 0));
