@@ -122,9 +122,9 @@ export class AceBaseClient implements Database {
         return Promise.resolve();
     }
 
-    async deleteExpiredOrder(timestamp: number) {
+    async deleteExpiredOrder(timestampInSeconds: number) {
         await this.ref.query()
-            .filter('expiry', '<', timestamp)
+            .filter('expiry', '<', timestampInSeconds)
             .remove();
         return Promise.resolve();
       }

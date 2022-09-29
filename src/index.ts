@@ -40,8 +40,8 @@ if (!database) {
 }
 
 const intervalId = setInterval(() => {
-  const currentTimestamp = new Date().getTime();
-  database.deleteExpiredOrder(currentTimestamp);
+  const currentTimestampInSeconds = new Date().getTime()/1000;
+  database.deleteExpiredOrder(currentTimestampInSeconds);
 }, 1000 * 60);
 
 const orderService = new OrderService(database);

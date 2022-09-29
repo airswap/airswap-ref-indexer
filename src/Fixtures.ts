@@ -14,7 +14,7 @@ export function forgeIndexedOrder(expectedAddedDate = new Date().getTime(), expi
 export function forgeDbOrder(expiryDate: number): DbOrder {
     return {
         nonce: "nonce",
-        expiry: expiryDate,
+        expiry: expiryDate/1000,
         signerWallet: AddressZero,
         signerToken: AddressZero,
         signerAmount: "5",
@@ -36,7 +36,7 @@ export function forgeDbOrder(expiryDate: number): DbOrder {
 export function forgeFullOrder(expiryDate: number): FullOrder {
     return {
         nonce: "nonce",
-        expiry: `${expiryDate}`,
+        expiry: `${expiryDate/1000}`,
         signerWallet: AddressZero,
         signerToken: AddressZero,
         signerAmount: "5",

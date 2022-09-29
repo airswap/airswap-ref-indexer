@@ -23,7 +23,7 @@ async function bench() {
             Math.floor(Math.random() * (tokens.length - 1))
         ];
         shift++;
-        const expiry = `${new Date().getTime() + shift * 60000}`;
+        const expiryInSeconds = `${(new Date().getTime() + shift * 60000) / 1000}`;
         try {
             await axios.post("http://localhost:4001/", {
                 jsonrpc: "2.0",
@@ -32,7 +32,7 @@ async function bench() {
                 params: [
                     {
                         nonce: "nonce",
-                        expiry: expiry,
+                        expiry: expiryInSeconds,
                         signerWallet: AddressZero,
                         signerToken: signerToken,
                         signerAmount: `${index}`,

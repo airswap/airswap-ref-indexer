@@ -252,9 +252,9 @@ describe("Database implementations", () => {
     }
 
     async function shouldDeleteExpiredOtcOrder(db: Database) {
-        const indexedOrder = forgeIndexedOrder(100, 200);
-        const indexedOrder2 = forgeIndexedOrder(100, 100);
-        const indexedOrder3 = forgeIndexedOrder(100, 500);
+        const indexedOrder = forgeIndexedOrder(1000, 2000);
+        const indexedOrder2 = forgeIndexedOrder(1000, 1000);
+        const indexedOrder3 = forgeIndexedOrder(1000, 500000);
         await db.addOrder(indexedOrder);
         await db.addOrder(indexedOrder2);
         await db.addOrder(indexedOrder3);
@@ -311,7 +311,7 @@ describe("Database implementations", () => {
 
         const hash = db.generateHash(indexedOrder);
 
-        expect(hash).toBe("d71f51fa93d8bc7bd479ab3a9a36e93154c68f9c221433067c63231720645af7");
+        expect(hash).toBe("032d6d906f159fccee7855829aee8ff7c177085264c34e7a4adeef55133edaec");
         return Promise.resolve();
     }
 });
