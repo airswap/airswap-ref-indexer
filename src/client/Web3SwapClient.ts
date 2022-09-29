@@ -10,20 +10,21 @@ export class Web3SwapClient {
         this.database = database;
         this.contract = new ethers.Contract(registryAddress, abi, provider);
 
-        this.contract.on("Swap", (from, to, value) => {
-            console.log("Swap", value);
-            this.onEvent(value);
+        this.contract.on("Swap", (nonce, timestamp, signerWallet, signerToken, signerAmount, protocolFee, senderWallet, senderToken, senderAmount) => {
+            this.onEvent(nonce, signerWallet);
         });
         
-        this.contract.on("Cancel", (from, to, value) => {
-            console.log("Cancel", value);
-            this.onEvent(value);
+        this.contract.on("Cancel", (nonce, signerWallet) => {
+            this.onEvent(nonce, signerWallet);
         });
     }
 
-    private onEvent(value: any) {        
-        if (value?.args?.nonce && value?.args?.signerWallet) {
-            this.database.deleteOrder(value.args.nonce, value.args.signerWallet);
+    private onEvent(nonce: { _hex: string, _isBigNumber: boolean }, signerWallet: string) {        
+        if (nonce && signerWallet) {
+            const decodedNonce = parseInt(nonce._hex, 16);
+            if (isNaN(decodedNonce)) return;
+            
+            this.database.deleteOrder(`${decodedNonce}`, signerWallet);
         }
     }
 }

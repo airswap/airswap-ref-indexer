@@ -21,12 +21,7 @@ describe("Web3SwapClient", () => {
     it("Should remove order on event Swap", async () => {
         const mockedOn = jest.fn((eventName, callback) => {
             if (eventName === "Swap") {
-                callback("from", "to", {
-                    args: {
-                        nonce: "a_nonce",
-                        signerWallet: "a_wallet",
-                    }
-                });
+                callback({ _hex: "0xf5", _isBigNumber: true }, 3221654, "a_wallet");
             }
         });
         //@ts-ignore
@@ -42,18 +37,13 @@ describe("Web3SwapClient", () => {
         new Web3SwapClient(apiKey, registryAddress, abi as ContractInterface, network, fakeDatabase as Database);
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrder).toHaveBeenCalledTimes(1);
-        expect(fakeDatabase.deleteOrder).toHaveBeenCalledWith("a_nonce", "a_wallet");
+        expect(fakeDatabase.deleteOrder).toHaveBeenCalledWith("245", "a_wallet");
     });
 
     it("Should remove order on event Cancel", async () => {
         const mockedOn = jest.fn((eventName, callback) => {
             if (eventName === "Cancel") {
-                callback("from", "to", {
-                    args: {
-                        nonce: "a_nonce",
-                        signerWallet: "a_wallet",
-                    }
-                });
+                callback({ _hex: "0xf5", _isBigNumber: true }, "a_wallet");
             }
         });
         //@ts-ignore
@@ -69,13 +59,13 @@ describe("Web3SwapClient", () => {
         new Web3SwapClient(apiKey, registryAddress, abi as ContractInterface, network, fakeDatabase as Database);
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrder).toHaveBeenCalledTimes(1);
-        expect(fakeDatabase.deleteOrder).toHaveBeenCalledWith("a_nonce", "a_wallet");
+        expect(fakeDatabase.deleteOrder).toHaveBeenCalledWith("245", "a_wallet");
     });
 
     describe("Do nothing", () => {
         it("event is undefined", () => {
             const mockedOn = jest.fn((eventName, callback) => {
-                callback("from", "to", undefined);
+                callback();
             });
             //@ts-ignore
             mockedEther.providers.InfuraProvider = {
@@ -91,9 +81,9 @@ describe("Web3SwapClient", () => {
             expect(fakeDatabase.deleteOrder).not.toHaveBeenCalled();
         });
         
-        it("args is undefined", () => {
+        it("empty nonce", () => {
             const mockedOn = jest.fn((eventName, callback) => {
-                callback("from", "to", {});
+                callback({});
             });
             //@ts-ignore
             mockedEther.providers.InfuraProvider = {
@@ -109,9 +99,9 @@ describe("Web3SwapClient", () => {
             expect(fakeDatabase.deleteOrder).not.toHaveBeenCalled();
         });
 
-        it("args is empty", () => {
+        it("nonce has no value", () => {
             const mockedOn = jest.fn((eventName, callback) => {
-                callback("from", "to", {args: {}});
+                callback({ _hex: undefined, _isBigNumber: true }, "a_wallet");
             });
             //@ts-ignore
             mockedEther.providers.InfuraProvider = {
