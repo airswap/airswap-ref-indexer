@@ -35,8 +35,8 @@ export class AceBaseClient implements Database {
                 this.db.indexes.create(`${ENTRY_REF}`, 'addedOn');
                 this.db.indexes.create(`${ENTRY_REF}`, "approximatedSignerAmount");
                 this.db.indexes.create(`${ENTRY_REF}`, "approximatedSenderAmount");
-                // this.db.indexes.create(`${ENTRY_REF}`, "signerToken"); https://github.com/appy-one/acebase/issues/124
-                // this.db.indexes.create(`${ENTRY_REF}`, "senderToken");
+                this.db.indexes.create(`${ENTRY_REF}`, "signerToken");
+                this.db.indexes.create(`${ENTRY_REF}`, "senderToken");
                 resolve();
             });
         });
@@ -114,12 +114,20 @@ export class AceBaseClient implements Database {
         return Promise.resolve();
     }
 
-    async deleteOrder(hash: string): Promise<void> {
+    async deleteOrder(nonce: string, signerWallet: string): Promise<void> {
         await this.ref.query()
-            .filter('hash', '==', hash)
+            .filter('nonce', '==', nonce)
+            .filter('signerWallet', '==', signerWallet)
             .remove();
         return Promise.resolve();
     }
+
+    async deleteExpiredOrder(timestampInSeconds: number) {
+        await this.ref.query()
+            .filter('expiry', '<', timestampInSeconds)
+            .remove();
+        return Promise.resolve();
+      }
 
     async getOrder(hash: string): Promise<OrderResponse> {
         const query = await this.ref.query()

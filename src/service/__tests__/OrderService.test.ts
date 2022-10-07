@@ -1,9 +1,8 @@
 import { AlreadyExistsError } from './../../model/error/AlreadyExists';
 import { ClientError } from './../../model/error/ClientError';
 
-import { Order } from '@airswap/typescript';
 import { Database } from '../../database/Database';
-import { forgeDbOrder, forgeIndexedOrder, forgeFullOrder, forgeOrderResponse } from '../../Fixtures';
+import { forgeDbOrder, forgeFullOrder, forgeIndexedOrder, forgeOrderResponse } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
 import { Pagination } from '../../model/Pagination.js';
 import { Filters } from './../../database/filter/Filters';

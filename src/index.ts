@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { Web3SwapClient } from './client/Web3SwapClient.js';
 import { getNodeUrl } from "./client/getNodeUrl.js";
 import { getRegistry } from "./client/getRegistry.js";
 import { registerInNetwork } from "./client/registerInNetwork.js";
@@ -14,6 +15,7 @@ import { OrderService } from './service/OrderService.js';
 import { RootService } from './service/RootService.js';
 import { Webserver } from "./webserver/index.js";
 import { RequestForQuote } from "./webserver/RequestForQuote.js";
+import { getSwapAbi } from './indexers/index.js';
 
 // Env Variables
 if (!process.env.EXPRESS_PORT) {
@@ -39,13 +41,23 @@ if (!database) {
   process.exit(5);
 }
 
+const intervalId = setInterval(() => {
+  const currentTimestampInSeconds = new Date().getTime()/1000;
+  database.deleteExpiredOrder(currentTimestampInSeconds);
+}, 1000 * 60);
+
 const orderService = new OrderService(database);
 const peers = new Peers(database, host, peersClient, broadcastClient, useSmartContract);
 
 const peersController = new PeersController(peers);
 const registryClient = getRegistry(useSmartContract, process.env, peers);
-if(registryClient === null){
+if (registryClient === null) {
   process.exit(3);
+}
+const web3SwapClient = getWeb3SwapClient(database);
+if (web3SwapClient === null) {
+  console.log("Could connect to swap smart contract");
+  process.exit(4);
 }
 const rootController = new RootService(peers, database, process.env.REGISTRY!);
 
@@ -67,14 +79,22 @@ try {
 
 // Shutdown signals
 process.on("SIGTERM", () => {
-  gracefulShutdown(webserver, database);
+  gracefulShutdown(webserver, database, intervalId);
 });
 process.on("SIGINT", () => {
-  gracefulShutdown(webserver, database);
+  gracefulShutdown(webserver, database, intervalId);
 });
 
-async function gracefulShutdown(webserver: Webserver, database: Database) {
+function getWeb3SwapClient(database: Database) {
+  const address: string = process.env.SWAP as string;
+  const apiKey: string = process.env.API_KEY as string;
+  const network: string = process.env.NETWORK as string;
+  return new Web3SwapClient(apiKey, address, getSwapAbi(), network, database);
+}
+
+async function gracefulShutdown(webserver: Webserver, database: Database, intervalId: NodeJS.Timer) {
   try {
+    clearInterval(intervalId);
     await registryClient!.removeIpFromRegistry(host);
     await database.close();
     webserver.stop()

@@ -8,10 +8,11 @@ export function isDateInRange(date: string, validationDurationInWeek: number) {
     }
 
     const currentDate = new Date();
-    if (currentDate.getTime() >= +date) {
+    const currentTimestampInSeconds = currentDate.getTime() / 1000
+    if (currentTimestampInSeconds >= +date) {
         return false;
     }
-
     currentDate.setDate(currentDate.getDate() + validationDurationInWeek * 7);
-    return +date < currentDate.getTime();
+    const maxExpiryDateInSeconds = currentDate.getTime() / 1000;
+    return +date < maxExpiryDateInSeconds;
 }

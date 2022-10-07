@@ -1,3 +1,4 @@
+import { AddressZero } from '@ethersproject/constants';
 import { forgeDbOrder, forgeIndexedOrder } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
 import { AceBaseClient } from "../AcebaseClient";
@@ -53,6 +54,11 @@ describe("Database implementations", () => {
     describe("Should delete IndexedOrder", () => {
         test("inMemoryDb", async () => { await shouldDeleteOtcOrder(inMemoryDatabase); });
         test("acebaseDb", async () => { await shouldDeleteOtcOrder(acebaseClient); });
+    });    
+    
+    describe("Should delete expired IndexedOrder", () => {
+        test("inMemoryDb", async () => { await shouldDeleteExpiredOtcOrder(inMemoryDatabase); });
+        test("acebaseDb", async () => { await shouldDeleteExpiredOtcOrder(acebaseClient); });
     });
 
     describe("Should return true if IndexedOrder exists", () => {
@@ -95,7 +101,7 @@ describe("Database implementations", () => {
             r: "r",
             s: "s",
             chainId: "5",
-            swapContract: "0x0000000000000000000000000000000000000000",
+            swapContract: AddressZero,
             protocolFee: "4",
             senderWallet: "senderWallet",
         };
@@ -113,7 +119,7 @@ describe("Database implementations", () => {
             r: "r",
             s: "s",
             chainId: "5",
-            swapContract: "0x0000000000000000000000000000000000000000",
+            swapContract: AddressZero,
             protocolFee: "4",
             senderWallet: "senderWallet",
         };
@@ -131,7 +137,7 @@ describe("Database implementations", () => {
             r: "r",
             s: "s",
             chainId: "5",
-            swapContract: "0x0000000000000000000000000000000000000000",
+            swapContract: AddressZero,
             protocolFee: "4",
             senderWallet: "senderWallet",
         };
@@ -238,10 +244,25 @@ describe("Database implementations", () => {
         const indexedOrder = forgeIndexedOrder();
         await db.addOrder(indexedOrder);
 
-        await db.deleteOrder("hash");
+        await db.deleteOrder("nonce", AddressZero);
         const orders = await db.getOrders();
 
         expect(orders).toEqual(new OrderResponse({}, new Pagination("1", "1"), 0));
+        return Promise.resolve();
+    }
+
+    async function shouldDeleteExpiredOtcOrder(db: Database) {
+        const indexedOrder = forgeIndexedOrder(1000, 2000);
+        const indexedOrder2 = forgeIndexedOrder(1000, 1000);
+        const indexedOrder3 = forgeIndexedOrder(1000, 500000);
+        await db.addOrder(indexedOrder);
+        await db.addOrder(indexedOrder2);
+        await db.addOrder(indexedOrder3);
+
+        await db.deleteExpiredOrder(300);
+        const orders = await db.getOrders();
+
+        expect(orders).toEqual(new OrderResponse({"hash": indexedOrder3}, new Pagination("1", "1"), 1));
         return Promise.resolve();
     }
 
@@ -290,7 +311,7 @@ describe("Database implementations", () => {
 
         const hash = db.generateHash(indexedOrder);
 
-        expect(hash).toBe("d71f51fa93d8bc7bd479ab3a9a36e93154c68f9c221433067c63231720645af7");
+        expect(hash).toBe("032d6d906f159fccee7855829aee8ff7c177085264c34e7a4adeef55133edaec");
         return Promise.resolve();
     }
 });

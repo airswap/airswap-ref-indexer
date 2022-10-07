@@ -1,4 +1,5 @@
 import { mapAnyToDbOrder } from "../mapAnyToOrder";
+import { AddressZero } from '@ethersproject/constants';
 
 describe("mapAnyToOrder", () => {
     test("should map all string values", () => {
@@ -16,7 +17,7 @@ describe("mapAnyToOrder", () => {
             senderWallet: "senderWallet",
             v: "v",
             chainId: "5",
-            swapContract: "0x0000000000000000000000000000000000000000"
+            swapContract: AddressZero
         })).toEqual({
             expiry: 1653900784706,
             nonce: "nonce",
@@ -33,7 +34,7 @@ describe("mapAnyToOrder", () => {
             s: "s",
             v: "v",
             chainId: "5",
-            swapContract: "0x0000000000000000000000000000000000000000"
+            swapContract: AddressZero
         });
     });
 });

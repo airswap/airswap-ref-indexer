@@ -2,7 +2,7 @@ import { isNumeric, isDateInRange } from '../index';
 
 jest
     .useFakeTimers()
-    .setSystemTime(new Date(1));
+    .setSystemTime(new Date(603001));
     
 describe("Validator", () => {
     describe("isNumeric", () => {
