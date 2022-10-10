@@ -1,5 +1,6 @@
 {
-  "version": "1.0.0-alpha",
+  "version": "1.0.0",
+  "name": "1.0.0",
   "engines": {
     "node": ">=14.19.0"
   },
@@ -15,7 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "@airswap/indexers": "^3.0.0",
-    "@airswap/libraries": "^3.0.3",
+    "@airswap/libraries": "3.3.0",
     "@airswap/typescript": "^3.0.1",
     "@airswap/utils": "^3.0.4",
     "@ethersproject/constants": "^5.7.0",

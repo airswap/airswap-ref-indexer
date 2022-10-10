@@ -1,9 +1,8 @@
 import { Express, Request, Response } from "express";
 import { SuccessResponse } from '../model/response/SuccessResponse.js';
 import { ClientError } from './../model/error/ClientError.js';
-import { IndexedOrderError } from '../model/error/IndexedOrderError.js';
+import { IndexedOrderError, JsonRpcResponse } from  '@airswap/libraries';
 import { NotFound } from '../model/error/NotFound.js';
-import { JsonRpcResponse } from '../model/response/JsonRpcResponse.js';
 import { RootService } from '../service/RootService.js';
 import { Peers } from './../peer/Peers.js';
 import { OrderService, METHODS } from './../service/OrderService.js';
@@ -67,7 +66,7 @@ export class RequestForQuote {
             } catch (error) {
                 console.log("error", error)
                 const err = error as IndexedOrderError;
-                response.status(err.code);
+                response.status(err.code || 500);
                 response.json(new JsonRpcResponse(id, err));
             }
         });

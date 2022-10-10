@@ -1,9 +1,9 @@
-import { Pagination } from './../../model/Pagination.js';
+import { Pagination } from '@airswap/libraries';
 
 const DEFAULT_MIN_MAX = "1";
-export function computePagination(elementPerPage: number, totalResults: number, actualPage: number = 1) {
+export function computePagination(elementPerPage: number, totalResults: number, actualPage: number = 1): Pagination {
     if (totalResults === 0) {
-        return new Pagination(DEFAULT_MIN_MAX, DEFAULT_MIN_MAX);
+        return { first: DEFAULT_MIN_MAX, last: DEFAULT_MIN_MAX };
     }
 
     const totalPages = Math.ceil(totalResults / elementPerPage);
@@ -17,5 +17,10 @@ export function computePagination(elementPerPage: number, totalResults: number, 
         previousPage = actualPage >= 2 ? `${actualPage - 1}` : undefined;
     }
 
-    return new Pagination(DEFAULT_MIN_MAX, `${totalPages > 0 ? totalPages : DEFAULT_MIN_MAX}`, nextPage, previousPage);
+    return {
+        first: DEFAULT_MIN_MAX,
+        last: `${totalPages > 0 ? totalPages : DEFAULT_MIN_MAX}`,
+        prev: previousPage,
+        next: nextPage,
+    };
 }

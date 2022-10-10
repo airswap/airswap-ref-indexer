@@ -1,8 +1,8 @@
 import { toNumber, toArray, toBigInt } from "../converter/index.js";
-import { RequestFilter } from "../database/filter/RequestFilter.js";
-import { toSortField } from "../database/filter/SortField.js";
-import { toSortOrder } from "../database/filter/SortOrder.js";
 import { isNumeric } from '../validator/index.js';
+import { RequestFilter } from '@airswap/libraries';
+import { toSortField } from '@airswap/libraries';
+import { toSortOrder } from '@airswap/libraries';
 
 export function mapAnyToRequestFilter(data: any): RequestFilter {
     return {

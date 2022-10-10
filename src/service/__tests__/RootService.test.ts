@@ -1,7 +1,6 @@
+import { OrderResponse } from '@airswap/libraries';
 import { Database } from '../../database/Database';
-import { forgeIndexedOrder, forgeIndexedOrderResponse } from '../../Fixtures';
-import { Pagination } from '../../model/Pagination.js';
-import { OrderResponse } from '../../model/response/OrderResponse';
+import { forgeIndexedOrderResponse } from '../../Fixtures';
 import { Peers } from '../../peer/Peers';
 import { RootService } from '../RootService';
 describe("Root service", () => {
@@ -9,11 +8,20 @@ describe("Root service", () => {
     let fakeDb: Partial<Database>;
     let fakePeers: Partial<Peers>;
     let registryAddress = "registry";
-    const IndexedOrder = forgeIndexedOrderResponse(1653854738949, 1653854738959);
+    const indexedOrderResponse = forgeIndexedOrderResponse(1653854738949, 1653854738959);
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve((new OrderResponse({ "aze": IndexedOrder }, new Pagination("1", "1"), 1))) as Promise<OrderResponse>),
+            getOrders: jest.fn(() => Promise.resolve(
+                {
+                    orders: { "aze": indexedOrderResponse },
+                    pagination: {
+                        first: "1",
+                        last: "1"
+                    },
+                    ordersForQuery: 1
+                }
+            )),
         };
         fakePeers = {
             getPeers: jest.fn(() => [])

@@ -1,4 +1,4 @@
-import { IndexedOrderError } from "./IndexedOrderError.js";
+import { IndexedOrderError } from '@airswap/libraries';
 
 export class NotFound extends IndexedOrderError {
     constructor(message: string) {

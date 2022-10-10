@@ -1,5 +1,4 @@
-import { HealthCheckResponse } from './../../model/response/HealthCheckResponse';
-import { ClientError } from './../../model/error/ClientError';
+import { HealthCheckResponse } from '@airswap/libraries';
 import { Order } from '@airswap/typescript';
 import bodyParser from "body-parser";
 import express from 'express';
@@ -7,6 +6,7 @@ import http from "http";
 import supertest from "supertest";
 import { forgeJsonRpcResponse, forgeOrderResponse } from '../../Fixtures';
 import { Peers } from '../../peer/Peers';
+import { ClientError } from './../../model/error/ClientError';
 import { OrderService } from './../../service/OrderService';
 import { RootService } from './../../service/RootService';
 import { RequestForQuote } from './../RequestForQuote';
@@ -48,7 +48,7 @@ describe("Order controller", () => {
 
     describe("GET *", () => {
         test("should give basic info", done => {
-            const result = new HealthCheckResponse([], "registry", 100)
+            const result: HealthCheckResponse = { registry: "registry", peers: [], databaseOrders: 100 };
             const expected = {
                 "jsonrpc": "2.0",
                 "id": "-1",
@@ -118,7 +118,7 @@ describe("Order controller", () => {
             fakeOrderService.getOrders = jest.fn().mockResolvedValue(forgeOrderResponse());
 
             new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
-            
+
             supertest(webserver)
                 .post("/")
                 .type("json")

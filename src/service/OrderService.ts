@@ -1,6 +1,7 @@
+import { Filters } from './../database/filter/Filters';
 import { Order } from '@airswap/typescript';
 import { isValidFullOrder } from '@airswap/utils';
-import { FiltersResponse } from '../database/filter/FiltersResponse.js';
+import { AmountLimitFilterResponse, FiltersResponse } from '@airswap/libraries';
 import { Database } from '../database/Database.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
 import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
@@ -8,7 +9,7 @@ import { isDateInRange, isNumeric } from '../validator/index.js';
 import { AlreadyExistsError } from './../model/error/AlreadyExists.js';
 import { ClientError } from './../model/error/ClientError.js';
 import { IndexedOrder } from './../model/IndexedOrder.js';
-import { OrderResponse } from './../model/response/OrderResponse.js';
+import { OrderResponse } from '@airswap/libraries';
 
 const validationDurationInWeek = 1;
 
@@ -44,7 +45,7 @@ export class OrderService {
         const addedTimestamp = isNumeric(body.addedOn) ? +body.addedOn : new Date().getTime();
         const indexedOrder = new IndexedOrder(dbOrder, addedTimestamp);
         const hash = this.database.generateHash(indexedOrder);
-        const orderExists = await this.database.orderExists(hash);        
+        const orderExists = await this.database.orderExists(hash);
         if (orderExists) {
             throw new AlreadyExistsError();
         }
@@ -68,15 +69,33 @@ export class OrderService {
         else {
             orders = await this.database.getOrderBy(mapAnyToRequestFilter(query));
         }
-        
+
         if (query.filters) {
             const filters = await this.database.getFilters();
-            orders.filters = new FiltersResponse(filters);
+            orders.filters = toFilterResponse(filters)
         }
         return Promise.resolve(orders);
     }
 }
 
+function toFilterResponse(filters: Filters): FiltersResponse {
+    const senderToken: Record<string, AmountLimitFilterResponse> = {};
+    const signerToken: Record<string, AmountLimitFilterResponse> = {};
+    Object.keys(filters.senderToken).forEach(key => {
+        senderToken[key] = {
+            min: filters.senderToken[key].min.toString(),
+            max: filters.senderToken[key].max.toString()
+        } as AmountLimitFilterResponse;
+    });
+    Object.keys(filters.signerToken).forEach(key => {
+        signerToken[key] = {
+            min: filters.signerToken[key].min.toString(),
+            max: filters.signerToken[key].max.toString()
+        } as AmountLimitFilterResponse;
+    });
+
+    return { senderToken, signerToken };
+}
 
 function areNumberFieldsValid(order: Order) {
     return isNumeric(order.senderAmount) && isNumeric(order.signerAmount) && isNumeric(order.expiry)

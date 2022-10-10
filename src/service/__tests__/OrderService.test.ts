@@ -1,12 +1,10 @@
-import { FiltersResponse } from './../../database/filter/FiltersResponse';
+import { FiltersResponse } from '@airswap/libraries';
+import { Database } from '../../database/Database';
+import { forgeDbOrder, forgeFullOrder, forgeIndexedOrder, forgeIndexedOrderResponse, forgeOrderResponse } from '../../Fixtures';
+import { IndexedOrder } from '../../model/IndexedOrder';
+import { Filters } from './../../database/filter/Filters';
 import { AlreadyExistsError } from './../../model/error/AlreadyExists';
 import { ClientError } from './../../model/error/ClientError';
-import { Database } from '../../database/Database';
-import { forgeDbOrder, forgeIndexedOrder, forgeFullOrder, forgeIndexedOrderResponse, forgeOrderResponse } from '../../Fixtures';
-import { IndexedOrder } from '../../model/IndexedOrder';
-import { Pagination } from '../../model/Pagination.js';
-import { Filters } from './../../database/filter/Filters';
-import { OrderResponse } from './../../model/response/OrderResponse';
 import { OrderService } from './../../service/OrderService';
 
 jest
@@ -19,9 +17,9 @@ describe("Order service", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, new Pagination("1", "1"), 1))),
-            getOrder: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, new Pagination("1", "1"), 1))),
-            getOrderBy: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, new Pagination("1", "1"), 1))),
+            getOrders: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
+            getOrder: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
+            getOrderBy: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
             getFilters: jest.fn(() => Promise.resolve({ signerToken: { "ETH": { min: BigInt(10), max: BigInt(10) } }, senderToken: { "dai": { min: BigInt(5), max: BigInt(5) } } } as unknown as Filters) as Promise<Filters>),
             addOrder: jest.fn(() => Promise.resolve()),
             orderExists: jest.fn(() => Promise.resolve(true)),
@@ -40,11 +38,18 @@ describe("Order service", () => {
             expect(result).toEqual(expected);
         });
 
-        test("get all with filers", async () => {
+        test("get all with filters", async () => {
             const filters = new Filters();
             filters.signerToken = { "ETH": { min: BigInt(10), max: BigInt(10) } };
             filters.senderToken = { "dai": { min: BigInt(5), max: BigInt(5) } };
-            const expectedFilters = new FiltersResponse(filters);
+            const expectedFilters: FiltersResponse = {
+                signerToken: {
+                    ETH: { min: "10", max: "10" }
+                },
+                senderToken: {
+                    dai: { min: "5", max: "5" }
+                }
+            }
             const expected = forgeOrderResponse(expectedFilters);
 
             const result = await new OrderService(fakeDb as Database).getOrders({ filters: true } as Record<string, any>);
