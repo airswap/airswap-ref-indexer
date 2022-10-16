@@ -14,3 +14,6 @@ export function toArray(value: string[]): string[] | undefined {
 export function toNumber(value: string): number | undefined {
     return isNumeric(value) ? +value : undefined
 }
+export function toBigInt(value: string): BigInt | undefined {
+    return isNumeric(value) ? BigInt(value) : undefined
+}

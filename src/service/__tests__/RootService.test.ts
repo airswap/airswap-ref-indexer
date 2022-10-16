@@ -1,7 +1,6 @@
-import { Request, Response } from 'express';
-import { Pagination } from '../../model/Pagination.js';
 import { Database } from '../../database/Database';
-import { forgeIndexedOrder } from '../../Fixtures';
+import { forgeIndexedOrder, forgeIndexedOrderResponse } from '../../Fixtures';
+import { Pagination } from '../../model/Pagination.js';
 import { OrderResponse } from '../../model/response/OrderResponse';
 import { Peers } from '../../peer/Peers';
 import { RootService } from '../RootService';
@@ -10,7 +9,7 @@ describe("Root service", () => {
     let fakeDb: Partial<Database>;
     let fakePeers: Partial<Peers>;
     let registryAddress = "registry";
-    const IndexedOrder = forgeIndexedOrder(1653854738949, 1653854738959);
+    const IndexedOrder = forgeIndexedOrderResponse(1653854738949, 1653854738959);
 
     beforeEach(() => {
         fakeDb = {

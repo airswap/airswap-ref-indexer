@@ -1,18 +1,22 @@
 import { AddressZero } from '@ethersproject/constants';
-import { forgeDbOrder, forgeIndexedOrder } from '../../Fixtures';
+import { Order } from '@airswap/typescript';
+import { forgeDbOrder, forgeIndexedOrder, forgeIndexedOrderResponse } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
 import { AceBaseClient } from "../AcebaseClient";
 import { Database } from '../Database';
 import { InMemoryDatabase } from '../InMemoryDatabase';
 import { DbOrder } from './../../model/DbOrder';
-import { OrderResponse } from './../../model/response/OrderResponse';
 import { Pagination } from './../../model/Pagination.js';
+import { IndexedOrderResponse } from './../../model/response/IndexedOrderResponse';
+import { OrderResponse } from './../../model/response/OrderResponse';
 import { SortField } from './../filter/SortField';
 import { SortOrder } from './../filter/SortOrder';
 
 describe("Database implementations", () => {
     let inMemoryDatabase: InMemoryDatabase;
     let acebaseClient: AceBaseClient;
+    const addedOn = new Date().getTime();
+    const expiryDate = new Date().getTime() + 10;
 
     beforeAll(async () => {
         inMemoryDatabase = new InMemoryDatabase();
@@ -87,16 +91,16 @@ describe("Database implementations", () => {
     });
 
     async function getOtcOrderByFilter(db: Database) {
-        const order1: DbOrder = {
+        const dbOrder1: DbOrder = {
             nonce: "nonce",
             expiry: 1653138423537,
             signerWallet: "signerWallet",
             signerToken: "signerToken",
             signerAmount: "2",
-            approximatedSignerAmount: 2,
+            approximatedSignerAmount: BigInt(2),
             senderToken: "senderToken",
             senderAmount: "1",
-            approximatedSenderAmount: 1,
+            approximatedSenderAmount: BigInt(1),
             v: "v",
             r: "r",
             s: "s",
@@ -105,16 +109,28 @@ describe("Database implementations", () => {
             protocolFee: "4",
             senderWallet: "senderWallet",
         };
-        const order2: DbOrder = {
+        const order1: Order = {
+            nonce: "nonce",
+            expiry: "1653138423537",
+            signerWallet: "signerWallet",
+            signerToken: "signerToken",
+            signerAmount: "2",
+            senderToken: "senderToken",
+            senderAmount: "1",
+            v: "v",
+            r: "r",
+            s: "s",
+        };
+        const dbOrder2: DbOrder = {
             nonce: "nonce",
             expiry: 1653138423537,
             signerWallet: "signerWallet",
             signerToken: "blip",
             signerAmount: "20",
-            approximatedSignerAmount: 20,
+            approximatedSignerAmount: BigInt(20),
             senderToken: "another",
             senderAmount: "10",
-            approximatedSenderAmount: 10,
+            approximatedSenderAmount: BigInt(10),
             v: "v",
             r: "r",
             s: "s",
@@ -123,16 +139,28 @@ describe("Database implementations", () => {
             protocolFee: "4",
             senderWallet: "senderWallet",
         };
-        const order3: DbOrder = {
+        const order2: Order = {
+            nonce: "nonce",
+            expiry: "1653138423537",
+            signerWallet: "signerWallet",
+            signerToken: "blip",
+            signerAmount: "20",
+            senderToken: "another",
+            senderAmount: "10",
+            v: "v",
+            r: "r",
+            s: "s",
+        };
+        const dbOrder3: DbOrder = {
             nonce: "nonce",
             expiry: 1653138423537,
             signerWallet: "signerWallet",
             signerToken: "signerToken",
             signerAmount: "3",
-            approximatedSignerAmount: 3,
+            approximatedSignerAmount: BigInt(3),
             senderToken: "senderToken",
             senderAmount: "100",
-            approximatedSenderAmount: 100,
+            approximatedSenderAmount: BigInt(100),
             v: "v",
             r: "r",
             s: "s",
@@ -141,31 +169,46 @@ describe("Database implementations", () => {
             protocolFee: "4",
             senderWallet: "senderWallet",
         };
+        const order3: Order = {
+            nonce: "nonce",
+            expiry: "1653138423537",
+            signerWallet: "signerWallet",
+            signerToken: "signerToken",
+            signerAmount: "3",
+            senderToken: "senderToken",
+            senderAmount: "100",
+            v: "v",
+            r: "r",
+            s: "s",
+        };
 
-        const otcOrder1 = new IndexedOrder(order1, 1653138423537, "id1");
-        const otcOrder2 = new IndexedOrder(order2, 1653138423527, "id2");
-        const otcOrder3 = new IndexedOrder(order3, 1653138423517, "id3");
+        const otcOrder1 = new IndexedOrder(dbOrder1, 1653138423537, "id1");
+        const expectedOtcOrder1 = new IndexedOrderResponse(order1, 1653138423537, "id1");
+        const otcOrder2 = new IndexedOrder(dbOrder2, 1653138423527, "id2");
+        const expectedOtcOrder2 = new IndexedOrderResponse(order2, 1653138423527, "id2");
+        const otcOrder3 = new IndexedOrder(dbOrder3, 1653138423517, "id3");
+        const expectedOtcOrder3 = new IndexedOrderResponse(order3, 1653138423517, "id3");
         await db.addOrder(otcOrder1);
         await db.addOrder(otcOrder2);
         await db.addOrder(otcOrder3);
 
         const ordersFromToken = await db.getOrderBy({ page: 1, signerTokens: ["signerToken"] });
-        expect(ordersFromToken).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3 }, new Pagination("1", "1"), 2));
+        expect(ordersFromToken).toEqual(new OrderResponse({ "id1": expectedOtcOrder1, "id3": expectedOtcOrder3 }, new Pagination("1", "1"), 2));
 
         const anotherToken = await db.getOrderBy({ page: 1, senderTokens: ["another"] });
-        expect(anotherToken).toEqual(new OrderResponse({ "id2": otcOrder2 }, new Pagination("1", "1"), 1));
+        expect(anotherToken).toEqual(new OrderResponse({ "id2": expectedOtcOrder2 }, new Pagination("1", "1"), 1));
 
-        const minSignerAmountFromToken = await db.getOrderBy({ page: 1, minSignerAmount: 15 });
-        expect(minSignerAmountFromToken).toEqual(new OrderResponse({ "id2": otcOrder2 }, new Pagination("1", "1"), 1));
+        const minSignerAmountFromToken = await db.getOrderBy({ page: 1, minSignerAmount: BigInt(15) });
+        expect(minSignerAmountFromToken).toEqual(new OrderResponse({ "id2": expectedOtcOrder2 }, new Pagination("1", "1"), 1));
 
-        const maxSignerAmountFromToken = await db.getOrderBy({ page: 1, maxSignerAmount: 5 });
-        expect(maxSignerAmountFromToken).toEqual(new OrderResponse({ "id1": otcOrder1, "id3": otcOrder3 }, new Pagination("1", "1"), 2));
+        const maxSignerAmountFromToken = await db.getOrderBy({ page: 1, maxSignerAmount: BigInt(5) });
+        expect(maxSignerAmountFromToken).toEqual(new OrderResponse({ "id1": expectedOtcOrder1, "id3": expectedOtcOrder3 }, new Pagination("1", "1"), 2));
 
-        const minSenderAmount = await db.getOrderBy({ page: 1, minSenderAmount: 20 });
-        expect(minSenderAmount).toEqual(new OrderResponse({ "id3": otcOrder3 }, new Pagination("1", "1"), 1));
+        const minSenderAmount = await db.getOrderBy({ page: 1, minSenderAmount: BigInt(20) });
+        expect(minSenderAmount).toEqual(new OrderResponse({ "id3": expectedOtcOrder3 }, new Pagination("1", "1"), 1));
 
-        const maxSenderAmount = await db.getOrderBy({ page: 1, maxSenderAmount: 15 });
-        expect(maxSenderAmount).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, new Pagination("1", "1"), 2));
+        const maxSenderAmount = await db.getOrderBy({ page: 1, maxSenderAmount: BigInt(15) });
+        expect(maxSenderAmount).toEqual(new OrderResponse({ "id1": expectedOtcOrder1, "id2": expectedOtcOrder2 }, new Pagination("1", "1"), 2));
 
         const senderAmountAsc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.ASC });
         expect(Object.keys(senderAmountAsc.orders)).toEqual(["id1", "id2", "id3"]);
@@ -183,65 +226,69 @@ describe("Database implementations", () => {
         expect(Object.keys(minSignerAmountDesc.orders)).toEqual(["id2", "id3", "id1"]);
 
         const maxAddedOn = await db.getOrderBy({ page: 1, maxAddedDate: 1653138423527 });
-        expect(maxAddedOn).toEqual(new OrderResponse({ "id1": otcOrder1, "id2": otcOrder2 }, new Pagination("1", "1"), 2));
+        expect(maxAddedOn).toEqual(new OrderResponse({ "id1": expectedOtcOrder1, "id2": expectedOtcOrder2 }, new Pagination("1", "1"), 2));
 
         const specificOne = await db.getOrderBy({
             page: 1,
             signerTokens: ["signerToken"],
             senderTokens: ["senderToken"],
-            minSignerAmount: 0,
-            maxSignerAmount: 5,
-            minSenderAmount: 1,
-            maxSenderAmount: 3,
+            minSignerAmount: BigInt(0),
+            maxSignerAmount: BigInt(5),
+            minSenderAmount: BigInt(1),
+            maxSenderAmount: BigInt(3),
         });
-        expect(specificOne).toEqual(new OrderResponse({ "id1": otcOrder1 }, new Pagination("1", "1"), 1));
+        expect(specificOne).toEqual(new OrderResponse({ "id1": expectedOtcOrder1 }, new Pagination("1", "1"), 1));
 
         return Promise.resolve();
     }
 
     async function getAndAddOtcOrder(db: Database) {
-        const indexedOrder = forgeIndexedOrder();
+        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
+        const expectedIndexedOrder = forgeIndexedOrderResponse(addedOn, expiryDate);
 
         await db.addOrder(indexedOrder);
         const orders = await db.getOrders();
 
-        expect(orders).toEqual(new OrderResponse({ hash: indexedOrder }, new Pagination("1", "1"), 1));
+        expect(orders).toEqual(new OrderResponse({ hash: expectedIndexedOrder }, new Pagination("1", "1"), 1));
         return Promise.resolve();
     }
 
     async function addAllAndGetOrders(db: Database) {
-        const indexedOrder = forgeIndexedOrder();
-        const anotherOrder = forgeIndexedOrder();
+        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
+        const anotherOrder = forgeIndexedOrder(addedOn, expiryDate);
+        const expectedIndexedOrder = forgeIndexedOrderResponse(addedOn, expiryDate);
+        const expectedAnotherOrder = forgeIndexedOrderResponse(addedOn, expiryDate);
         anotherOrder.hash = "another_hash";
+        expectedAnotherOrder.hash = "another_hash";
 
         await db.addAll({ "hash": indexedOrder, "another_hash": anotherOrder });
         const orders = await db.getOrders();
 
-        expect(orders).toEqual(new OrderResponse({ "hash": indexedOrder, "another_hash": anotherOrder }, new Pagination("1", "1"), 2));
+        expect(orders).toEqual(new OrderResponse({ "hash": expectedIndexedOrder, "another_hash": expectedAnotherOrder }, new Pagination("1", "1"), 2));
         return Promise.resolve();
     }
 
     async function shouldAddfiltersOnOtcAdd(db: Database) {
-        const indexedOrder = forgeIndexedOrder();
-        const anotherOrder = forgeIndexedOrder();
+        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
+        const anotherOrder = forgeIndexedOrder(addedOn, expiryDate);
         anotherOrder.hash = "another_hash";
         anotherOrder.order.senderAmount = "15";
-        anotherOrder.order.approximatedSenderAmount = 15;
+        anotherOrder.order.approximatedSenderAmount = BigInt(15);
         anotherOrder.order.signerAmount = "50";
-        anotherOrder.order.approximatedSignerAmount = 50;
+        anotherOrder.order.approximatedSignerAmount = BigInt(50);
 
         await db.addAll({ "hash": indexedOrder, "another_hash": anotherOrder });
         const filters = await db.getFilters();
 
         expect(filters).toEqual({
-            senderToken: { "0x0000000000000000000000000000000000000000": { max: 15, min: 10 } },
-            signerToken: { "0x0000000000000000000000000000000000000000": { max: 50, min: 5 } }
+            senderToken: { "0x0000000000000000000000000000000000000000": { max: BigInt(15), min: BigInt(10) } },
+            signerToken: { "0x0000000000000000000000000000000000000000": { max: BigInt(50), min: BigInt(5) } }
         });
         return Promise.resolve();
     }
 
     async function shouldDeleteOtcOrder(db: Database) {
-        const indexedOrder = forgeIndexedOrder();
+        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
         await db.addOrder(indexedOrder);
 
         await db.deleteOrder("nonce", AddressZero);
@@ -258,16 +305,17 @@ describe("Database implementations", () => {
         await db.addOrder(indexedOrder);
         await db.addOrder(indexedOrder2);
         await db.addOrder(indexedOrder3);
+        const expected = forgeIndexedOrderResponse(1000, 500000);
 
         await db.deleteExpiredOrder(300);
         const orders = await db.getOrders();
 
-        expect(orders).toEqual(new OrderResponse({"hash": indexedOrder3}, new Pagination("1", "1"), 1));
+        expect(orders).toEqual(new OrderResponse({"hash": expected}, new Pagination("1", "1"), 1));
         return Promise.resolve();
     }
 
     async function otcOrderExists(db: Database) {
-        const indexedOrder = forgeIndexedOrder();
+        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
         await db.addOrder(indexedOrder);
 
         const orderExists = await db.orderExists("hash");
@@ -277,7 +325,7 @@ describe("Database implementations", () => {
     }
 
     async function otcOrderDoesNotExist(db: Database) {
-        const indexedOrder = forgeIndexedOrder();
+        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
         await db.addOrder(indexedOrder);
 
         const orderExists = await db.orderExists("unknownHash");
@@ -287,17 +335,18 @@ describe("Database implementations", () => {
     }
 
     async function addOtcOrder(db: Database) {
-        const indexedOrder = forgeIndexedOrder();
+        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
+        const expectedIndexedOrder = forgeIndexedOrderResponse(addedOn, expiryDate);
         await db.addOrder(indexedOrder);
 
         const orderExists = await db.getOrder("hash");
 
-        expect(orderExists).toEqual(new OrderResponse({ hash: indexedOrder }, new Pagination("1", "1"), 1));
+        expect(orderExists).toEqual(new OrderResponse({ hash: expectedIndexedOrder }, new Pagination("1", "1"), 1));
         return Promise.resolve();
     }
 
     async function renturnsNullOnUnknownHash(db: Database) {
-        const indexedOrder = forgeIndexedOrder();
+        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
         await db.addOrder(indexedOrder);
 
         const orderExists = await db.getOrder("unknownHash");

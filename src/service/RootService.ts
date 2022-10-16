@@ -1,6 +1,6 @@
-import { HealthCheckResponse } from './../model/response/HealthCheckResponse.js';
 import { Database } from '../database/Database.js';
 import { Peers } from '../peer/Peers.js';
+import { HealthCheckResponse } from './../model/response/HealthCheckResponse.js';
 export class RootService {
 
     private peers: Peers;

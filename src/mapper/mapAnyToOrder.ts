@@ -1,28 +1,16 @@
-import { DbOrder } from 'model/DbOrder.js';
-import { toNumber } from '../converter/index.js';
+import { Order } from '@airswap/typescript';
 
-/**
- * Caller should ensure, number fields are present
- * @param data object that conatins all the needed fields
- * @returns a DbOrder
- */
-export function mapAnyToDbOrder(data: any): DbOrder {
+export function mapAnyToOrder(data: any): Order {
     return {
         nonce: String(data.nonce),
         signerWallet: String(data.signerWallet),
         signerToken: String(data.signerToken),
         signerAmount: String(data.signerAmount),
-        protocolFee: String(data.protocolFee),
-        senderWallet: String(data.senderWallet),
         senderToken: String(data.senderToken),
         senderAmount: String(data.senderAmount),
-        expiry: toNumber(data.expiry)!,
-        approximatedSignerAmount: toNumber(data.signerAmount)!,
-        approximatedSenderAmount: toNumber(data.senderAmount)!,
+        expiry: String(data.expiry)!,
         r: String(data.r),
         s: String(data.s),
         v: String(data.v),
-        chainId: String(data.chainId),
-        swapContract: String(data.swapContract)
     }
 }

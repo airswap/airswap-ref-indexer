@@ -8,8 +8,8 @@ export declare type DbOrder = {
     senderToken: string
     senderAmount: string
     expiry: number;
-    approximatedSignerAmount: number;
-    approximatedSenderAmount: number;
+    approximatedSignerAmount: BigInt;
+    approximatedSenderAmount: BigInt;
 } & Signature & Settlement;
 
 export declare type Signature = {

@@ -16,10 +16,10 @@ describe("mapAnyToRequestFilter", () => {
             sortOrder: "DESC",
             maxAddedDate: "321546"
         })).toEqual({
-            maxSenderAmount: 20,
-            maxSignerAmount: 200,
-            minSenderAmount: 2,
-            minSignerAmount: 200,
+            maxSenderAmount: BigInt(20),
+            maxSignerAmount: BigInt(200),
+            minSenderAmount: BigInt(2),
+            minSignerAmount: BigInt(200),
             page: 3,
             senderTokens: ["dai", "btc"],
             signerTokens: ["eth", "ast"],
@@ -41,10 +41,10 @@ describe("mapAnyToRequestFilter", () => {
             sortOrder: "DESC",
             maxAddedDate: "321546"
         })).toEqual({
-            maxSenderAmount: 20,
-            maxSignerAmount: 200,
-            minSenderAmount: 2,
-            minSignerAmount: 200,
+            maxSenderAmount: BigInt(20),
+            maxSignerAmount: BigInt(200),
+            minSenderAmount: BigInt(2),
+            minSignerAmount: BigInt(200),
             page: 1,
             senderTokens: ["dai"],
             signerTokens: ["eth"],
