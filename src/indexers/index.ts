@@ -1,7 +1,7 @@
 import { ContractInterface } from 'ethers';
 import { createRequire } from 'module';
 const customRequire = createRequire(import.meta.url);
-const Indexers = customRequire('@airswap/indexers/build/contracts/Indexers.sol/Indexers.json');
+const Indexers = customRequire('@airswap/indexer-registry/build/contracts/IndexerRegistry.sol/IndexerRegistry.json');
 const Swap = customRequire('@airswap/swap/build/contracts/Swap.sol/Swap.json');
 
 export function getIndexersAbi(){

@@ -14,13 +14,6 @@
   dependencies:
     "@openzeppelin/contracts" "^4.3.1"
 
-"@airswap/indexers@^3.0.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@airswap/indexers/-/indexers-3.1.0.tgz#0c1b6dc150d60402728f39b07a5f4d15bfb1213e"
-  integrity sha512-QtoqS62Di6wZkNEe1a+7+qH0SNxpSNERhphlrjB52Fr4Oerp+bjLXVKxdG88vKsw/E1t8MXAGxLsfVzHLG4tQg==
-  dependencies:
-    "@openzeppelin/contracts" "^4.3.1"
-
 "@airswap/jsonrpc-client-websocket@0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@airswap/jsonrpc-client-websocket/-/jsonrpc-client-websocket-0.0.1.tgz#e75932a0f19cb6c23cf145834277211cce150400"
