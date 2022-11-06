@@ -1,4 +1,5 @@
 import { AddressZero } from "@ethersproject/constants";
+import { NodeIndexer } from "@airswap/libraries";
 import axios from "axios";
 
 const tokens = [
@@ -9,6 +10,7 @@ const tokens = [
 ];
 
 async function bench() {
+    const client = new NodeIndexer("https://airswap.mitsi.ovh/");
     let lastDate = new Date().getTime();
     let shift = 0;
     for (let index = 1; index < 10000; index++) {
@@ -17,44 +19,39 @@ async function bench() {
             Math.floor(Math.random() * (tokens.length - 1))
         ];
         shift++;
-        const expiryInSeconds = `${(new Date().getTime() + shift * 60000) / 1000}`;
+        const expiryInSeconds = `${
+            (new Date().getTime() + shift * 60000) / 1000
+        }`;
         const body = {
-            jsonrpc: "2.0",
-            id: "1",
-            method: "addOrder",
-            params: [
-                {
-                    nonce: "nonce",
-                    expiry: expiryInSeconds,
-                    signerWallet: AddressZero,
-                    signerToken: signerToken,
-                    signerAmount: `${index}`,
-                    senderWallet: AddressZero,
-                    senderToken: senderToken,
-                    senderAmount: "10",
-                    protocolFee: "4",
-                    r: "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",
-                    s: "0x5a12fdf12c2b966a98d238916a670bdfd83e207e54a9c7d0af923839582de79f",
-                    v: "28",
-                    chainId: "5",
-                    swapContract: AddressZero,
-                },
-            ],
-        }
+            nonce: "nonce",
+            expiry: expiryInSeconds,
+            signerWallet: AddressZero,
+            signerToken: signerToken,
+            signerAmount: `${index}`,
+            senderWallet: AddressZero,
+            senderToken: senderToken,
+            senderAmount: "10",
+            protocolFee: "4",
+            r: "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",
+            s: "0x5a12fdf12c2b966a98d238916a670bdfd83e207e54a9c7d0af923839582de79f",
+            v: "28",
+            chainId: "5",
+            swapContract: AddressZero,
+        };
+
         try {
-            if(index % 10 === 0){
-                await axios.post("https://airswap.mitsi.ovh/", body);
+            if (index % 10 === 0) {
+                await client.addOrder(body);
                 const now = new Date().getTime();
                 const elapsed = now - lastDate;
                 console.log(index, elapsed, elapsed / 100, "ms/rq");
                 lastDate = now;
-            }else {
-                axios.post("https://airswap.mitsi.ovh/", body);
+            } else {
+                await client.addOrder(body);
             }
         } catch (error) {
             console.log(error);
         }
-        
     }
 }
 
