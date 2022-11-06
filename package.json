@@ -26,8 +26,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "ethers": "^5.6.9",
-    "express": "^4.17.3",
-    "public-ip": "^5.0.0"
+    "express": "^4.17.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",

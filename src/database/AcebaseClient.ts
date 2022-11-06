@@ -2,7 +2,7 @@ import { IndexedOrderResponse, OrderResponse, RequestFilter, SortField, SortOrde
 import { AceBase, DataReference } from 'acebase';
 import crypto from "crypto";
 import fs from "fs";
-import { computePagination } from '../controller/pagination/index.js';
+import { computePagination } from '../mapper/pagination/index.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { AceBaseLocalSettings } from './../../node_modules/acebase/index.d';

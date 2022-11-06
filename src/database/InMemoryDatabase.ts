@@ -1,6 +1,6 @@
 import { IndexedOrderResponse, OrderResponse, RequestFilter, SortField, SortOrder } from '@airswap/libraries';
 import crypto from "crypto";
-import { computePagination } from '../controller/pagination/index.js';
+import { computePagination } from '../mapper/pagination/index.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Database } from './Database.js';
