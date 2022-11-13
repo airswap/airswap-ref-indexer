@@ -3,8 +3,6 @@ import { Database } from '../../database/Database';
 import { forgeDbOrder, forgeFullOrder, forgeIndexedOrder, forgeIndexedOrderResponse, forgeOrderResponse } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
 import { Filters } from './../../database/filter/Filters';
-import { AlreadyExistsError } from './../../model/error/AlreadyExists';
-import { ClientError } from './../../model/error/ClientError';
 import { OrderService } from './../../service/OrderService';
 
 jest
