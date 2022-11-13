@@ -1,4 +1,4 @@
-import { FiltersResponse } from '@airswap/libraries';
+import { FiltersResponse } from '@airswap/libraries/build/src/Indexer';
 import { Database } from '../../database/Database';
 import { forgeDbOrder, forgeFullOrder, forgeIndexedOrder, forgeIndexedOrderResponse, forgeOrderResponse } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';

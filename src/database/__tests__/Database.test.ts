@@ -6,11 +6,11 @@ import { AceBaseClient } from "../AcebaseClient";
 import { Database } from '../Database';
 import { InMemoryDatabase } from '../InMemoryDatabase';
 import { DbOrder } from './../../model/DbOrder';
-import { Pagination } from '@airswap/libraries';
-import { IndexedOrderResponse } from '@airswap/libraries';
-import { OrderResponse } from '@airswap/libraries';
-import { SortField } from '@airswap/libraries';
-import { SortOrder } from '@airswap/libraries';
+import { Pagination } from '@airswap/libraries/build/src/Indexer';
+import { IndexedOrderResponse } from '@airswap/libraries/build/src/Indexer';
+import { OrderResponse } from '@airswap/libraries/build/src/Indexer';
+import { SortField } from '@airswap/libraries/build/src/Indexer';
+import { SortOrder } from '@airswap/libraries/build/src/Indexer';
 
 describe("Database implementations", () => {
     let inMemoryDatabase: InMemoryDatabase;

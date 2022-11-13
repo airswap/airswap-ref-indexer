@@ -1,4 +1,4 @@
-import { HealthCheckResponse } from '@airswap/libraries';
+import { HealthCheckResponse } from '@airswap/libraries/build/src/Indexer';
 import { Order } from '@airswap/typescript';
 import bodyParser from "body-parser";
 import express from 'express';

@@ -1,4 +1,4 @@
-import { OrderResponse } from '@airswap/libraries';
+import { OrderResponse } from '@airswap/libraries/build/src/Indexer';
 import { Database } from '../../database/Database';
 import { forgeIndexedOrderResponse } from '../../Fixtures';
 import { Peers } from '../../peer/Peers';

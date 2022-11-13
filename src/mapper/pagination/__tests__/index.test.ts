@@ -1,4 +1,4 @@
-import { Pagination } from '@airswap/libraries';
+import { Pagination } from '@airswap/libraries/build/src/Indexer';
 import { computePagination } from '../index.js';
 describe("Pagination", () => {
     it("should return default pagination 1,1 if less than max result", () => {

@@ -1,4 +1,4 @@
-import { Pagination } from '@airswap/libraries';
+import { Pagination } from '@airswap/libraries/build/src/Indexer';
 
 const DEFAULT_MIN_MAX = "1";
 export function computePagination(elementPerPage: number, totalResults: number, actualPage: number = 1): Pagination {

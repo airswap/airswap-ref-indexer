@@ -1,7 +1,7 @@
 import { Express, Request, Response } from "express";
 import { SuccessResponse } from '../model/response/SuccessResponse.js';
 import { ClientError } from './../model/error/ClientError.js';
-import { IndexedOrderError, JsonRpcResponse } from  '@airswap/libraries';
+import { IndexedOrderError, JsonRpcResponse } from  '@airswap/libraries/build/src/Indexer';
 import { NotFound } from '../model/error/NotFound.js';
 import { RootService } from '../service/RootService.js';
 import { Peers } from './../peer/Peers.js';
