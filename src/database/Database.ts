@@ -1,5 +1,5 @@
-import { OrderResponse } from '@airswap/libraries/build/src/Indexer';
-import { RequestFilter } from '@airswap/libraries/build/src/Indexer';
+import { OrderResponse } from '@airswap/libraries/build/src/Indexer.js';
+import { RequestFilter } from '@airswap/libraries/build/src/Indexer.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Filters } from './filter/Filters.js';
 

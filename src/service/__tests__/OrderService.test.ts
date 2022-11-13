@@ -1,4 +1,4 @@
-import { FiltersResponse } from '@airswap/libraries/build/src/Indexer';
+import { FiltersResponse } from '@airswap/libraries/build/src/Indexer.js';
 import { Database } from '../../database/Database';
 import { forgeDbOrder, forgeFullOrder, forgeIndexedOrder, forgeIndexedOrderResponse, forgeOrderResponse } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
@@ -99,7 +99,7 @@ describe("Order service", () => {
             await expect(async () => {
                 // @ts-ignore
                 await new OrderService(fakeDb as Database).getOrders(null, undefined)
-            }).rejects.toThrow(ClientError);
+            }).rejects.toThrow("Incorrect query");
 
             expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
@@ -153,7 +153,7 @@ describe("Order service", () => {
             }).rejects.toThrow();
             await expect(async () => {
                 await new OrderService(fakeDb as Database).addOrder(orderBadValueSignerAmount)
-            }).rejects.toThrow(ClientError);
+            }).rejects.toThrow("Number fields are incorrect");
 
             expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
@@ -165,7 +165,7 @@ describe("Order service", () => {
 
             await expect(async () => {
                 await new OrderService(fakeDb as Database).addOrder(orderDateNotInRange)
-            }).rejects.toThrow(ClientError);
+            }).rejects.toThrow("Invalid expiry date");
 
             expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
@@ -174,7 +174,7 @@ describe("Order service", () => {
         test("Missing order", async () => {
             await expect(async () => {
                 await new OrderService(fakeDb as Database).addOrder({})
-            }).rejects.toThrow(ClientError);
+            }).rejects.toThrow("No body");
 
             expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
@@ -194,7 +194,7 @@ describe("Order service", () => {
 
             await expect(async () => {
                 await new OrderService(fakeDb as Database).addOrder(order)
-            }).rejects.toThrow(AlreadyExistsError);
+            }).rejects.toThrow("Already exists");
 
             expect(fakeDb.generateHash).toHaveBeenCalledWith(expected);
             expect(fakeDb.orderExists).toHaveBeenCalledWith("a");

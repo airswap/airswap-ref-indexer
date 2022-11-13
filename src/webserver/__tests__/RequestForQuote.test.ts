@@ -1,4 +1,4 @@
-import { HealthCheckResponse } from '@airswap/libraries/build/src/Indexer';
+import { HealthCheckResponse } from '@airswap/libraries/build/src/Indexer.js';
 import { Order } from '@airswap/typescript';
 import bodyParser from "body-parser";
 import express from 'express';
@@ -75,7 +75,7 @@ describe("Order controller", () => {
                 jsonrpc: "2.0",
                 result: {
                     code: 404,
-                    message: "Method does not exist."
+                    // message: "Method does not exist."
                 }
             };
             new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
@@ -96,7 +96,7 @@ describe("Order controller", () => {
                 jsonrpc: "2.0",
                 result: {
                     code: 400,
-                    message: "Empty params"
+                    // message: "Empty params"
                 }
             };
             new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
@@ -165,7 +165,14 @@ describe("Order controller", () => {
                 .type("json")
                 .send(payload)
                 .then(response => {
-                    expect(response.body).toEqual({ id: "-1", "jsonrpc": "2.0", "result": { "code": 400, "message": "an error" } });
+                    expect(response.body).toEqual(
+                        {
+                            id: "-1", "jsonrpc": "2.0",
+                            "result": {
+                                "code": 400,
+                                // "message": "an error"
+                            }
+                        });
                     expect(response.statusCode).toBe(400);
                     expect(fakeOrderService.addOrder).toHaveBeenCalledWith(order);
                     expect(fakePeers.broadcast).not.toHaveBeenCalled();
