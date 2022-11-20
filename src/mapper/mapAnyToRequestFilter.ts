@@ -1,8 +1,6 @@
 import { toNumber, toArray, toBigInt } from "../converter/index.js";
 import { isNumeric } from '../validator/index.js';
-import { RequestFilter } from '@airswap/libraries/build/src/Indexer.js';
-import { toSortField } from '@airswap/libraries/build/src/Indexer.js';
-import { toSortOrder } from '@airswap/libraries/build/src/Indexer.js';
+import { RequestFilter, toSortField, toSortOrder } from '@airswap/libraries/build/src/Indexer.js';
 
 export function mapAnyToRequestFilter(data: any): RequestFilter {
     return {

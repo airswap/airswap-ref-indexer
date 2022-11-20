@@ -7,7 +7,7 @@ import { RootService } from '../service/RootService.js';
 import { Peers } from './../peer/Peers.js';
 import { OrderService, METHODS } from './../service/OrderService.js';
 
-export class RequestForQuote {
+export class IndexerServer {
     private server: Express;
     private orderService: OrderService;
     private rootService: RootService;
@@ -16,7 +16,6 @@ export class RequestForQuote {
     constructor(server: Express, orderService: OrderService, rootService: RootService, peers: Peers) {
         this.server = server;
         this.rootService = rootService;
-        this.orderService = orderService;
         this.orderService = orderService;
         this.peers = peers;
     }
