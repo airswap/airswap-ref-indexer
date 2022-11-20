@@ -11,7 +11,7 @@ import { Peers } from "./peer/Peers.js";
 import { OrderService } from './service/OrderService.js';
 import { RootService } from './service/RootService.js';
 import { Webserver } from "./webserver/index.js";
-import { RequestForQuote } from "./webserver/RequestForQuote.js";
+import { IndexerServer } from "./webserver/IndexerServer.js";
 
 // Env Variables
 if (!process.env.EXPRESS_PORT) {
@@ -60,7 +60,7 @@ console.log("Available peers:", peersFromRegistry);
 await requestDataFromOtherPeer(peersFromRegistry, database, peers, orderClient);
 const webserver = new Webserver(+EXPRESS_PORT);
 const expressApp = webserver.run();
-new RequestForQuote(expressApp, orderService, rootController, peers).run();
+new IndexerServer(expressApp, orderService, rootController, peers).run();
 
 // Shutdown signals
 process.on("SIGTERM", () => {
