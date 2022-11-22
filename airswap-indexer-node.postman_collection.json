@@ -43,7 +43,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"jsonrpc\": \"2.0\",\r\n    \"id\": \"1\",\r\n    \"method\": \"addOrder\",\r\n    \"params\": [{\r\n        \"nonce\": \"nonce\",\r\n        \"expiry\": \"1661368714662\",\r\n        \"signerWallet\": \"signerWallet\",\r\n        \"signerToken\": \"0x0000000000000000000000000000000000000000\",\r\n        \"signerAmount\": \"40\",\r\n        \"senderWallet\": \"senderWallet\",\r\n        \"senderToken\": \"senderToken\",\r\n        \"senderAmount\": \"142\",\r\n        \"r\": \"r\",\r\n        \"s\": \"s\",\r\n        \"v\": \"v\",\r\n        \"chainId\": \"5\",\r\n        \"swapContract\": \"0x0000000000000000000000000000000000000000\",\r\n        \"protocolFee\": \"4\"\r\n    }]\r\n}",
+							"raw": "{\r\n    \"jsonrpc\": \"2.0\",\r\n    \"id\": \"1\",\r\n    \"method\": \"addOrder\",\r\n    \"params\": [\r\n        {\r\n            \"nonce\": \"nonce\",\r\n            \"expiry\": \"1669227620\",\r\n            \"signerWallet\": \"0x0000000000000000000000000000000000000000\",\r\n            \"signerToken\": \"0x0000000000000000000000000000000000000000\",\r\n            \"signerAmount\": \"40\",\r\n            \"senderWallet\": \"0x0000000000000000000000000000000000000000\",\r\n            \"senderToken\": \"0x0000000000000000000000000000000000000000\",\r\n            \"senderAmount\": \"10\",\r\n            \"protocolFee\": \"4\",\r\n            \"r\": \"0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7\",\r\n            \"s\": \"0x5a12fdf12c2b966a98d238916a670bdfd83e207e54a9c7d0af923839582de79f\",\r\n            \"v\": \"28\",\r\n            \"chainId\": \"5\",\r\n            \"swapContract\": \"0x0000000000000000000000000000000000000000\"\r\n        }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -108,139 +108,6 @@
 							],
 							"path": [
 								""
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "peers",
-			"item": [
-				{
-					"name": "Get peers from node",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://{{node_url}}/peers/",
-							"protocol": "http",
-							"host": [
-								"{{node_url}}"
-							],
-							"path": [
-								"peers",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Add peers to node",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"urls\": [\r\n        \"192.168.1.58:4001\"\r\n    ]\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://{{node_url}}/peers/",
-							"protocol": "http",
-							"host": [
-								"{{node_url}}"
-							],
-							"path": [
-								"peers",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete peers from node",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "http://{{node_url}}/peers/192.168.1.58:4001",
-							"protocol": "http",
-							"host": [
-								"{{node_url}}"
-							],
-							"path": [
-								"peers",
-								"192.168.1.58:4001"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "registry",
-			"item": [
-				{
-					"name": "Get ips",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://{{registry_url}}",
-							"protocol": "http",
-							"host": [
-								"{{registry_url}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Add an ip",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"ip\": \"192.168.1.58:4001\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://{{registry_url}}",
-							"protocol": "http",
-							"host": [
-								"{{registry_url}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete an ip",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "http://{{registry_url}}/192.168.1.58",
-							"protocol": "http",
-							"host": [
-								"{{registry_url}}"
-							],
-							"path": [
-								"192.168.1.58"
 							]
 						}
 					},

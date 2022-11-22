@@ -1,6 +1,5 @@
 import { AddressZero } from "@ethersproject/constants";
 import { NodeIndexer } from "@airswap/libraries";
-import axios from "axios";
 
 const tokens = [
     "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", // WBTC
