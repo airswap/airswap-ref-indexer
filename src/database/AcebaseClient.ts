@@ -1,17 +1,13 @@
+import { IndexedOrderResponse, OrderResponse, RequestFilter, SortField, SortOrder } from '@airswap/libraries/build/src/Indexer.js';
 import { AceBase, DataReference } from 'acebase';
 import crypto from "crypto";
 import fs from "fs";
-import { computePagination } from '../controller/pagination/index.js';
-import { mapAnyToOrder } from '../mapper/mapAnyToOrder.js';
+import { computePagination } from '../mapper/pagination/index.js';
+import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { AceBaseLocalSettings } from './../../node_modules/acebase/index.d';
-import { IndexedOrderResponse } from './../model/response/IndexedOrderResponse.js';
-import { OrderResponse } from './../model/response/OrderResponse.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
-import { RequestFilter } from './filter/RequestFilter';
-import { SortField } from './filter/SortField.js';
-import { SortOrder } from './filter/SortOrder.js';
 
 const ENTRY_REF = "otcOrders";
 const elementPerPage = 20;
@@ -22,12 +18,12 @@ export class AceBaseClient implements Database {
     private filters!: Filters;
     private ref!: DataReference;
 
-    public async connect(databaseName: string, deleteOnStart = false): Promise<void> {        
+    public async connect(databaseName: string, deleteOnStart = false): Promise<void> {
         const options = { storage: { path: '.' }, logLevel: 'error' } as AceBaseLocalSettings;
         const dbName = `${databaseName}.acebase`;
-        if (deleteOnStart && fs.existsSync(dbName)) {            
+        if (deleteOnStart && fs.existsSync(dbName)) {
             await fs.promises.rm(dbName, { recursive: true });
-        } 
+        }
         this.db = new AceBase(databaseName, options);
         return new Promise((resolve, reject) => {
             this.db.ready(() => {
@@ -87,11 +83,15 @@ export class AceBaseClient implements Database {
         const entriesSkipped = (requestFilter.page - 1) * elementPerPage;
         const data = await query.skip(entriesSkipped).take(elementPerPage).get();
         const mapped = data.reduce((total, indexedOrder) => {
-            const mapped = this.datarefToRecord(indexedOrder.val());           
+            const mapped = this.datarefToRecord(indexedOrder.val());
             return { ...total, ...mapped };
         }, {} as Record<string, IndexedOrderResponse>);
         const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
-        return Promise.resolve(new OrderResponse(mapped, pagination, totalResults));
+        return Promise.resolve({
+            orders: mapped,
+            pagination: pagination,
+            ordersForQuery: totalResults
+        });
     }
 
     close(): Promise<void> {
@@ -128,7 +128,7 @@ export class AceBaseClient implements Database {
             .filter('expiry', '<', timestampInSeconds)
             .remove();
         return Promise.resolve();
-      }
+    }
 
     async getOrder(hash: string): Promise<OrderResponse> {
         const query = await this.ref.query()
@@ -136,11 +136,19 @@ export class AceBaseClient implements Database {
             .get();
         const serializedOrder = query.values()?.next()?.value?.val();
         if (!serializedOrder) {
-            return Promise.resolve(new OrderResponse({}, computePagination(elementPerPage, 0), 0));
+            return Promise.resolve({
+                orders: {},
+                pagination: computePagination(elementPerPage, 0),
+                ordersForQuery: 0
+            });
         }
         const result: Record<string, IndexedOrderResponse> = {};
         result[hash] = this.datarefToRecord(serializedOrder)[hash];
-        return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1), 1));
+        return Promise.resolve({
+            orders: result,
+            pagination: computePagination(elementPerPage, 1),
+            ordersForQuery: 1
+        });
     }
 
     async getOrders(): Promise<OrderResponse> {
@@ -151,7 +159,11 @@ export class AceBaseClient implements Database {
             const mapp = this.datarefToRecord(dataSnapshot.val());
             mapped = { ...mapped, ...mapp };
         });
-        return Promise.resolve(new OrderResponse(mapped, computePagination(totalResults, totalResults), totalResults));
+        return Promise.resolve({
+            orders: mapped,
+            pagination: computePagination(totalResults, totalResults),
+            ordersForQuery: totalResults
+        });
     }
 
     async erase() {
@@ -161,7 +173,11 @@ export class AceBaseClient implements Database {
 
     private datarefToRecord(data: any): Record<string, IndexedOrderResponse> {
         const mapped: Record<string, IndexedOrderResponse> = {};
-        mapped[data.hash] = new IndexedOrderResponse(mapAnyToOrder(data), data.addedOn, data.hash)
+        mapped[data.hash] = {
+            order: mapAnyToFullOrder(data),
+            addedOn: data.addedOn,
+            hash: data.hash
+        };
         return mapped;
     }
 

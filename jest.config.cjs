@@ -10,6 +10,7 @@ module.exports = {
     moduleNameMapper: {
         "^uint8array-tools$": "uint8array-tools/src/cjs",
         "^tiny-secp256k1$": "tiny-secp256k1/lib/cjs",
+        "^@airswap/libraries$": "@airswap/libraries/build/src/",
     },
     transformIgnorePatterns: [
         "node_modules/(?!tiny-secp256k1/lib/cjs/.*)",

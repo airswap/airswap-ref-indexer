@@ -1,7 +1,7 @@
-import { OrderResponse } from './../model/response/OrderResponse.js';
+import { OrderResponse } from '@airswap/libraries/build/src/Indexer.js';
+import { RequestFilter } from '@airswap/libraries/build/src/Indexer.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Filters } from './filter/Filters.js';
-import { RequestFilter } from './filter/RequestFilter.js';
 
 export interface Database {
     addOrder(IndexedOrder: IndexedOrder): Promise<void>;

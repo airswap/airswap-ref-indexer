@@ -1,6 +1,6 @@
-import { Order } from '@airswap/typescript';
+import { FullOrder } from '@airswap/typescript';
 
-export function mapAnyToOrder(data: any): Order {
+export function mapAnyToFullOrder(data: any): FullOrder {
     return {
         nonce: String(data.nonce),
         signerWallet: String(data.signerWallet),
@@ -12,5 +12,9 @@ export function mapAnyToOrder(data: any): Order {
         r: String(data.r),
         s: String(data.s),
         v: String(data.v),
+        protocolFee:  String(data.protocolFee), 
+        senderWallet:  String(data.senderWallet),
+        chainId:  String(data.chainId), 
+        swapContract:  String(data.swapContract)
     }
 }

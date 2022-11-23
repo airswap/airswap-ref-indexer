@@ -1,5 +1,4 @@
-import { HealthCheckResponse } from './../../model/response/HealthCheckResponse';
-import { ClientError } from './../../model/error/ClientError';
+import { HealthCheckResponse } from '@airswap/libraries/build/src/Indexer.js';
 import { Order } from '@airswap/typescript';
 import bodyParser from "body-parser";
 import express from 'express';
@@ -7,9 +6,10 @@ import http from "http";
 import supertest from "supertest";
 import { forgeJsonRpcResponse, forgeOrderResponse } from '../../Fixtures';
 import { Peers } from '../../peer/Peers';
+import { ClientError } from './../../model/error/ClientError';
 import { OrderService } from './../../service/OrderService';
 import { RootService } from './../../service/RootService';
-import { RequestForQuote } from './../RequestForQuote';
+import { IndexerServer } from './../IndexerServer';
 
 jest
     .useFakeTimers()
@@ -48,7 +48,7 @@ describe("Order controller", () => {
 
     describe("GET *", () => {
         test("should give basic info", done => {
-            const result = new HealthCheckResponse([], "registry", 100)
+            const result: HealthCheckResponse = { registry: "registry", peers: [], databaseOrders: 100 };
             const expected = {
                 "jsonrpc": "2.0",
                 "id": "-1",
@@ -57,7 +57,7 @@ describe("Order controller", () => {
             // @ts-ignore
             fakeRootService.get.mockImplementation(() => Promise.resolve(result));
 
-            new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
+            new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
             supertest(webserver)
                 .get("/")
                 .then(response => {
@@ -75,10 +75,10 @@ describe("Order controller", () => {
                 jsonrpc: "2.0",
                 result: {
                     code: 404,
-                    message: "Method does not exist."
+                    // message: "Method does not exist."
                 }
             };
-            new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
+            new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
             supertest(webserver)
                 .post("/")
                 .type("json")
@@ -96,10 +96,10 @@ describe("Order controller", () => {
                 jsonrpc: "2.0",
                 result: {
                     code: 400,
-                    message: "Empty params"
+                    // message: "Empty params"
                 }
             };
-            new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
+            new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
             supertest(webserver)
                 .post("/")
                 .type("json")
@@ -117,8 +117,8 @@ describe("Order controller", () => {
             const expected = forgeJsonRpcResponse("-1", forgeOrderResponse());
             fakeOrderService.getOrders = jest.fn().mockResolvedValue(forgeOrderResponse());
 
-            new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
-            
+            new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
+
             supertest(webserver)
                 .post("/")
                 .type("json")
@@ -137,7 +137,7 @@ describe("Order controller", () => {
         test("Add order nominal & broadcast", done => {
             const order = forgeOrder(1653900784696);
             const payload = { id: "-1", method: "addOrder", params: [order] };
-            new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
+            new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
             supertest(webserver)
                 .post("/")
                 .type("json")
@@ -158,14 +158,21 @@ describe("Order controller", () => {
             fakeOrderService.addOrder = jest.fn().mockImplementation(() => {
                 throw new ClientError("an error");
             })
-            new RequestForQuote(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
+            new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
 
             supertest(webserver)
                 .post("/")
                 .type("json")
                 .send(payload)
                 .then(response => {
-                    expect(response.body).toEqual({ id: "-1", "jsonrpc": "2.0", "result": { "code": 400, "message": "an error" } });
+                    expect(response.body).toEqual(
+                        {
+                            id: "-1", "jsonrpc": "2.0",
+                            "result": {
+                                "code": 400,
+                                // "message": "an error"
+                            }
+                        });
                     expect(response.statusCode).toBe(400);
                     expect(fakeOrderService.addOrder).toHaveBeenCalledWith(order);
                     expect(fakePeers.broadcast).not.toHaveBeenCalled();

@@ -1,14 +1,10 @@
+import { IndexedOrderResponse, OrderResponse, RequestFilter, SortField, SortOrder } from '@airswap/libraries/build/src/Indexer.js';
 import crypto from "crypto";
-import { mapAnyToOrder } from '../mapper/mapAnyToOrder.js';
-import { computePagination } from '../controller/pagination/index.js';
+import { computePagination } from '../mapper/pagination/index.js';
+import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
-import { IndexedOrderResponse } from './../model/response/IndexedOrderResponse.js';
-import { OrderResponse } from './../model/response/OrderResponse.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
-import { RequestFilter } from './filter/RequestFilter.js';
-import { SortField } from "./filter/SortField.js";
-import { SortOrder } from "./filter/SortOrder.js";
 
 const elementPerPage = 20;
 export class InMemoryDatabase implements Database {
@@ -66,12 +62,16 @@ export class InMemoryDatabase implements Database {
         return { ...total };
       }, {});
 
-    return Promise.resolve(new OrderResponse(orders, computePagination(elementPerPage, totalResultsCount, requestFilter.page), totalResultsCount));
+    return Promise.resolve({
+      orders,
+      pagination:computePagination(elementPerPage, totalResultsCount, requestFilter.page),
+      ordersForQuery:totalResultsCount
+    });
   }
 
   addOrder(indexedOrder: IndexedOrder) {
     this.database[indexedOrder.hash!] = indexedOrder;
-    this.filters.addSignerToken(indexedOrder.order.signerToken, indexedOrder.order.approximatedSignerAmount);
+    this.filters.addSignerToken(indexedOrder.order.signerToken, indexedOrder.order.approximatedSignerAmount); 
     this.filters.addSenderToken(indexedOrder.order.senderToken, indexedOrder.order.approximatedSenderAmount);
     return Promise.resolve();
   }
@@ -107,9 +107,17 @@ export class InMemoryDatabase implements Database {
     const result: Record<string, IndexedOrderResponse> = {};
     if (this.database[hash]) {
       result[hash] = this.mapToIndexedOrderResponse(this.database[hash]);
-      return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 1), 1));
+      return Promise.resolve({
+        orders:result,
+        pagination: computePagination(elementPerPage, 1),
+        ordersForQuery:1
+      });
     }
-    return Promise.resolve(new OrderResponse(result, computePagination(elementPerPage, 0), 0));
+    return Promise.resolve({
+      orders:result,
+      pagination: computePagination(elementPerPage, 0),
+      ordersForQuery:0
+    });
   }
 
   async getOrders(): Promise<OrderResponse> {
@@ -118,7 +126,11 @@ export class InMemoryDatabase implements Database {
     Object.keys(this.database).forEach(key => {
       results[key] = this.mapToIndexedOrderResponse(this.database[key])
     })
-    return Promise.resolve(new OrderResponse(results, computePagination(size, size), size));
+    return Promise.resolve({
+      orders:results,
+      pagination: computePagination(size, size),
+      ordersForQuery:size
+    });
   }
 
   getFilters(): Promise<Filters> {
@@ -151,6 +163,10 @@ export class InMemoryDatabase implements Database {
   }
 
   private mapToIndexedOrderResponse(indexedOrder: IndexedOrder): IndexedOrderResponse {
-    return new IndexedOrderResponse(mapAnyToOrder(indexedOrder.order), indexedOrder.addedOn, indexedOrder.hash);
+    return {
+      hash: indexedOrder.hash,
+      addedOn:indexedOrder.addedOn,
+      order:mapAnyToFullOrder(indexedOrder.order)
+    };
   }
 }

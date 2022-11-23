@@ -1,6 +1,6 @@
 import { mapAnyToRequestFilter } from '../mapAnyToRequestFilter';
-import { SortField } from './../../database/filter/SortField';
-import { SortOrder } from './../../database/filter/SortOrder';
+import { SortField } from '@airswap/libraries/build/src/Indexer.js';
+import { SortOrder } from '@airswap/libraries/build/src/Indexer.js';
 
 describe("mapAnyToRequestFilter", () => {
     test("should map all string values", () => {

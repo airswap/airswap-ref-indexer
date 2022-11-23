@@ -1,5 +1,3 @@
-import { AxiosResponse } from 'axios';
-import { PeersClient } from '../client/PeersClient.js';
 import { Database } from '../database/Database.js';
 import { BroadcastClient } from './../client/BroadcastClient';
 
@@ -8,17 +6,13 @@ export class Peers {
   peers: string[];
   database: Database;
   host: string;
-  peersClient: PeersClient;
   broadcastClient: BroadcastClient;
-  isSmartContract: boolean;
 
-  constructor(database: Database, host: string, peersClient: PeersClient, broadcastClient: BroadcastClient, isSmartContract: boolean) {
+  constructor(database: Database, host: string, broadcastClient: BroadcastClient) {
     this.peers = [];
     this.database = database;
     this.host = this.sanitizeUrl(host);
-    this.peersClient = peersClient;
     this.broadcastClient = broadcastClient;
-    this.isSmartContract = isSmartContract;
   };
 
   addPeer = (url: string) => {
@@ -63,29 +57,6 @@ export class Peers {
       }
     });
   }
-
-  broadcastMyHostToOtherPeer = () => {
-    if (this.isSmartContract) return;
-    console.log("Broadcasted my host to other peers");
-
-    this.peers.forEach((clientUrl) => {
-      if (clientUrl && clientUrl != this.host) {
-        this.peersClient.addPeer(clientUrl, this.host);
-      }
-    });
-  };
-
-  broadcastDisconnectionToOtherPeer = async () => {
-    if (this.isSmartContract) return;
-
-    const promises: Promise<AxiosResponse<any, any>>[] = [];
-    this.peers.forEach((clientUrl) => {
-      if (clientUrl && clientUrl != this.host) {
-        promises.push(this.peersClient.removePeer(clientUrl, this.host));
-      }
-    });
-    return await Promise.all(promises);
-  };
 
   getPeers = () => {
     return this.peers;

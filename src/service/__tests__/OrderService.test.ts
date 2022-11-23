@@ -1,12 +1,8 @@
-import { FiltersResponse } from './../../database/filter/FiltersResponse';
-import { AlreadyExistsError } from './../../model/error/AlreadyExists';
-import { ClientError } from './../../model/error/ClientError';
+import { FiltersResponse } from '@airswap/libraries/build/src/Indexer.js';
 import { Database } from '../../database/Database';
-import { forgeDbOrder, forgeIndexedOrder, forgeFullOrder, forgeIndexedOrderResponse, forgeOrderResponse } from '../../Fixtures';
+import { forgeDbOrder, forgeFullOrder, forgeIndexedOrder, forgeIndexedOrderResponse, forgeOrderResponse } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
-import { Pagination } from '../../model/Pagination.js';
 import { Filters } from './../../database/filter/Filters';
-import { OrderResponse } from './../../model/response/OrderResponse';
 import { OrderService } from './../../service/OrderService';
 
 jest
@@ -19,9 +15,9 @@ describe("Order service", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, new Pagination("1", "1"), 1))),
-            getOrder: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, new Pagination("1", "1"), 1))),
-            getOrderBy: jest.fn(() => Promise.resolve(new OrderResponse({ "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, new Pagination("1", "1"), 1))),
+            getOrders: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
+            getOrder: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
+            getOrderBy: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
             getFilters: jest.fn(() => Promise.resolve({ signerToken: { "ETH": { min: BigInt(10), max: BigInt(10) } }, senderToken: { "dai": { min: BigInt(5), max: BigInt(5) } } } as unknown as Filters) as Promise<Filters>),
             addOrder: jest.fn(() => Promise.resolve()),
             orderExists: jest.fn(() => Promise.resolve(true)),
@@ -40,11 +36,18 @@ describe("Order service", () => {
             expect(result).toEqual(expected);
         });
 
-        test("get all with filers", async () => {
+        test("get all with filters", async () => {
             const filters = new Filters();
             filters.signerToken = { "ETH": { min: BigInt(10), max: BigInt(10) } };
             filters.senderToken = { "dai": { min: BigInt(5), max: BigInt(5) } };
-            const expectedFilters = new FiltersResponse(filters);
+            const expectedFilters: FiltersResponse = {
+                signerToken: {
+                    ETH: { min: "10", max: "10" }
+                },
+                senderToken: {
+                    dai: { min: "5", max: "5" }
+                }
+            }
             const expected = forgeOrderResponse(expectedFilters);
 
             const result = await new OrderService(fakeDb as Database).getOrders({ filters: true } as Record<string, any>);
@@ -94,7 +97,7 @@ describe("Order service", () => {
             await expect(async () => {
                 // @ts-ignore
                 await new OrderService(fakeDb as Database).getOrders(null, undefined)
-            }).rejects.toThrow(ClientError);
+            }).rejects.toThrow("Incorrect query");
 
             expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
@@ -148,7 +151,7 @@ describe("Order service", () => {
             }).rejects.toThrow();
             await expect(async () => {
                 await new OrderService(fakeDb as Database).addOrder(orderBadValueSignerAmount)
-            }).rejects.toThrow(ClientError);
+            }).rejects.toThrow("Number fields are incorrect");
 
             expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
@@ -160,7 +163,7 @@ describe("Order service", () => {
 
             await expect(async () => {
                 await new OrderService(fakeDb as Database).addOrder(orderDateNotInRange)
-            }).rejects.toThrow(ClientError);
+            }).rejects.toThrow("Invalid expiry date");
 
             expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
@@ -169,7 +172,7 @@ describe("Order service", () => {
         test("Missing order", async () => {
             await expect(async () => {
                 await new OrderService(fakeDb as Database).addOrder({})
-            }).rejects.toThrow(ClientError);
+            }).rejects.toThrow("No body");
 
             expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
@@ -189,7 +192,7 @@ describe("Order service", () => {
 
             await expect(async () => {
                 await new OrderService(fakeDb as Database).addOrder(order)
-            }).rejects.toThrow(AlreadyExistsError);
+            }).rejects.toThrow("Already exists");
 
             expect(fakeDb.generateHash).toHaveBeenCalledWith(expected);
             expect(fakeDb.orderExists).toHaveBeenCalledWith("a");

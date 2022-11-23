@@ -1,6 +1,6 @@
 import { Database } from '../database/Database.js';
 import { Peers } from '../peer/Peers.js';
-import { HealthCheckResponse } from './../model/response/HealthCheckResponse.js';
+import { HealthCheckResponse } from '@airswap/libraries/build/src/Indexer.js';
 export class RootService {
 
     private peers: Peers;
@@ -15,7 +15,11 @@ export class RootService {
 
     public async get(): Promise<HealthCheckResponse> {
         const orders = await this.database.getOrders();
-        return new HealthCheckResponse(this.peers.getPeers(), this.registry, orders.ordersForQuery);
+        return {
+            peers: this.peers.getPeers(),
+            registry: this.registry,
+            databaseOrders: orders.ordersForQuery
+        }
     }
 
 }

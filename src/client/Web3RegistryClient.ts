@@ -1,8 +1,7 @@
 import { Contract, ContractInterface, ethers } from 'ethers';
 import { Peers } from './../peer/Peers';
-import { RegistryClient } from './RegistryClient.js';
 
-export class Web3RegistryClient implements RegistryClient {
+export class Web3RegistryClient {
     private contract: Contract;
     private peers: Peers;
 
@@ -16,14 +15,6 @@ export class Web3RegistryClient implements RegistryClient {
     async getPeersFromRegistry(): Promise<string[]> {
         const urls = await this.contract.getURLs();
         return Promise.resolve(urls?.filter((url: string) => url && url.trim() != "") || []);
-    }
-
-    async sendIpToRegistry(ip: string): Promise<void> {
-        return Promise.resolve();
-    }
-
-    removeIpFromRegistry(ip: string): Promise<void> {
-        return Promise.resolve();
     }
 
     onSetURLEvent = async (from: string, to: string, value: Record<any, any>): Promise<void> => {
