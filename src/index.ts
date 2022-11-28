@@ -37,18 +37,20 @@ const intervalId = setInterval(() => {
   database.deleteExpiredOrder(currentTimestampInSeconds);
 }, 1000 * 60);
 
-const orderService = new OrderService(database);
+const web3SwapClient = getWeb3SwapClient(database);
+if (web3SwapClient === null) {
+  console.log("Could connect to swap smart contract");
+  process.exit(4);
+}
+
+const orderService = new OrderService(database, web3SwapClient);
 const peers = new Peers(database, host, broadcastClient);
 
 const registryClient = getRegistry(process.env, peers);
 if (registryClient === null) {
   process.exit(3);
 }
-const web3SwapClient = getWeb3SwapClient(database);
-if (web3SwapClient === null) {
-  console.log("Could connect to swap smart contract");
-  process.exit(4);
-}
+
 const rootController = new RootService(peers, database, process.env.REGISTRY!);
 
 // Network register & synchronization 
@@ -72,7 +74,9 @@ function getWeb3SwapClient(database: Database) {
   const address: string = process.env.SWAP as string;
   const apiKey: string = process.env.API_KEY as string;
   const network: string = process.env.NETWORK as string;
-  return new Web3SwapClient(apiKey, address, getSwapAbi(), network, database);
+  const client = new Web3SwapClient(apiKey, getSwapAbi(), database);
+  client.addContractIfNotExists(address, network);
+  return client;
 }
 
 async function gracefulShutdown(webserver: Webserver, database: Database, intervalId: NodeJS.Timer) {

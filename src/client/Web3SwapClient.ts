@@ -1,22 +1,54 @@
-import { Contract, ContractInterface, ethers } from 'ethers';
-import { Database } from './../database/Database';
+import { Contract, ContractInterface, ethers, providers } from 'ethers';
+import { isNumeric } from '../validator/index.js';
+import { Database } from '../database/Database.js';
 
 export class Web3SwapClient {
-    private contract: Contract;
+    private contracts: Contract[] = [];
     private database: Database;
+    private abi: ContractInterface;
+    private apiKey: string;
+    private registeredContracts: string[] = [];
 
-    constructor(apiKey: string, registryAddress: string, abi: ContractInterface, network: string, database: Database) {
-        const provider = ethers.providers.InfuraProvider.getWebSocketProvider(network, apiKey);
+    constructor(apiKey: string, abi: ContractInterface, database: Database) {
         this.database = database;
-        this.contract = new ethers.Contract(registryAddress, abi, provider);
+        this.abi = abi;
+        this.apiKey = apiKey;
+    }
 
-        this.contract.on("Swap", (nonce, timestamp, signerWallet, signerToken, signerAmount, protocolFee, senderWallet, senderToken, senderAmount) => {
+    public addContractIfNotExists(registryAddress: string, network: string) {
+        let mappedNetwork = network;
+        if(isNumeric(network)) {
+            mappedNetwork = ethers.providers.getNetwork(+network)?.name;
+        }
+        if(!mappedNetwork){
+            console.warn("Tried to add this pair but it does not work :", registryAddress, network)
+            return;
+        }
+        if(this.keyExists(registryAddress, mappedNetwork)){
+            console.log("Already connected");
+            return;
+        }
+
+        const provider = ethers.providers.InfuraProvider.getWebSocketProvider(mappedNetwork, this.apiKey);
+        const contract = new ethers.Contract(registryAddress, this.abi, provider);
+        contract.on("Swap", (nonce, timestamp, signerWallet, signerToken, signerAmount, protocolFee, senderWallet, senderToken, senderAmount) => {
             this.onEvent(nonce, signerWallet);
         });
-        
-        this.contract.on("Cancel", (nonce, signerWallet) => {
+        contract.on("Cancel", (nonce, signerWallet) => {
             this.onEvent(nonce, signerWallet);
         });
+        this.contracts.push(contract);
+        this.registeredContracts.push(this.generateKey(registryAddress, mappedNetwork));
+        console.log("Registered event from", registryAddress, `${mappedNetwork}(${network})`)
+    }
+
+    private generateKey(registryAddress: string, network: string): string {
+        return `${registryAddress}:${network}`
+    }
+
+    private keyExists(registryAddress: string, network: string): boolean {
+        const keyToFind = this.generateKey(registryAddress, network);
+        return this.registeredContracts.indexOf(keyToFind) !== -1;
     }
 
     private onEvent(nonce: { _hex: string, _isBigNumber: boolean }, signerWallet: string) {        

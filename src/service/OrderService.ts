@@ -1,7 +1,7 @@
-import { Filters } from './../database/filter/Filters';
+import { AmountLimitFilterResponse, FiltersResponse, OrderResponse } from '@airswap/libraries';
 import { Order } from '@airswap/typescript';
 import { isValidFullOrder } from '@airswap/utils';
-import { AmountLimitFilterResponse, FiltersResponse, OrderResponse } from '@airswap/libraries';
+import { Filters } from './../database/filter/Filters';
 import { Database } from '../database/Database.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
 import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
@@ -9,15 +9,18 @@ import { isDateInRange, isNumeric } from '../validator/index.js';
 import { AlreadyExistsError } from './../model/error/AlreadyExists.js';
 import { ClientError } from './../model/error/ClientError.js';
 import { IndexedOrder } from './../model/IndexedOrder.js';
+import { Web3SwapClient } from '../client/Web3SwapClient.js';
 
 const validationDurationInWeek = 1;
 
 export const METHODS = { getOrders: "getOrders", addOrder: "addOrder" } as Record<string, string>;
 export class OrderService {
     private database: Database;
+    private web3SwapClient: Web3SwapClient;
 
-    constructor(database: Database) {
+    constructor(database: Database, web3SwapClient: Web3SwapClient) {
         this.database = database;
+        this.web3SwapClient = web3SwapClient;
 
         const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter((name) => name !== "constructor").sort();
         if (!(methods.length === Object.keys(METHODS).length && methods.every((value: string) => value === METHODS[value]))) {
@@ -51,6 +54,8 @@ export class OrderService {
 
         indexedOrder.hash = hash;
         await this.database.addOrder(indexedOrder);
+        console.log("Added", indexedOrder.order)
+        this.web3SwapClient.addContractIfNotExists(indexedOrder.order.swapContract, indexedOrder.order.chainId)
         return Promise.resolve();
     }
 
