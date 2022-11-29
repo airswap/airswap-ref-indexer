@@ -2,7 +2,7 @@
 module.exports = {
   preset: 'ts-jest/presets/js-with-ts',
   moduleFileExtensions: ["ts", "js", "cjs", "mjs"],
-  transformIgnorePatterns:["node_modules/(?!@airswap/.*)"],     //   '//node_modules'
+  transformIgnorePatterns:["node_modules/(?!@airswap/.*)"],
   testPathIgnorePatterns: ["node_modules", "dist"],
   collectCoverageFrom: [
       "**/src/**/*.{js,ts}",
