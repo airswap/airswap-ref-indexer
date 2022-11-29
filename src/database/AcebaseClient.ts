@@ -1,4 +1,4 @@
-import { IndexedOrderResponse, OrderResponse, RequestFilter, SortField, SortOrder } from '@airswap/libraries/build/src/Indexer.js';
+import { IndexedOrderResponse, OrderResponse, RequestFilter, SortField, SortOrder } from '@airswap/libraries';
 import { AceBase, DataReference } from 'acebase';
 import crypto from "crypto";
 import fs from "fs";

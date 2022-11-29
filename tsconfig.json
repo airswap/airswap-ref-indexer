@@ -12,6 +12,6 @@
     "resolveJsonModule": true,
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules/acebase-core/*"],
+  "exclude": ["node_modules/@airswap/*"],
   "typeRoots": ["./node_modules/@types", "./src/types"]
 }
