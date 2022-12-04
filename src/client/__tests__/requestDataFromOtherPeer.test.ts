@@ -25,11 +25,11 @@ describe("requestDataFromOtherPeer", () => {
     test("Nominal", async () => {
         // @ts-ignore
         fakePeers.getConnectablePeers.mockImplementation(() => ["http://first_node/", "http://second_node/"]);
-        const mockGetOrders = jest.fn().mockResolvedValueOnce(undefined).mockResolvedValueOnce({orders: [{ hash: "hash", addedOn: 123, order: forgeFullOrder(1) }]})
+        const mockGetOrders = jest.fn()
+            .mockResolvedValueOnce(undefined)
+            .mockResolvedValueOnce({orders: [{ hash: "hash", addedOn: 123, order: forgeFullOrder(1) }]})
         //@ts-ignore
-        mockNodeIndexer.mockImplementation(jest.fn(() => ({
-            getOrders: mockGetOrders
-        })))
+        mockNodeIndexer.mockImplementation(jest.fn(() => ({ getOrders: mockGetOrders })))
 
         await requestDataFromOtherPeer(["http://first_node/", "http://second_node/"], fakeDb as Database, fakePeers as Peers);
 
@@ -44,28 +44,31 @@ describe("requestDataFromOtherPeer", () => {
     test("No connectable peers", async () => {
         // @ts-ignore
         fakePeers.getConnectablePeers.mockImplementation(() => []);
-        // @ts-ignore
-        //mockClient.getOrders.mockImplementation(() => Promise.resolve({ data: { orders: [{ order: "yay" }] } }));
+        
+        const mockGetOrders = jest.fn();
+        //@ts-ignore
+        mockNodeIndexer.mockImplementation(jest.fn(() => ({ getOrders: mockGetOrders })))
 
         await requestDataFromOtherPeer(["http://first_node/"], fakeDb as Database, fakePeers as Peers);
 
         expect(fakePeers.addPeers).toHaveBeenCalledWith(["http://first_node/"]);
         expect(fakePeers.getConnectablePeers).toHaveBeenCalledTimes(1);
-        //expect(mockClient.getOrders).not.toHaveBeenCalled();
+        expect(mockGetOrders).not.toHaveBeenCalled();
         expect(fakeDb.addAll).not.toHaveBeenCalled();
     });
 
     test("No peers", async () => {
         // @ts-ignore
         fakePeers.getConnectablePeers.mockImplementation(() => []);
-        // @ts-ignore
-        //mockClient.getOrders.mockImplementation(() => Promise.resolve({ data: { orders: [{ order: "yay" }] } }));
+        const mockGetOrders = jest.fn();
+        //@ts-ignore
+        mockNodeIndexer.mockImplementation(jest.fn(() => ({ getOrders: mockGetOrders })))
 
         await requestDataFromOtherPeer([], fakeDb as Database, fakePeers as Peers);
 
         expect(fakePeers.addPeers).not.toHaveBeenCalled();
         expect(fakePeers.getConnectablePeers).toHaveBeenCalledTimes(1);
-        //expect(mockClient.getOrders).not.toHaveBeenCalled();
+        expect(mockNodeIndexer).not.toHaveBeenCalled();
         expect(fakeDb.addAll).not.toHaveBeenCalled();
     });
 });
