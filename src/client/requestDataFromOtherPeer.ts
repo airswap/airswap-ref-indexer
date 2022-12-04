@@ -1,33 +1,33 @@
 import { NodeIndexer } from '@airswap/libraries';
 import { IndexedOrder } from 'model/IndexedOrder.js';
 import { Database } from '../database/Database.js';
-import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
+import { mapIndexedOrderResponseToDbOrder } from '../mapper/mapIndexedOrderResponseToDbOrder.js';
 import { Peers } from './../peer/Peers.js';
 
 export async function requestDataFromOtherPeer(peersFromRegistry: string[], database: Database, peers: Peers) {
     if (peersFromRegistry.length > 0) {
         peers.addPeers(peersFromRegistry);
     }
-
-    if (peers.getConnectablePeers().length > 0) {
+    const peerUrls = peers.getConnectablePeers();
+    //remove
+    peerUrls.push("https://airswap.mitsi.ovh/")
+    for(let index = 0; index < peerUrls.length; index++) {
+        const peerUrl = peerUrls[index];
         try {
-            const peerUrl = peers.getConnectablePeers()[0];
-            console.log("Configure client");
+            console.log("Requesting from", peerUrl);
             const { orders } = await new NodeIndexer(peerUrl).getOrders();
-            
             const toAdd: Record<string, IndexedOrder> = Object.values(orders).reduce((indexedOrders, indexedOrderResponse) => {
-                const indexedOrder: Record<string, IndexedOrder> = {};  
-                //TODO Extract dedicated mapper :)
-                indexedOrder[indexedOrderResponse.hash!] =  new IndexedOrder(mapAnyToDbOrder(indexedOrderResponse), indexedOrderResponse.addedOn, indexedOrderResponse.hash);
-                return {...indexedOrders, indexedOrder};                
-            },{});
+                const indexedOrder = mapIndexedOrderResponseToDbOrder(indexedOrderResponse);
+                
+                return indexedOrder ? {...indexedOrders, ...indexedOrder} : indexedOrders;
+            }, {});
             await database.addAll(toAdd);
             console.log("Asked all queries to", peerUrl);
+            return Promise.resolve();
         } catch (err) {
-            console.log("Could not connect to peer...");
+            console.warn("Could not connect to peer", peerUrl);
         }
-    } else {
-        console.log("/!\\ FIRST NODE AVAILABLE !");    
     }
+    console.log("/!\\ FIRST NODE AVAILABLE !");          
     return Promise.resolve();
 }

@@ -1,15 +1,18 @@
 import { Database } from './../../database/Database';
 import { Peers } from './../../peer/Peers';
-import { OrderClient } from './../OrderClient';
+import * as client from '@airswap/libraries';
 import { requestDataFromOtherPeer } from "../requestDataFromOtherPeer";
+import { NodeIndexer } from '@airswap/libraries';
 
 let fakeDb: Partial<Database>;
 let fakePeers: Partial<Peers>;
-let fakeClient: Partial<OrderClient>;
+
+let mockClient: Partial<NodeIndexer>;
+jest.mock('@airswap/libraries');
 
 describe("requestDataFromOtherPeer", () => {
     beforeEach(() => {
-        fakeClient = {
+        mockClient = {
             getOrders: jest.fn()
         }
         fakePeers = {
@@ -27,11 +30,11 @@ describe("requestDataFromOtherPeer", () => {
         // @ts-ignore
         fakeClient.getOrders.mockImplementation(() => Promise.resolve({ data: { orders: [{ order: "yay" }] } }));
 
-        await requestDataFromOtherPeer(["http://first_node/", "http://seconde_node/"], fakeDb as Database, fakePeers as Peers, fakeClient as OrderClient);
+        await requestDataFromOtherPeer(["http://first_node/", "http://seconde_node/"], fakeDb as Database, fakePeers as Peers);
 
         expect(fakePeers.addPeers).toHaveBeenCalledWith(["http://first_node/", "http://seconde_node/"]);
         expect(fakePeers.getConnectablePeers).toHaveBeenCalledTimes(2);
-        expect(fakeClient.getOrders).toHaveBeenCalledWith("http://first_node/");
+        expect(mockClient.getOrders).toHaveBeenCalledWith("http://first_node/");
         expect(fakeDb.addAll).toHaveBeenCalledWith([{ order: "yay" }]);
     });
 
@@ -41,11 +44,11 @@ describe("requestDataFromOtherPeer", () => {
         // @ts-ignore
         fakeClient.getOrders.mockImplementation(() => Promise.resolve({ data: { orders: [{ order: "yay" }] } }));
 
-        await requestDataFromOtherPeer(["http://first_node/"], fakeDb as Database, fakePeers as Peers, fakeClient as OrderClient);
+        await requestDataFromOtherPeer(["http://first_node/"], fakeDb as Database, fakePeers as Peers);
 
         expect(fakePeers.addPeers).toHaveBeenCalledWith(["http://first_node/"]);
         expect(fakePeers.getConnectablePeers).toHaveBeenCalledTimes(1);
-        expect(fakeClient.getOrders).not.toHaveBeenCalled();
+        expect(mockClient.getOrders).not.toHaveBeenCalled();
         expect(fakeDb.addAll).not.toHaveBeenCalled();
     });
 
@@ -55,11 +58,11 @@ describe("requestDataFromOtherPeer", () => {
         // @ts-ignore
         fakeClient.getOrders.mockImplementation(() => Promise.resolve({ data: { orders: [{ order: "yay" }] } }));
 
-        await requestDataFromOtherPeer([], fakeDb as Database, fakePeers as Peers, fakeClient as OrderClient);
+        await requestDataFromOtherPeer([], fakeDb as Database, fakePeers as Peers);
 
         expect(fakePeers.addPeers).not.toHaveBeenCalled();
         expect(fakePeers.getConnectablePeers).toHaveBeenCalledTimes(1);
-        expect(fakeClient.getOrders).not.toHaveBeenCalled();
+        expect(mockClient.getOrders).not.toHaveBeenCalled();
         expect(fakeDb.addAll).not.toHaveBeenCalled();
     });
 });
