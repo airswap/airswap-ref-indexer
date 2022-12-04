@@ -9,16 +9,14 @@ export async function requestDataFromOtherPeer(peersFromRegistry: string[], data
         peers.addPeers(peersFromRegistry);
     }
     const peerUrls = peers.getConnectablePeers();
-    //remove
-    peerUrls.push("https://airswap.mitsi.ovh/")
     for(let index = 0; index < peerUrls.length; index++) {
         const peerUrl = peerUrls[index];
         try {
             console.log("Requesting from", peerUrl);
-            const { orders } = await new NodeIndexer(peerUrl).getOrders();
+            const data = await new NodeIndexer(peerUrl).getOrders();
+            const { orders } = data;
             const toAdd: Record<string, IndexedOrder> = Object.values(orders).reduce((indexedOrders, indexedOrderResponse) => {
-                const indexedOrder = mapIndexedOrderResponseToDbOrder(indexedOrderResponse);
-                
+                const indexedOrder = mapIndexedOrderResponseToDbOrder(indexedOrderResponse);                
                 return indexedOrder ? {...indexedOrders, ...indexedOrder} : indexedOrders;
             }, {});
             await database.addAll(toAdd);
