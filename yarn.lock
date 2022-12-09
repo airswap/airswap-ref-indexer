@@ -60,7 +60,7 @@
   dependencies:
     "@openzeppelin/contracts" "^4.3.1"
 
-"@airswap/typescript@3.0.1", "@airswap/typescript@^3.0.1":
+"@airswap/typescript@3.0.1":
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/@airswap/typescript/-/typescript-3.0.1.tgz#2b936fe95196de42c2c1f8d2ddd6a9357540112c"
   integrity sha512-kN6ScCiMMFNGegVSs+n+6X3UDis2YqX1lXriIQyDE8DVqI3l7oJU6/RIPOLdg8iRFU6Z0IUgSInyoiVxhvY5ig==
