@@ -1,4 +1,4 @@
-import { IndexedOrderResponse, OrderResponse, FiltersResponse, JsonRpcResponse } from '@airswap/libraries/build/src/Indexer.js';
+import { IndexedOrderResponse, OrderResponse, FiltersResponse, JsonRpcResponse } from '@airswap/libraries';
 import { FullOrder } from '@airswap/typescript';
 import { AddressZero } from '@ethersproject/constants';
 import { DbOrder } from './model/DbOrder.js';

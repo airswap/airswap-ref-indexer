@@ -1,7 +1,7 @@
 import { Filters } from './../database/filter/Filters';
 import { Order } from '@airswap/typescript';
 import { isValidFullOrder } from '@airswap/utils';
-import { AmountLimitFilterResponse, FiltersResponse } from '@airswap/libraries/build/src/Indexer.js';
+import { AmountLimitFilterResponse, FiltersResponse, OrderResponse } from '@airswap/libraries';
 import { Database } from '../database/Database.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
 import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
@@ -9,7 +9,6 @@ import { isDateInRange, isNumeric } from '../validator/index.js';
 import { AlreadyExistsError } from './../model/error/AlreadyExists.js';
 import { ClientError } from './../model/error/ClientError.js';
 import { IndexedOrder } from './../model/IndexedOrder.js';
-import { OrderResponse } from '@airswap/libraries/build/src/Indexer.js';
 
 const validationDurationInWeek = 1;
 

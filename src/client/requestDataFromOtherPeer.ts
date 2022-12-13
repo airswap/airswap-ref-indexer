@@ -1,24 +1,24 @@
+import { NodeIndexer } from '@airswap/libraries';
 import { Database } from '../database/Database.js';
+import { mapAllIndexedOrderResponseToDbOrder } from '../mapper/mapIndexedOrderResponseToDbOrder.js';
 import { Peers } from './../peer/Peers.js';
-import { OrderClient } from './OrderClient.js';
 
-export async function requestDataFromOtherPeer(peersFromRegistry: string[], database: Database, peers: Peers, orderClient: OrderClient) {
+export async function requestDataFromOtherPeer(peersFromRegistry: string[], database: Database, peers: Peers) {
     if (peersFromRegistry.length > 0) {
         peers.addPeers(peersFromRegistry);
     }
-
-    if (peers.getConnectablePeers().length > 0) {
+    const peerUrls = peers.getConnectablePeers();
+    for (let peerUrl of peerUrls) {
         try {
-            const peerUrl = peers.getConnectablePeers()[0];
-            console.log("Configure client");
-            const { data } = await orderClient.getOrders(peerUrl);
-            await database.addAll(data.orders);
+            console.log("Requesting from", peerUrl);
+            const { orders } = await new NodeIndexer(peerUrl).getOrders();
+            await database.addAll(mapAllIndexedOrderResponseToDbOrder(orders));
             console.log("Asked all queries to", peerUrl);
+            return Promise.resolve();
         } catch (err) {
-            console.log("Could not connect to peer...");
+            console.warn("Could not connect to peer", peerUrl);
         }
-    } else {
-        console.log("/!\\ FIRST NODE AVAILABLE !");    
     }
+    console.log("/!\\ FIRST NODE AVAILABLE !");
     return Promise.resolve();
 }

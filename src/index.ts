@@ -1,7 +1,6 @@
 import "dotenv/config";
 import { BroadcastClient } from './client/BroadcastClient.js';
 import { getRegistry } from "./client/getRegistry.js";
-import { OrderClient } from './client/OrderClient.js';
 import { requestDataFromOtherPeer } from "./client/requestDataFromOtherPeer.js";
 import { Web3SwapClient } from './client/Web3SwapClient.js';
 import { Database } from './database/Database';
@@ -25,7 +24,6 @@ const host = process.env.NODE_URL!;
 console.log("HOST is", host);
 
 // Injection
-const orderClient = new OrderClient();
 const broadcastClient = new BroadcastClient();
 
 const database = await getDatabase(process.env.DELETE_DB_ON_START == "1", process.env.DATABASE_TYPE as string);
@@ -57,7 +55,7 @@ const rootController = new RootService(peers, database, process.env.REGISTRY!);
 let peersFromRegistry = await registryClient.getPeersFromRegistry();
 console.log("Available peers:", peersFromRegistry);
 
-await requestDataFromOtherPeer(peersFromRegistry, database, peers, orderClient);
+await requestDataFromOtherPeer(peersFromRegistry, database, peers);
 const webserver = new Webserver(+EXPRESS_PORT);
 const expressApp = webserver.run();
 new IndexerServer(expressApp, orderService, rootController, peers).run();

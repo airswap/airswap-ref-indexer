@@ -1,4 +1,4 @@
-import { HealthCheckResponse } from '@airswap/libraries/build/src/Indexer.js';
+import { HealthCheckResponse } from '@airswap/libraries';
 import { Order } from '@airswap/typescript';
 import bodyParser from "body-parser";
 import express from 'express';
@@ -75,7 +75,7 @@ describe("Order controller", () => {
                 jsonrpc: "2.0",
                 result: {
                     code: 404,
-                    // message: "Method does not exist."
+                    message: "Method does not exist."
                 }
             };
             new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
@@ -96,7 +96,7 @@ describe("Order controller", () => {
                 jsonrpc: "2.0",
                 result: {
                     code: 400,
-                    // message: "Empty params"
+                    message: "Empty params"
                 }
             };
             new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
@@ -170,7 +170,7 @@ describe("Order controller", () => {
                             id: "-1", "jsonrpc": "2.0",
                             "result": {
                                 "code": 400,
-                                // "message": "an error"
+                                "message": "an error"
                             }
                         });
                     expect(response.statusCode).toBe(400);

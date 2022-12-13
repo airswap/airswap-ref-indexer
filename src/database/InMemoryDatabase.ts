@@ -1,4 +1,4 @@
-import { IndexedOrderResponse, OrderResponse, RequestFilter, SortField, SortOrder } from '@airswap/libraries/build/src/Indexer.js';
+import { IndexedOrderResponse, OrderResponse, RequestFilter, SortField, SortOrder } from '@airswap/libraries';
 import crypto from "crypto";
 import { computePagination } from '../mapper/pagination/index.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
