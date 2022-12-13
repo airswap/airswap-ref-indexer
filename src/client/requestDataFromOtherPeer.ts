@@ -8,8 +8,7 @@ export async function requestDataFromOtherPeer(peersFromRegistry: string[], data
         peers.addPeers(peersFromRegistry);
     }
     const peerUrls = peers.getConnectablePeers();
-    for(let index = 0; index < peerUrls.length; index++) {
-        const peerUrl = peerUrls[index];
+    for (let peerUrl of peerUrls) {
         try {
             console.log("Requesting from", peerUrl);
             const { orders } = await new NodeIndexer(peerUrl).getOrders();
@@ -20,6 +19,6 @@ export async function requestDataFromOtherPeer(peersFromRegistry: string[], data
             console.warn("Could not connect to peer", peerUrl);
         }
     }
-    console.log("/!\\ FIRST NODE AVAILABLE !");          
+    console.log("/!\\ FIRST NODE AVAILABLE !");
     return Promise.resolve();
 }
