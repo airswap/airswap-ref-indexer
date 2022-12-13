@@ -17,6 +17,7 @@
   "dependencies": {
     "@airswap/indexer-registry": "3.1.2",
     "@airswap/libraries": "3.3.3",
+    "@airswap/swap-erc20": "^3.0.0",
     "@airswap/typescript": "3.0.1",
     "@airswap/utils": "3.0.4",
     "@babel/preset-env": "^7.20.2",

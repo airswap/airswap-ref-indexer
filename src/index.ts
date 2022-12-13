@@ -1,11 +1,12 @@
 import "dotenv/config";
+import { isNumeric } from "./validator/index.js";
 import { BroadcastClient } from './client/BroadcastClient.js';
 import { getRegistry } from "./client/getRegistry.js";
 import { requestDataFromOtherPeer } from "./client/requestDataFromOtherPeer.js";
 import { Web3SwapClient } from './client/Web3SwapClient.js';
 import { Database } from './database/Database';
 import { getDatabase } from "./database/getDatabase.js";
-import { getSwapAbi } from './indexers/index.js';
+import { getContractAdressByChainId, getSwapAbi } from './indexers/index.js';
 import { Peers } from "./peer/Peers.js";
 import { OrderService } from './service/OrderService.js';
 import { RootService } from './service/RootService.js';
@@ -71,11 +72,17 @@ process.on("SIGINT", () => {
 });
 
 function getWeb3SwapClient(database: Database) {
-  const address: string = process.env.SWAP as string;
   const apiKey: string = process.env.API_KEY as string;
-  const network: string = process.env.NETWORK as string;
+  const network = process.env.NETWORK && isNumeric(process.env.NETWORK) ? +process.env.NETWORK : undefined;
   const client = new Web3SwapClient(apiKey, getSwapAbi(), database);
-  client.addContractIfNotExists(address, network);
+  if (!network) {
+    return null;
+  }
+  const contractAddress = getContractAdressByChainId(network);
+  if (!contractAddress) {
+    return null;
+  }
+  client.addContractIfNotExists(contractAddress, `${network}`);
   return client;
 }
 

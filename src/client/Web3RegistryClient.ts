@@ -1,12 +1,14 @@
 import { Contract, ContractInterface, ethers } from 'ethers';
-import { Peers } from './../peer/Peers';
+import { Peers } from './../peer/Peers.js';
+import { getNetwork } from './getNetwork.js';
 
 export class Web3RegistryClient {
     private contract: Contract;
     private peers: Peers;
 
     constructor(apiKey: string, registryAddress: string, abi: ContractInterface, network: string, peers: Peers) {
-        const provider = ethers.providers.InfuraProvider.getWebSocketProvider(network, apiKey);
+        const mappedNetwork = getNetwork(network);
+        const provider = ethers.providers.InfuraProvider.getWebSocketProvider(mappedNetwork, apiKey);
         this.peers = peers;
         this.contract = new ethers.Contract(registryAddress, abi, provider);
         this.contract.on("SetURL", this.onSetURLEvent);

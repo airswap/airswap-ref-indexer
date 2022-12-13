@@ -53,7 +53,7 @@
   dependencies:
     "@openzeppelin/contracts" "^4.3.1"
 
-"@airswap/swap-erc20@3.0.0":
+"@airswap/swap-erc20@3.0.0", "@airswap/swap-erc20@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@airswap/swap-erc20/-/swap-erc20-3.0.0.tgz#7afc57b5e32dc607d0946972da1908af5d5098c1"
   integrity sha512-pYtdWeg4ZFxtyMNduw5H3UvFkbhnR/vNmK8xOWovgu020U1xSBenGlSG+Yaq9LXkx1UlS1mDYJtBIChmHROSrg==
@@ -76,13 +76,13 @@
     "@airswap/constants" "3.0.3"
     "@uniswap/token-lists" "^1.0.0-beta.26"
 
-"@airswap/utils@3.0.5":
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-3.0.5.tgz#2fe8257778721f2d54ca2d6387ce9ec408094d2a"
-  integrity sha512-oBg2pOUF/bG2A9vurIyAgTZB5Z6h9K+Gqq1rgfpULp7sfrnkdwXROo3UX37VccFOa/GLr2r9bc1es1/va3E9Yw==
+"@airswap/utils@3.0.4":
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-3.0.4.tgz#56e1065ee3df2c86b9e8fb28e1568e044b3cf8fa"
+  integrity sha512-sp2BHnHlnpDtKmAXm7iSXR3796O+CccEfHhF+44b05LZrWX8RP44GEGxYOXM2VFj23+E4eTvubwowKcYQ2fbDQ==
   dependencies:
-    "@airswap/constants" "3.0.3"
-    "@airswap/typescript" "3.0.2"
+    "@airswap/constants" "3.0.1"
+    "@airswap/typescript" "3.0.1"
     "@types/ethereumjs-util" "^6.1.0"
     bignumber.js "^9.0.1"
     eth-sig-util "^3.0.0"
@@ -90,13 +90,13 @@
     ethers "^5.6.9"
     lz-string "^1.4.4"
 
-"@airswap/utils@^3.0.4":
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-3.0.4.tgz#56e1065ee3df2c86b9e8fb28e1568e044b3cf8fa"
-  integrity sha512-sp2BHnHlnpDtKmAXm7iSXR3796O+CccEfHhF+44b05LZrWX8RP44GEGxYOXM2VFj23+E4eTvubwowKcYQ2fbDQ==
+"@airswap/utils@3.0.5":
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-3.0.5.tgz#2fe8257778721f2d54ca2d6387ce9ec408094d2a"
+  integrity sha512-oBg2pOUF/bG2A9vurIyAgTZB5Z6h9K+Gqq1rgfpULp7sfrnkdwXROo3UX37VccFOa/GLr2r9bc1es1/va3E9Yw==
   dependencies:
-    "@airswap/constants" "3.0.1"
-    "@airswap/typescript" "3.0.1"
+    "@airswap/constants" "3.0.3"
+    "@airswap/typescript" "3.0.2"
     "@types/ethereumjs-util" "^6.1.0"
     bignumber.js "^9.0.1"
     eth-sig-util "^3.0.0"

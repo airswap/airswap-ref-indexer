@@ -1,6 +1,6 @@
-import { Contract, ContractInterface, ethers, providers } from 'ethers';
-import { isNumeric } from '../validator/index.js';
+import { Contract, ContractInterface, ethers } from 'ethers';
 import { Database } from '../database/Database.js';
+import { getNetwork } from './getNetwork.js';
 
 export class Web3SwapClient {
     private contracts: Contract[] = [];
@@ -16,15 +16,12 @@ export class Web3SwapClient {
     }
 
     public addContractIfNotExists(registryAddress: string, network: string) {
-        let mappedNetwork = network;
-        if(isNumeric(network)) {
-            mappedNetwork = ethers.providers.getNetwork(+network)?.name;
-        }
-        if(!mappedNetwork){
+        const mappedNetwork = getNetwork(network);
+        if (!mappedNetwork) {
             console.warn("Tried to add this pair but it does not work :", registryAddress, network)
             return;
         }
-        if(this.keyExists(registryAddress, mappedNetwork)){
+        if (this.keyExists(registryAddress, mappedNetwork)) {
             console.log("Already connected");
             return;
         }
@@ -51,11 +48,11 @@ export class Web3SwapClient {
         return this.registeredContracts.indexOf(keyToFind) !== -1;
     }
 
-    private onEvent(nonce: { _hex: string, _isBigNumber: boolean }, signerWallet: string) {        
+    private onEvent(nonce: { _hex: string, _isBigNumber: boolean }, signerWallet: string) {
         if (nonce && signerWallet) {
             const decodedNonce = parseInt(nonce._hex, 16);
             if (isNaN(decodedNonce)) return;
-            
+
             this.database.deleteOrder(`${decodedNonce}`, signerWallet);
         }
     }
