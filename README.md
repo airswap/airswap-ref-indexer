@@ -27,7 +27,7 @@ DELETE_DB_ON_START=1
 DATABASE_TYPE="IN_MEMORY"
 ########### smartcontract definition
 REGISTRY="0xC32a3c867aBAd28d977e1724f92D9684fF3d2976"
-NETWORK="goerli"
+NETWORK=1
 API_KEY="<add your api key>"
 </pre>
 
