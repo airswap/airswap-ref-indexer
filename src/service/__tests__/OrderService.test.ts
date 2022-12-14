@@ -1,4 +1,6 @@
 import { FiltersResponse } from '@airswap/libraries';
+import { AddressZero } from '@ethersproject/constants';
+import { Web3SwapClient } from '../../client/Web3SwapClient';
 import { Database } from '../../database/Database';
 import { forgeDbOrder, forgeFullOrder, forgeIndexedOrder, forgeIndexedOrderResponse, forgeOrderResponse } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
@@ -12,6 +14,7 @@ jest
 describe("Order service", () => {
 
     let fakeDb: Partial<Database>;
+    let fakeWeb3SwapClient: Partial<Web3SwapClient>;
 
     beforeEach(() => {
         fakeDb = {
@@ -24,13 +27,16 @@ describe("Order service", () => {
             generateHash: jest.fn(),
             deleteOrder: jest.fn(() => Promise.resolve()),
         };
+        fakeWeb3SwapClient = {
+            addContractIfNotExists: jest.fn()
+        }
     })
 
     describe('Get orders', () => {
         test("get all", async () => {
             const expected = forgeOrderResponse();
 
-            const result = await new OrderService(fakeDb as Database).getOrders({});
+            const result = await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).getOrders({});
 
             expect(fakeDb.getOrders).toHaveBeenCalled();
             expect(result).toEqual(expected);
@@ -50,7 +56,7 @@ describe("Order service", () => {
             }
             const expected = forgeOrderResponse(expectedFilters);
 
-            const result = await new OrderService(fakeDb as Database).getOrders({ filters: true } as Record<string, any>);
+            const result = await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).getOrders({ filters: true } as Record<string, any>);
 
             expect(fakeDb.getOrders).toHaveBeenCalled();
             expect(fakeDb.getFilters).toHaveBeenCalledTimes(1);
@@ -60,7 +66,7 @@ describe("Order service", () => {
         test("get by hash", async () => {
             const expected = forgeOrderResponse();
 
-            const result = await new OrderService(fakeDb as Database).getOrders({ hash: "aze" });
+            const result = await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).getOrders({ hash: "aze" });
 
             expect(fakeDb.getOrder).toHaveBeenCalledWith("aze");
             expect(result).toEqual(expected);
@@ -78,7 +84,7 @@ describe("Order service", () => {
 
             const expected = forgeOrderResponse();
 
-            const result = await new OrderService(fakeDb as Database).getOrders(body);
+            const result = await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).getOrders(body);
 
             expect(fakeDb.getOrderBy).toHaveBeenCalledWith({
                 maxSenderAmount: BigInt(20),
@@ -119,11 +125,13 @@ describe("Order service", () => {
             //@ts-ignore
             fakeDb.orderExists.mockImplementation(() => false);
 
-            await new OrderService(fakeDb as Database).addOrder(order);
+            await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(order);
 
             expect(fakeDb.generateHash).toHaveBeenCalledTimes(1);
             expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
+            expect(fakeWeb3SwapClient.addContractIfNotExists).toHaveBeenCalledWith(AddressZero, "5");
+            
         });
 
         test("Add order missing data", async () => {
@@ -132,7 +140,7 @@ describe("Order service", () => {
             orderMissingExpiry.order.expiry = undefined;
 
             await expect(async () => {
-                await new OrderService(fakeDb as Database).addOrder(orderMissingExpiry)
+                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(orderMissingExpiry)
             }).rejects.toThrow();
 
             expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
@@ -147,10 +155,10 @@ describe("Order service", () => {
             orderBadValueSignerAmount.signerAmount = "a";
 
             await expect(async () => {
-                await new OrderService(fakeDb as Database).addOrder(orderBadValueSenderAmount)
+                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(orderBadValueSenderAmount)
             }).rejects.toThrow();
             await expect(async () => {
-                await new OrderService(fakeDb as Database).addOrder(orderBadValueSignerAmount)
+                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(orderBadValueSignerAmount)
             }).rejects.toThrow("Number fields are incorrect");
 
             expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
@@ -162,7 +170,7 @@ describe("Order service", () => {
             orderDateNotInRange.expiry = `${new Date().getTime()}${1000 * 3600 * 24 * 100}`;
 
             await expect(async () => {
-                await new OrderService(fakeDb as Database).addOrder(orderDateNotInRange)
+                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(orderDateNotInRange)
             }).rejects.toThrow("Invalid expiry date");
 
             expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
@@ -171,7 +179,7 @@ describe("Order service", () => {
 
         test("Missing order", async () => {
             await expect(async () => {
-                await new OrderService(fakeDb as Database).addOrder({})
+                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder({})
             }).rejects.toThrow("No body");
 
             expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
@@ -191,7 +199,7 @@ describe("Order service", () => {
             expected.hash = undefined;
 
             await expect(async () => {
-                await new OrderService(fakeDb as Database).addOrder(order)
+                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(order)
             }).rejects.toThrow("Already exists");
 
             expect(fakeDb.generateHash).toHaveBeenCalledWith(expected);

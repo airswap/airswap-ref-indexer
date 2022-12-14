@@ -1,11 +1,12 @@
 import "dotenv/config";
+import { isNumeric } from "./validator/index.js";
 import { BroadcastClient } from './client/BroadcastClient.js';
 import { getRegistry } from "./client/getRegistry.js";
 import { requestDataFromOtherPeer } from "./client/requestDataFromOtherPeer.js";
 import { Web3SwapClient } from './client/Web3SwapClient.js';
 import { Database } from './database/Database';
 import { getDatabase } from "./database/getDatabase.js";
-import { getSwapAbi } from './indexers/index.js';
+import { getContractAdressByChainId, getSwapAbi } from './indexers/index.js';
 import { Peers } from "./peer/Peers.js";
 import { OrderService } from './service/OrderService.js';
 import { RootService } from './service/RootService.js';
@@ -37,18 +38,20 @@ const intervalId = setInterval(() => {
   database.deleteExpiredOrder(currentTimestampInSeconds);
 }, 1000 * 60);
 
-const orderService = new OrderService(database);
+const web3SwapClient = getWeb3SwapClient(database);
+if (web3SwapClient === null) {
+  console.log("Could connect to swap smart contract");
+  process.exit(4);
+}
+
+const orderService = new OrderService(database, web3SwapClient);
 const peers = new Peers(database, host, broadcastClient);
 
 const registryClient = getRegistry(process.env, peers);
 if (registryClient === null) {
   process.exit(3);
 }
-const web3SwapClient = getWeb3SwapClient(database);
-if (web3SwapClient === null) {
-  console.log("Could connect to swap smart contract");
-  process.exit(4);
-}
+
 const rootController = new RootService(peers, database, process.env.REGISTRY!);
 
 // Network register & synchronization 
@@ -69,10 +72,18 @@ process.on("SIGINT", () => {
 });
 
 function getWeb3SwapClient(database: Database) {
-  const address: string = process.env.SWAP as string;
   const apiKey: string = process.env.API_KEY as string;
-  const network: string = process.env.NETWORK as string;
-  return new Web3SwapClient(apiKey, address, getSwapAbi(), network, database);
+  const network = process.env.NETWORK && isNumeric(process.env.NETWORK) ? +process.env.NETWORK : undefined;
+  const client = new Web3SwapClient(apiKey, getSwapAbi(), database);
+  if (!network) {
+    return null;
+  }
+  const contractAddress = getContractAdressByChainId(network);
+  if (!contractAddress) {
+    return null;
+  }
+  client.addContractIfNotExists(contractAddress, `${network}`);
+  return client;
 }
 
 async function gracefulShutdown(webserver: Webserver, database: Database, intervalId: NodeJS.Timer) {
