@@ -7,6 +7,7 @@ import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
 import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
 import { isDateInRange, isNumeric } from '../validator/index.js';
 import { AlreadyExistsError } from './../model/error/AlreadyExists.js';
+import { InvalidSignatureException } from './../model/error/InvalidSignatureException.js';
 import { ClientError } from './../model/error/ClientError.js';
 import { IndexedOrder } from './../model/IndexedOrder.js';
 import { Web3SwapClient } from '../client/Web3SwapClient.js';
@@ -53,9 +54,16 @@ export class OrderService {
         }
 
         indexedOrder.hash = hash;
+        this.web3SwapClient.addContractIfNotExists(indexedOrder.order.swapContract, indexedOrder.order.chainId);
+
+        if(process.env.enableSignatureVerification === "true"){
+            const isOrderValid = await this.web3SwapClient.isValidOrder(indexedOrder.order);
+            if(!isOrderValid) {
+                throw new InvalidSignatureException();
+            }
+        }
+
         await this.database.addOrder(indexedOrder);
-        console.log("Added", indexedOrder.order)
-        this.web3SwapClient.addContractIfNotExists(indexedOrder.order.swapContract, indexedOrder.order.chainId)
         return Promise.resolve();
     }
 

@@ -1,4 +1,5 @@
 import { ContractInterface, ethers } from 'ethers';
+import { forgeDbOrder } from '../../Fixtures';
 import { Database } from '../../database/Database';
 import { Web3SwapClient } from './../Web3SwapClient';
 
@@ -23,10 +24,10 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
-                InfuraProvider : {
+                InfuraProvider: {
                     getWebSocketProvider: jest.fn()
                 },
-                getNetwork: jest.fn(() => ({chainId: 5, name: "a_custom"}))
+                getNetwork: jest.fn(() => ({ chainId: 5, name: "a_custom" }))
             };
             //@ts-ignore
             mockedEther.Contract = function () {
@@ -37,7 +38,7 @@ describe("Web3SwapClient", () => {
 
             const client = new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database);
             client.addContractIfNotExists("another_address", "5");
-    
+
             expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
             expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).toHaveBeenCalledWith("a_custom", "apikey");
         });
@@ -46,7 +47,7 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
-                InfuraProvider : {
+                InfuraProvider: {
                     getWebSocketProvider: jest.fn()
                 },
                 //@ts-ignore
@@ -61,7 +62,7 @@ describe("Web3SwapClient", () => {
 
             const client = new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database);
             client.addContractIfNotExists("another_address", "5");
-    
+
             expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
             expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).not.toHaveBeenCalled();
         });
@@ -70,11 +71,11 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
-                InfuraProvider : {
+                InfuraProvider: {
                     getWebSocketProvider: jest.fn()
                 },
                 //@ts-ignore
-                getNetwork: jest.fn(() => undefined)
+                getNetwork: jest.fn(() => ({ chainId: 5, name: "a_custom" }))
             };
             //@ts-ignore
             mockedEther.Contract = function () {
@@ -86,9 +87,9 @@ describe("Web3SwapClient", () => {
             const client = new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database);
             client.addContractIfNotExists("another_address", "5");
             client.addContractIfNotExists("another_address", "5");
-    
+
             expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
-            expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).not.toHaveBeenCalled();
+            expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -154,7 +155,7 @@ describe("Web3SwapClient", () => {
             new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
             expect(fakeDatabase.deleteOrder).not.toHaveBeenCalled();
         });
-        
+
         it("empty nonce", () => {
             const mockedOn = jest.fn((eventName, callback) => {
                 callback({});
@@ -189,6 +190,159 @@ describe("Web3SwapClient", () => {
             }
             new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
             expect(fakeDatabase.deleteOrder).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("isValidOrder", () => {
+        it("Is valid", async () => {
+            const dbOrder = forgeDbOrder(321);
+            const mockCheck = jest.fn().mockResolvedValue(true);
+            //@ts-ignore
+            mockedEther.providers = {
+                //@ts-ignore
+                InfuraProvider: {
+                    getWebSocketProvider: jest.fn()
+                },
+                //@ts-ignore
+                getNetwork: jest.fn(() => ({ chainId: 5, name: "a_custom" }))
+            };
+            //@ts-ignore
+            mockedEther.Contract = function () {
+                return ({
+                    on: jest.fn(),
+                    check: mockCheck
+                });
+            }
+            const client = new Web3SwapClient(apiKey, abi, fakeDatabase as Database);
+            client.addContractIfNotExists(dbOrder.swapContract, dbOrder.chainId);
+            
+            const isValid = await client.isValidOrder(dbOrder);
+
+            expect(isValid).toBeTruthy();
+            expect(mockCheck).toHaveBeenCalledWith(
+                "0x0000000000000000000000000000000000000000",
+                "nonce",
+                0.321,
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000",
+                "5",
+                "0x0000000000000000000000000000000000000000",
+                "10",
+                "28",
+                "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",
+                "0x5a12fdf12c2b966a98d238916a670bdfd83e207e54a9c7d0af923839582de79f"
+            );
+        });
+
+        it("Is invalid", async () => {
+            const dbOrder = forgeDbOrder(321);
+            const mockCheck = jest.fn().mockResolvedValue(false);
+            //@ts-ignore
+            mockedEther.providers = {
+                //@ts-ignore
+                InfuraProvider: {
+                    getWebSocketProvider: jest.fn()
+                },
+                //@ts-ignore
+                getNetwork: jest.fn(() => ({ chainId: 5, name: "a_custom" }))
+            };
+            //@ts-ignore
+            mockedEther.Contract = function () {
+                return ({
+                    on: jest.fn(),
+                    check: mockCheck
+                });
+            }
+            const client = new Web3SwapClient(apiKey, abi, fakeDatabase as Database);
+            client.addContractIfNotExists(dbOrder.swapContract, dbOrder.chainId);
+            
+            const isValid = await client.isValidOrder(dbOrder);
+
+            expect(isValid).toBeFalsy();
+            expect(mockCheck).toHaveBeenCalledWith(
+                "0x0000000000000000000000000000000000000000",
+                "nonce",
+                0.321,
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000",
+                "5",
+                "0x0000000000000000000000000000000000000000",
+                "10",
+                "28",
+                "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",
+                "0x5a12fdf12c2b966a98d238916a670bdfd83e207e54a9c7d0af923839582de79f"
+            );
+        });
+
+        it("Return false on error and log", async () => {
+            const dbOrder = forgeDbOrder(321);
+            const errorDesc = "An error has been received so I must crash"
+            const mockCheck = jest.fn().mockRejectedValue(errorDesc);
+            const logSpy = jest.spyOn(console, 'error');
+            //@ts-ignore
+            mockedEther.providers = {
+                //@ts-ignore
+                InfuraProvider: {
+                    getWebSocketProvider: jest.fn()
+                },
+                //@ts-ignore
+                getNetwork: jest.fn(() => ({ chainId: 5, name: "a_custom" }))
+            };
+            //@ts-ignore
+            mockedEther.Contract = function () {
+                return ({
+                    on: jest.fn(),
+                    check: mockCheck
+                });
+            }
+            const client = new Web3SwapClient(apiKey, abi, fakeDatabase as Database);
+            client.addContractIfNotExists(dbOrder.swapContract, dbOrder.chainId);
+            
+            const isValid = await client.isValidOrder(dbOrder);
+
+            expect(isValid).toBeFalsy();
+            expect(mockCheck).toHaveBeenCalledWith(
+                "0x0000000000000000000000000000000000000000",
+                "nonce",
+                0.321,
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000",
+                "5",
+                "0x0000000000000000000000000000000000000000",
+                "10",
+                "28",
+                "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",
+                "0x5a12fdf12c2b966a98d238916a670bdfd83e207e54a9c7d0af923839582de79f"
+            );
+            expect(logSpy).toHaveBeenCalledWith(errorDesc);
+        });
+
+        it("Network was not registered", async () => {
+            const dbOrder = forgeDbOrder(321);
+            const mockCheck = jest.fn().mockResolvedValue(false);
+            //@ts-ignore
+            mockedEther.providers = {
+                //@ts-ignore
+                InfuraProvider: {
+                    getWebSocketProvider: jest.fn()
+                },
+                //@ts-ignore
+                getNetwork: jest.fn()
+            };
+            //@ts-ignore
+            mockedEther.Contract = function () {
+                return ({
+                    on: jest.fn(),
+                    check: mockCheck
+                });
+            }
+            const client = new Web3SwapClient(apiKey, abi, fakeDatabase as Database);
+            client.addContractIfNotExists(dbOrder.swapContract, dbOrder.chainId);
+            
+            const isValid = await client.isValidOrder(dbOrder);
+
+            expect(isValid).toBeFalsy();
+            expect(mockCheck).not.toHaveBeenCalled();
         });
     });
 });

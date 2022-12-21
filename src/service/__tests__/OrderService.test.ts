@@ -11,6 +11,13 @@ jest
     .useFakeTimers()
     .setSystemTime(new Date(1653900784706));
 
+beforeAll(() => {
+    process.env.enableSignatureVerification="true"
+})
+afterAll(() => {
+    delete process.env.enableSignatureVerification
+})
+
 describe("Order service", () => {
 
     let fakeDb: Partial<Database>;
@@ -28,7 +35,8 @@ describe("Order service", () => {
             deleteOrder: jest.fn(() => Promise.resolve()),
         };
         fakeWeb3SwapClient = {
-            addContractIfNotExists: jest.fn()
+            addContractIfNotExists: jest.fn(),
+            isValidOrder: jest.fn()
         }
     })
 
@@ -113,7 +121,8 @@ describe("Order service", () => {
     describe("Add Order", () => {
         test("Add order nominal & broadcast", async () => {
             const order = forgeFullOrder(1653900784796);
-            const expectedForgeHash = new IndexedOrder(forgeDbOrder(1653900784796), 1653900784706, undefined);
+            const expectedDbOrder = forgeDbOrder(1653900784796);
+            const expectedForgeHash = new IndexedOrder(expectedDbOrder, 1653900784706, undefined);
             const expected = forgeIndexedOrder(1653900784706, 1653900784796);
             expected.hash = "a";
 
@@ -124,6 +133,8 @@ describe("Order service", () => {
             });
             //@ts-ignore
             fakeDb.orderExists.mockImplementation(() => false);
+            //@ts-ignore
+            fakeWeb3SwapClient.isValidOrder.mockResolvedValue(true);
 
             await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(order);
 
@@ -131,7 +142,7 @@ describe("Order service", () => {
             expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
             expect(fakeWeb3SwapClient.addContractIfNotExists).toHaveBeenCalledWith(AddressZero, "5");
-            
+            expect(fakeWeb3SwapClient.isValidOrder).toHaveBeenCalledWith(expectedDbOrder);
         });
 
         test("Add order missing data", async () => {
@@ -206,6 +217,33 @@ describe("Order service", () => {
             expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
         });
+    
+        test("Add order signature is invalid", async () => {
+            const order = forgeFullOrder(1653900784796);
+            const expectedDbOrder = forgeDbOrder(1653900784796);
+            const expectedForgeHash = new IndexedOrder(expectedDbOrder, 1653900784706, undefined);
+            const expected = forgeIndexedOrder(1653900784706, 1653900784796);
+            expected.hash = "a";
+    
+            //@ts-ignore
+            fakeDb.generateHash.mockImplementation((order) => {
+                expect(order).toEqual(expectedForgeHash); // https://github.com/facebook/jest/issues/7950
+                return "a";
+            });
+            //@ts-ignore
+            fakeDb.orderExists.mockImplementation(() => false);
+            //@ts-ignore
+            fakeWeb3SwapClient.isValidOrder.mockResolvedValue(false);
+    
+            await expect(async () => {
+                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(order)
+            }).rejects.toThrow("Invalid signature");
+    
+            expect(fakeDb.generateHash).toHaveBeenCalledTimes(1);
+            expect(fakeDb.orderExists).not.toHaveBeenCalledWith();
+            expect(fakeDb.addOrder).not.toHaveBeenCalledWith();
+            expect(fakeWeb3SwapClient.addContractIfNotExists).toHaveBeenCalledWith(AddressZero, "5");
+            expect(fakeWeb3SwapClient.isValidOrder).toHaveBeenCalledWith(expectedDbOrder);
+        });    
     });
-
 });

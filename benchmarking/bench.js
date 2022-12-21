@@ -18,11 +18,9 @@ async function bench() {
             Math.floor(Math.random() * (tokens.length - 1))
         ];
         shift++;
-        const expiryInSeconds = `${
-            (new Date().getTime() + shift * 60000) / 1000
-        }`;
+        const expiryInSeconds = `${(new Date().getTime() + shift * 60000) / 1000}`;
         const body = {
-            nonce: "nonce",
+            nonce: `${expiryInSeconds}`,
             expiry: expiryInSeconds,
             signerWallet: AddressZero,
             signerToken: signerToken,
