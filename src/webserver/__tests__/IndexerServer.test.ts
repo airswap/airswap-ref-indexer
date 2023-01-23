@@ -1,5 +1,5 @@
 import { HealthCheckResponse } from '@airswap/libraries';
-import { Order } from '@airswap/typescript';
+import { OrderERC20 } from '@airswap/typescript';
 import bodyParser from "body-parser";
 import express from 'express';
 import http from "http";
@@ -182,7 +182,7 @@ describe("Order controller", () => {
     });
 });
 
-function forgeOrder(expiryDate: number): Order {
+function forgeOrder(expiryDate: number): OrderERC20 {
     return {
         nonce: "nonce",
         expiry: `${expiryDate}`,

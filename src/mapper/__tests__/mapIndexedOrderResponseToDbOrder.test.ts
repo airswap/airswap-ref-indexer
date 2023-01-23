@@ -1,4 +1,4 @@
-import { forgeDbOrder, forgeFullOrder } from "../../Fixtures";
+import { forgeDbOrder, forgeFullOrderERC20 } from "../../Fixtures";
 import { mapAllIndexedOrderResponseToDbOrder } from "../mapIndexedOrderResponseToDbOrder";
 
 describe("mapIndexedOrderResponseToDbOrder", () => {
@@ -6,7 +6,7 @@ describe("mapIndexedOrderResponseToDbOrder", () => {
         const parameter = {
             "hash": {
                 hash:"hash",
-                order: forgeFullOrder(1),
+                order: forgeFullOrderERC20(1),
                 addedOn: 1
             }
         };
@@ -27,12 +27,12 @@ describe("mapIndexedOrderResponseToDbOrder", () => {
         const parameter = {
             "hash": {
                 hash:"hash",
-                order: forgeFullOrder(1),
+                order: forgeFullOrderERC20(1),
                 addedOn: 1
             },
             "hash2": {},
             "hash3": {                
-                order: forgeFullOrder(1),
+                order: forgeFullOrderERC20(1),
                 addedOn: 1
             },
             "hash4": {    
@@ -41,7 +41,7 @@ describe("mapIndexedOrderResponseToDbOrder", () => {
             },
             "hash5": {
                 hash:"hash5",
-                order: forgeFullOrder(1),                
+                order: forgeFullOrderERC20(1),                
             },
             "hash6": undefined,
             "hash7": "toto",

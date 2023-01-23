@@ -1,6 +1,6 @@
-import { FullOrder } from '@airswap/typescript';
+import { FullOrderERC20 } from '@airswap/typescript';
 
-export function mapAnyToFullOrder(data: any): FullOrder {
+export function mapAnyToFullOrder(data: any): FullOrderERC20 {
     return {
         nonce: String(data.nonce),
         signerWallet: String(data.signerWallet),
