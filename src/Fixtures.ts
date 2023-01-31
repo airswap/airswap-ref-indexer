@@ -1,5 +1,5 @@
 import { IndexedOrderResponse, OrderResponse, FiltersResponse, JsonRpcResponse } from '@airswap/libraries';
-import { FullOrder } from '@airswap/typescript';
+import { FullOrderERC20 } from '@airswap/typescript';
 import { AddressZero } from '@ethersproject/constants';
 import { DbOrder } from './model/DbOrder.js';
 import { IndexedOrder } from './model/IndexedOrder';
@@ -12,7 +12,7 @@ export function forgeIndexedOrderResponse(expectedAddedDate: number, expiryDate:
     return {
         hash: "hash",
         addedOn: expectedAddedDate,
-        order: forgeFullOrder(expiryDate)
+        order: forgeFullOrderERC20(expiryDate)
     }
 }
 
@@ -38,7 +38,7 @@ export function forgeDbOrder(expiryDate: number): DbOrder {
 }
 
 
-export function forgeFullOrder(expiryDate: number): FullOrder {
+export function forgeFullOrderERC20(expiryDate: number): FullOrderERC20 {
     return {
         nonce: "nonce",
         expiry: `${expiryDate / 1000}`,
@@ -63,7 +63,7 @@ export function forgeOrderResponse(filters?: FiltersResponse): OrderResponse {
             aze: {
                 addedOn: 1653900784696,
                 hash: "hash",
-                order: forgeFullOrder(1653900784706),
+                order: forgeFullOrderERC20(1653900784706),
             },
         },
         pagination: {

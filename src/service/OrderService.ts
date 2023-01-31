@@ -1,6 +1,6 @@
 import { AmountLimitFilterResponse, FiltersResponse, OrderResponse } from '@airswap/libraries';
-import { Order } from '@airswap/typescript';
-import { isValidFullOrder } from '@airswap/utils';
+import { OrderERC20 } from '@airswap/typescript';
+import { isValidFullOrderERC20 } from '@airswap/utils';
 import { Filters } from './../database/filter/Filters';
 import { Database } from '../database/Database.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
@@ -33,7 +33,7 @@ export class OrderService {
         if (!body || Object.keys(body).length == 0) {
             throw new ClientError("No body");
         }
-        if (!isValidFullOrder(body)) {
+        if (!isValidFullOrderERC20(body)) {
             throw new ClientError("Missing fields");
         }
         if (!areNumberFieldsValid(body)) {
@@ -101,6 +101,6 @@ function toFilterResponse(filters: Filters): FiltersResponse {
     return { senderToken, signerToken };
 }
 
-function areNumberFieldsValid(order: Order) {
+function areNumberFieldsValid(order: OrderERC20) {
     return isNumeric(order.senderAmount) && isNumeric(order.signerAmount) && isNumeric(order.expiry)
 }

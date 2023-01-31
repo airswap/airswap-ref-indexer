@@ -2,7 +2,7 @@ import { Database } from './../../database/Database';
 import { Peers } from './../../peer/Peers';
 import { NodeIndexer } from '@airswap/libraries';
 import { requestDataFromOtherPeer } from "../requestDataFromOtherPeer";
-import { forgeDbOrder, forgeFullOrder } from '../../Fixtures';
+import { forgeDbOrder, forgeFullOrderERC20 } from '../../Fixtures';
 
 let fakeDb: Partial<Database>;
 let fakePeers: Partial<Peers>;
@@ -27,7 +27,7 @@ describe("requestDataFromOtherPeer", () => {
         fakePeers.getConnectablePeers.mockImplementation(() => ["http://first_node/", "http://second_node/"]);
         const mockGetOrders = jest.fn()
             .mockResolvedValueOnce(undefined)
-            .mockResolvedValueOnce({orders: [{ hash: "hash", addedOn: 123, order: forgeFullOrder(1) }]})
+            .mockResolvedValueOnce({orders: [{ hash: "hash", addedOn: 123, order: forgeFullOrderERC20(1) }]})
         //@ts-ignore
         mockNodeIndexer.mockImplementation(jest.fn(() => ({ getOrders: mockGetOrders })))
 

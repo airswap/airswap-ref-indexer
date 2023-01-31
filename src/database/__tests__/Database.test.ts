@@ -1,5 +1,5 @@
 import { AddressZero } from '@ethersproject/constants';
-import { FullOrder, Order } from '@airswap/typescript';
+import { FullOrderERC20 } from '@airswap/typescript';
 import { forgeDbOrder, forgeIndexedOrder, forgeIndexedOrderResponse } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
 import { AceBaseClient } from "../AcebaseClient";
@@ -105,7 +105,7 @@ describe("Database implementations", () => {
             protocolFee: "4",
             senderWallet: AddressZero,
         };
-        const order1: FullOrder = {
+        const order1: FullOrderERC20 = {
             nonce: "nonce",
             expiry: "1653138423537",
             signerWallet: "signerWallet",
@@ -139,7 +139,7 @@ describe("Database implementations", () => {
             protocolFee: "4",
             senderWallet: AddressZero,
         };
-        const order2: FullOrder = {
+        const order2: FullOrderERC20 = {
             nonce: "nonce",
             expiry: "1653138423537",
             signerWallet: "signerWallet",
@@ -173,7 +173,7 @@ describe("Database implementations", () => {
             protocolFee: "4",
             senderWallet: AddressZero,
         };
-        const order3: FullOrder = {
+        const order3: FullOrderERC20 = {
             nonce: "nonce",
             expiry: "1653138423537",
             signerWallet: "signerWallet",

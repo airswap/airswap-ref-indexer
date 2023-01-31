@@ -1,11 +1,10 @@
 import { IndexedOrderResponse, OrderResponse, RequestFilter, SortField, SortOrder } from '@airswap/libraries';
-import { AceBase, DataReference } from 'acebase';
+import { AceBase, AceBaseLocalSettings, DataReference } from 'acebase';
 import crypto from "crypto";
 import fs from "fs";
 import { computePagination } from '../mapper/pagination/index.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
-import { AceBaseLocalSettings } from './../../node_modules/acebase/index.d';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
 
