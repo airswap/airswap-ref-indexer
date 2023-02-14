@@ -19,7 +19,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse> {
+  getOrderERC20By(requestFilter: RequestFilter): Promise<OrderResponse> {
     const totalResults = Object.values(this.database).filter((indexedOrder: IndexedOrder) => {
       const order = indexedOrder.order;
       let isFound = true;
@@ -83,7 +83,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  deleteOrder(nonce: string, signerWallet: string): Promise<void> {
+  deleteOrderERC20(nonce: string, signerWallet: string): Promise<void> {
     const orderToDelete = Object.values(this.database).find((indexedOrder: IndexedOrder) => {
       return indexedOrder.order.nonce === nonce && indexedOrder.order.signerWallet === signerWallet
     });
@@ -93,7 +93,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
   
-  deleteExpiredOrder(timestampInSeconds: number) {
+  deleteExpiredOrderERC20(timestampInSeconds: number) {
     const hashToDelete: string[] = Object.keys(this.database).filter((key: string) => {
       return this.database[key].order.expiry < timestampInSeconds;
     });
@@ -103,7 +103,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  getOrder(hash: string): Promise<OrderResponse> {
+  getOrderERC20(hash: string): Promise<OrderResponse> {
     const result: Record<string, IndexedOrderResponse> = {};
     if (this.database[hash]) {
       result[hash] = this.mapToIndexedOrderResponse(this.database[hash]);
@@ -120,7 +120,7 @@ export class InMemoryDatabase implements Database {
     });
   }
 
-  async getOrders(): Promise<OrderResponse> {
+  async getOrdersERC20(): Promise<OrderResponse> {
     const size = Object.keys(this.database).length;
     const results: Record<string, IndexedOrderResponse> = {};
     Object.keys(this.database).forEach(key => {
@@ -133,11 +133,11 @@ export class InMemoryDatabase implements Database {
     });
   }
 
-  getFilters(): Promise<Filters> {
+  getFiltersERC20(): Promise<Filters> {
     return Promise.resolve(this.filters);
   }
 
-  orderExists(hash: string): Promise<boolean> {
+  orderERC20Exists(hash: string): Promise<boolean> {
     return Promise.resolve(Object.keys(this.database).indexOf(hash) != -1);
   }
 

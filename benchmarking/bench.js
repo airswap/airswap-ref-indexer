@@ -34,19 +34,19 @@ async function bench() {
             r: "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",
             s: "0x5a12fdf12c2b966a98d238916a670bdfd83e207e54a9c7d0af923839582de79f",
             v: "28",
-            chainId: "5",
+            chainId: 5,
             swapContract: AddressZero,
         };
 
         try {
             if (index % 10 === 0) {
-                await client.addOrder(body);
+                await client.addOrderERC20(body);
                 const now = new Date().getTime();
                 const elapsed = now - lastDate;
                 console.log(index, elapsed, elapsed / 100, "ms/rq");
                 lastDate = now;
             } else {
-                await client.addOrder(body);
+                await client.addOrderERC20(body);
             }
         } catch (error) {
             console.log(error);

@@ -11,7 +11,7 @@ describe("Root service", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve(
+            getOrdersERC20: jest.fn(() => Promise.resolve(
                 {
                     orders: { "aze": indexedOrderResponse },
                     pagination: {

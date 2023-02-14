@@ -36,8 +36,8 @@ describe("Order controller", () => {
             broadcast: jest.fn()
         };
         fakeOrderService = {
-            getOrders: jest.fn(),
-            addOrder: jest.fn()
+            getOrdersERC20: jest.fn(),
+            addOrderERC20: jest.fn()
         }
     });
 
@@ -103,7 +103,7 @@ describe("Order controller", () => {
             supertest(webserver)
                 .post("/")
                 .type("json")
-                .send({ id: "-1", method: "getOrders", params: {} })
+                .send({ id: "-1", method: "getOrdersERC20", params: {} })
                 .then(response => {
                     expect(response.body).toEqual(expected);
                     expect(response.statusCode).toBe(400);
@@ -115,18 +115,18 @@ describe("Order controller", () => {
     describe('Get orders', () => {
         test("nominal", (done) => {
             const expected = forgeJsonRpcResponse("-1", forgeOrderResponse());
-            fakeOrderService.getOrders = jest.fn().mockResolvedValue(forgeOrderResponse());
+            fakeOrderService.getOrdersERC20 = jest.fn().mockResolvedValue(forgeOrderResponse());
 
             new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
 
             supertest(webserver)
                 .post("/")
                 .type("json")
-                .send({ id: "-1", method: "getOrders", params: [{ filters: true }] })
+                .send({ id: "-1", method: "getOrdersERC20", params: [{ filters: true }] })
                 .then(response => {
                     expect(response.body).toEqual(expected);
                     expect(response.statusCode).toBe(200);
-                    expect(fakeOrderService.getOrders).toHaveBeenCalledWith({ "filters": true });
+                    expect(fakeOrderService.getOrdersERC20).toHaveBeenCalledWith({ "filters": true });
                     done();
                 });
         });
@@ -136,7 +136,7 @@ describe("Order controller", () => {
     describe("Add Order", () => {
         test("Add order nominal & broadcast", done => {
             const order = forgeOrder(1653900784696);
-            const payload = { id: "-1", method: "addOrder", params: [order] };
+            const payload = { id: "-1", method: "addOrderERC20", params: [order] };
             new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
             supertest(webserver)
                 .post("/")
@@ -145,7 +145,7 @@ describe("Order controller", () => {
                 .then(response => {
                     expect(response.body).toEqual({ id: "-1", "jsonrpc": "2.0", "result": { "message": "Added" } });
                     expect(response.statusCode).toBe(201);
-                    expect(fakeOrderService.addOrder).toHaveBeenCalledWith(order);
+                    expect(fakeOrderService.addOrderERC20).toHaveBeenCalledWith(order);
                     expect(fakePeers.broadcast).toHaveBeenCalledWith("POST", "/", payload);
                     done();
                 });
@@ -153,9 +153,9 @@ describe("Order controller", () => {
 
         test("Add order error, no broadcast", done => {
             const order = forgeOrder(1653900784696);
-            const payload = { id: "-1", method: "addOrder", params: [order] };
+            const payload = { id: "-1", method: "addOrderERC20", params: [order] };
 
-            fakeOrderService.addOrder = jest.fn().mockImplementation(() => {
+            fakeOrderService.addOrderERC20 = jest.fn().mockImplementation(() => {
                 throw new ClientError("an error");
             })
             new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
@@ -174,7 +174,7 @@ describe("Order controller", () => {
                             }
                         });
                     expect(response.statusCode).toBe(400);
-                    expect(fakeOrderService.addOrder).toHaveBeenCalledWith(order);
+                    expect(fakeOrderService.addOrderERC20).toHaveBeenCalledWith(order);
                     expect(fakePeers.broadcast).not.toHaveBeenCalled();
                     done();
                 });

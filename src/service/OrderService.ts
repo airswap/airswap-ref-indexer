@@ -13,7 +13,7 @@ import { Web3SwapClient } from '../client/Web3SwapClient.js';
 
 const validationDurationInWeek = 1;
 
-export const METHODS = { getOrders: "getOrders", addOrder: "addOrder" } as Record<string, string>;
+export const METHODS = { getOrdersERC20: "getOrdersERC20", addOrderERC20: "addOrderERC20" } as Record<string, string>;
 export class OrderService {
     private database: Database;
     private web3SwapClient: Web3SwapClient;
@@ -29,7 +29,7 @@ export class OrderService {
         }
     }
 
-    public async addOrder(body: any): Promise<void> {
+    public async addOrderERC20(body: any): Promise<void> {
         if (!body || Object.keys(body).length == 0) {
             throw new ClientError("No body");
         }
@@ -47,7 +47,7 @@ export class OrderService {
         const addedTimestamp = isNumeric(body.addedOn) ? +body.addedOn : new Date().getTime();
         const indexedOrder = new IndexedOrder(dbOrder, addedTimestamp);
         const hash = this.database.generateHash(indexedOrder);
-        const orderExists = await this.database.orderExists(hash);
+        const orderExists = await this.database.orderERC20Exists(hash);
         if (orderExists) {
             throw new AlreadyExistsError();
         }
@@ -59,23 +59,23 @@ export class OrderService {
         return Promise.resolve();
     }
 
-    public async getOrders(query: Record<string, any>): Promise<OrderResponse> {
+    public async getOrdersERC20(query: Record<string, any>): Promise<OrderResponse> {
         if (query === undefined || query === null) {
             throw new ClientError("Incorrect query");
         }
         let orders: OrderResponse;
         if (query.hash) {
-            orders = await this.database.getOrder(query.hash);
+            orders = await this.database.getOrderERC20(query.hash);
         }
         else if (Object.keys(query).filter(key => key !== "filters").length === 0) {
-            orders = await this.database.getOrders();
+            orders = await this.database.getOrdersERC20();
         }
         else {
-            orders = await this.database.getOrderBy(mapAnyToRequestFilter(query));
+            orders = await this.database.getOrderERC20By(mapAnyToRequestFilter(query));
         }
 
         if (query.filters) {
-            const filters = await this.database.getFilters();
+            const filters = await this.database.getFiltersERC20();
             orders.filters = toFilterResponse(filters)
         }
         return Promise.resolve(orders);

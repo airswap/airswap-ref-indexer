@@ -118,7 +118,7 @@ describe("Database implementations", () => {
             s: "s",
             protocolFee: "4",
             senderWallet: AddressZero,
-            chainId: "5",
+            chainId: 5,
             swapContract: AddressZero
         };
         const dbOrder2: DbOrder = {
@@ -152,7 +152,7 @@ describe("Database implementations", () => {
             s: "s",
             protocolFee: "4",
             senderWallet: AddressZero,
-            chainId: "5",
+            chainId: 5,
             swapContract: AddressZero
         };
         const dbOrder3: DbOrder = {
@@ -186,7 +186,7 @@ describe("Database implementations", () => {
             s: "s",
             protocolFee: "4",
             senderWallet: AddressZero,
-            chainId: "5",
+            chainId: 5,
             swapContract: AddressZero
         };
 
@@ -200,7 +200,7 @@ describe("Database implementations", () => {
         await db.addOrder(otcOrder2);
         await db.addOrder(otcOrder3);
 
-        const ordersFromToken = await db.getOrderBy({ page: 1, signerTokens: ["signerToken"] });
+        const ordersFromToken = await db.getOrderERC20By({ page: 1, signerTokens: ["signerToken"] });
         expect(ordersFromToken).toEqual({
             orders: { "id1": expectedOtcOrder1, "id3": expectedOtcOrder3 },
             pagination: {
@@ -210,7 +210,7 @@ describe("Database implementations", () => {
             ordersForQuery: 2
         });
 
-        const anotherToken = await db.getOrderBy({ page: 1, senderTokens: ["another"] });
+        const anotherToken = await db.getOrderERC20By({ page: 1, senderTokens: ["another"] });
         expect(anotherToken).toEqual({
             orders: { "id2": expectedOtcOrder2 },
             pagination: {
@@ -220,7 +220,7 @@ describe("Database implementations", () => {
             ordersForQuery: 1
         });
 
-        const minSignerAmountFromToken = await db.getOrderBy({ page: 1, minSignerAmount: BigInt(15) });
+        const minSignerAmountFromToken = await db.getOrderERC20By({ page: 1, minSignerAmount: BigInt(15) });
         expect(minSignerAmountFromToken).toEqual({
             orders: { "id2": expectedOtcOrder2 },
             pagination: {
@@ -230,7 +230,7 @@ describe("Database implementations", () => {
             ordersForQuery: 1
         });
 
-        const maxSignerAmountFromToken = await db.getOrderBy({ page: 1, maxSignerAmount: BigInt(5) });
+        const maxSignerAmountFromToken = await db.getOrderERC20By({ page: 1, maxSignerAmount: BigInt(5) });
         expect(maxSignerAmountFromToken).toEqual({
             orders: { "id1": expectedOtcOrder1, "id3": expectedOtcOrder3 },
             pagination: {
@@ -240,7 +240,7 @@ describe("Database implementations", () => {
             ordersForQuery: 2
         });
 
-        const minSenderAmount = await db.getOrderBy({ page: 1, minSenderAmount: BigInt(20) });
+        const minSenderAmount = await db.getOrderERC20By({ page: 1, minSenderAmount: BigInt(20) });
         expect(minSenderAmount).toEqual({
             orders: { "id3": expectedOtcOrder3 },
             pagination: {
@@ -250,7 +250,7 @@ describe("Database implementations", () => {
             ordersForQuery: 1
         });
 
-        const maxSenderAmount = await db.getOrderBy({ page: 1, maxSenderAmount: BigInt(15) });
+        const maxSenderAmount = await db.getOrderERC20By({ page: 1, maxSenderAmount: BigInt(15) });
         expect(maxSenderAmount).toEqual({
             orders: { "id1": expectedOtcOrder1, "id2": expectedOtcOrder2 },
             pagination: {
@@ -260,22 +260,22 @@ describe("Database implementations", () => {
             ordersForQuery: 2
         });
 
-        const senderAmountAsc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.ASC });
+        const senderAmountAsc = await db.getOrderERC20By({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.ASC });
         expect(Object.keys(senderAmountAsc.orders)).toEqual(["id1", "id2", "id3"]);
 
-        const senderAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.DESC, senderTokens: ["senderToken"] });
+        const senderAmountDesc = await db.getOrderERC20By({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.DESC, senderTokens: ["senderToken"] });
         expect(Object.keys(senderAmountDesc.orders)).toEqual(["id3", "id1"]);
 
-        const signerAmountAsc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.ASC });
+        const signerAmountAsc = await db.getOrderERC20By({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.ASC });
         expect(Object.keys(signerAmountAsc.orders)).toEqual(["id1", "id3", "id2"]);
 
-        const signerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC, signerTokens: ["signerToken"] });
+        const signerAmountDesc = await db.getOrderERC20By({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC, signerTokens: ["signerToken"] });
         expect(Object.keys(signerAmountDesc.orders)).toEqual(["id3", "id1"]);
 
-        const minSignerAmountDesc = await db.getOrderBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC });
+        const minSignerAmountDesc = await db.getOrderERC20By({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC });
         expect(Object.keys(minSignerAmountDesc.orders)).toEqual(["id2", "id3", "id1"]);
 
-        const maxAddedOn = await db.getOrderBy({ page: 1, maxAddedDate: 1653138423527 });
+        const maxAddedOn = await db.getOrderERC20By({ page: 1, maxAddedDate: 1653138423527 });
         expect(maxAddedOn).toEqual({
             orders: { "id1": expectedOtcOrder1, "id2": expectedOtcOrder2 },
             pagination: {
@@ -285,7 +285,7 @@ describe("Database implementations", () => {
             ordersForQuery: 2
         });
 
-        const specificOne = await db.getOrderBy({
+        const specificOne = await db.getOrderERC20By({
             page: 1,
             signerTokens: ["signerToken"],
             senderTokens: ["senderToken"],
@@ -311,7 +311,7 @@ describe("Database implementations", () => {
         const expectedIndexedOrder = forgeIndexedOrderResponse(addedOn, expiryDate);
 
         await db.addOrder(indexedOrder);
-        const orders = await db.getOrders();
+        const orders = await db.getOrdersERC20();
 
         expect(orders).toEqual({
             orders: { hash: expectedIndexedOrder, },
@@ -333,7 +333,7 @@ describe("Database implementations", () => {
         expectedAnotherOrder.hash = "another_hash";
 
         await db.addAll({ "hash": indexedOrder, "another_hash": anotherOrder });
-        const orders = await db.getOrders();
+        const orders = await db.getOrdersERC20();
 
         expect(orders).toEqual({
             orders: { hash: expectedIndexedOrder, "another_hash": expectedAnotherOrder },
@@ -356,7 +356,7 @@ describe("Database implementations", () => {
         anotherOrder.order.approximatedSignerAmount = BigInt(50);
 
         await db.addAll({ "hash": indexedOrder, "another_hash": anotherOrder });
-        const filters = await db.getFilters();
+        const filters = await db.getFiltersERC20();
 
         expect(filters).toEqual({
             senderToken: { "0x0000000000000000000000000000000000000000": { max: BigInt(15), min: BigInt(10) } },
@@ -369,8 +369,8 @@ describe("Database implementations", () => {
         const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
         await db.addOrder(indexedOrder);
 
-        await db.deleteOrder("nonce", AddressZero);
-        const orders = await db.getOrders();
+        await db.deleteOrderERC20("nonce", AddressZero);
+        const orders = await db.getOrdersERC20();
 
         expect(orders).toEqual({
             orders: {},
@@ -392,8 +392,8 @@ describe("Database implementations", () => {
         await db.addOrder(indexedOrder3);
         const expected = forgeIndexedOrderResponse(1000, 500000);
 
-        await db.deleteExpiredOrder(300);
-        const orders = await db.getOrders();
+        await db.deleteExpiredOrderERC20(300);
+        const orders = await db.getOrdersERC20();
 
         expect(orders).toEqual({
             orders: { hash: expected },
@@ -410,7 +410,7 @@ describe("Database implementations", () => {
         const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
         await db.addOrder(indexedOrder);
 
-        const orderExists = await db.orderExists("hash");
+        const orderExists = await db.orderERC20Exists("hash");
 
         expect(orderExists).toBe(true);
         return Promise.resolve();
@@ -420,7 +420,7 @@ describe("Database implementations", () => {
         const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
         await db.addOrder(indexedOrder);
 
-        const orderExists = await db.orderExists("unknownHash");
+        const orderExists = await db.orderERC20Exists("unknownHash");
 
         expect(orderExists).toBe(false);
         return Promise.resolve();
@@ -431,7 +431,7 @@ describe("Database implementations", () => {
         const expectedIndexedOrder = forgeIndexedOrderResponse(addedOn, expiryDate);
         await db.addOrder(indexedOrder);
 
-        const orderExists = await db.getOrder("hash");
+        const orderExists = await db.getOrderERC20("hash");
 
         expect(orderExists).toEqual({
             orders: { hash: expectedIndexedOrder },
@@ -448,7 +448,7 @@ describe("Database implementations", () => {
         const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
         await db.addOrder(indexedOrder);
 
-        const orderExists = await db.getOrder("unknownHash");
+        const orderExists = await db.getOrderERC20("unknownHash");
 
         expect(orderExists).toEqual({
             orders: {},

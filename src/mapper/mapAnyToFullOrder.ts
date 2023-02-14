@@ -14,7 +14,7 @@ export function mapAnyToFullOrder(data: any): FullOrderERC20 {
         v: String(data.v),
         protocolFee:  String(data.protocolFee), 
         senderWallet:  String(data.senderWallet),
-        chainId:  String(data.chainId), 
+        chainId:  Number(data.chainId), 
         swapContract:  String(data.swapContract)
     }
 }

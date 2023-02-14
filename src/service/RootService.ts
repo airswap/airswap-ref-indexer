@@ -14,7 +14,7 @@ export class RootService {
     }
 
     public async get(): Promise<HealthCheckResponse> {
-        const orders = await this.database.getOrders();
+        const orders = await this.database.getOrdersERC20();
         return {
             peers: this.peers.getPeers(),
             registry: this.registry,

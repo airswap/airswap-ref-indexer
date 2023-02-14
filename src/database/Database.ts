@@ -1,27 +1,27 @@
-import { OrderResponse, RequestFilter } from '@airswap/libraries';
-import { IndexedOrder } from '../model/IndexedOrder.js';
+import { OrderResponse as OrderResponseERC20, RequestFilter } from '@airswap/libraries';
+import { IndexedOrder as IndexedOrderERC20 } from '../model/IndexedOrder.js';
 import { Filters } from './filter/Filters.js';
 
 export interface Database {
-    addOrder(IndexedOrder: IndexedOrder): Promise<void>;
+    addOrder(IndexedOrderERC20: IndexedOrderERC20): Promise<void>;
 
-    addAll(orders: Record<string, IndexedOrder>): Promise<void>;
+    addAll(ordersERC20: Record<string, IndexedOrderERC20>): Promise<void>;
 
-    deleteOrder(nonce: string, signerWallet: string): Promise<void>;
+    deleteOrderERC20(nonce: string, signerWallet: string): Promise<void>;
 
-    deleteExpiredOrder(timestampInSeconds: number): Promise<void>;
+    deleteExpiredOrderERC20(timestampInSeconds: number): Promise<void>;
 
-    getOrder(hash: string): Promise<OrderResponse>;
+    getOrderERC20(hash: string): Promise<OrderResponseERC20>;
 
-    getOrders(): Promise<OrderResponse>;
+    getOrdersERC20(): Promise<OrderResponseERC20>;
 
-    getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse>;
+    getOrderERC20By(requestFilter: RequestFilter): Promise<OrderResponseERC20>;
 
-    orderExists(hash: string): Promise<boolean>;
+    orderERC20Exists(hash: string): Promise<boolean>;
 
-    generateHash(indexedOrder: IndexedOrder): string;
+    generateHash(indexedOrderERC20: IndexedOrderERC20): string;
 
-    getFilters(): Promise<Filters>;
+    getFiltersERC20(): Promise<Filters>;
 
     connect(databaseName: string, deleteOnStart: boolean): Promise<void>;
 

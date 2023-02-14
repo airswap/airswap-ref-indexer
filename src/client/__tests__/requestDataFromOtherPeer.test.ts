@@ -29,7 +29,7 @@ describe("requestDataFromOtherPeer", () => {
             .mockResolvedValueOnce(undefined)
             .mockResolvedValueOnce({orders: [{ hash: "hash", addedOn: 123, order: forgeFullOrderERC20(1) }]})
         //@ts-ignore
-        mockNodeIndexer.mockImplementation(jest.fn(() => ({ getOrders: mockGetOrders })))
+        mockNodeIndexer.mockImplementation(jest.fn(() => ({ getOrdersERC20: mockGetOrders })))
 
         await requestDataFromOtherPeer(["http://first_node/", "http://second_node/"], fakeDb as Database, fakePeers as Peers);
 

@@ -42,11 +42,11 @@ export class AceBaseClient implements Database {
         this.filters = new Filters();
     }
 
-    getFilters(): Promise<Filters> {
+    getFiltersERC20(): Promise<Filters> {
         return Promise.resolve(this.filters);
     }
 
-    async getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse> {
+    async getOrderERC20By(requestFilter: RequestFilter): Promise<OrderResponse> {
         const query = this.ref.query();
 
         if (requestFilter.signerTokens != undefined) {
@@ -114,7 +114,7 @@ export class AceBaseClient implements Database {
         return Promise.resolve();
     }
 
-    async deleteOrder(nonce: string, signerWallet: string): Promise<void> {
+    async deleteOrderERC20(nonce: string, signerWallet: string): Promise<void> {
         await this.ref.query()
             .filter('nonce', '==', nonce)
             .filter('signerWallet', '==', signerWallet)
@@ -122,14 +122,14 @@ export class AceBaseClient implements Database {
         return Promise.resolve();
     }
 
-    async deleteExpiredOrder(timestampInSeconds: number) {
+    async deleteExpiredOrderERC20(timestampInSeconds: number) {
         await this.ref.query()
             .filter('expiry', '<', timestampInSeconds)
             .remove();
         return Promise.resolve();
     }
 
-    async getOrder(hash: string): Promise<OrderResponse> {
+    async getOrderERC20(hash: string): Promise<OrderResponse> {
         const query = await this.ref.query()
             .filter('hash', '==', hash)
             .get();
@@ -150,7 +150,7 @@ export class AceBaseClient implements Database {
         });
     }
 
-    async getOrders(): Promise<OrderResponse> {
+    async getOrdersERC20(): Promise<OrderResponse> {
         const data = await this.ref.query().take(1000000).get(); // bypass default limitation 
         const totalResults = await this.ref.query().take(1000000).count();
         let mapped = {} as Record<string, IndexedOrderResponse>;
@@ -180,7 +180,7 @@ export class AceBaseClient implements Database {
         return mapped;
     }
 
-    async orderExists(hash: string): Promise<boolean> {
+    async orderERC20Exists(hash: string): Promise<boolean> {
         return await this.ref.query()
             .filter('hash', '==', hash).exists();
     }
