@@ -52,7 +52,7 @@ export function forgeFullOrderERC20(expiryDate: number): FullOrderERC20 {
         r: "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",
         s: "0x5a12fdf12c2b966a98d238916a670bdfd83e207e54a9c7d0af923839582de79f",
         v: "28",
-        chainId: "5",
+        chainId: 5,
         swapContract: AddressZero
     };
 }

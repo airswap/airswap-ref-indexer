@@ -14,7 +14,7 @@ describe("Web3SwapClient", () => {
 
     beforeEach(() => {
         fakeDatabase = {
-            deleteOrder: jest.fn(),
+            deleteOrderERC20: jest.fn(),
         };
     });
 
@@ -110,8 +110,8 @@ describe("Web3SwapClient", () => {
         }
         new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
         expect(mockedOn).toHaveBeenCalledTimes(2);
-        expect(fakeDatabase.deleteOrder).toHaveBeenCalledTimes(1);
-        expect(fakeDatabase.deleteOrder).toHaveBeenCalledWith("245", "a_wallet");
+        expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledTimes(1);
+        expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledWith("245", "a_wallet");
     });
 
     it("Should remove order on event Cancel", async () => {
@@ -132,8 +132,8 @@ describe("Web3SwapClient", () => {
         }
         new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
         expect(mockedOn).toHaveBeenCalledTimes(2);
-        expect(fakeDatabase.deleteOrder).toHaveBeenCalledTimes(1);
-        expect(fakeDatabase.deleteOrder).toHaveBeenCalledWith("245", "a_wallet");
+        expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledTimes(1);
+        expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledWith("245", "a_wallet");
     });
 
     describe("Do nothing", () => {
@@ -152,7 +152,7 @@ describe("Web3SwapClient", () => {
                 });
             }
             new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
-            expect(fakeDatabase.deleteOrder).not.toHaveBeenCalled();
+            expect(fakeDatabase.deleteOrderERC20).not.toHaveBeenCalled();
         });
         
         it("empty nonce", () => {
@@ -170,7 +170,7 @@ describe("Web3SwapClient", () => {
                 });
             }
             new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
-            expect(fakeDatabase.deleteOrder).not.toHaveBeenCalled();
+            expect(fakeDatabase.deleteOrderERC20).not.toHaveBeenCalled();
         });
 
         it("nonce has no value", () => {
@@ -188,7 +188,7 @@ describe("Web3SwapClient", () => {
                 });
             }
             new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
-            expect(fakeDatabase.deleteOrder).not.toHaveBeenCalled();
+            expect(fakeDatabase.deleteOrderERC20).not.toHaveBeenCalled();
         });
     });
 });

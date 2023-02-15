@@ -51,11 +51,11 @@ export class IndexerServer {
                 let result;
                 response.status(200);
                 switch (method) {
-                    case METHODS.getOrders:
-                        result = await this.orderService.getOrders(parameters);
+                    case METHODS.getOrdersERC20:
+                        result = await this.orderService.getOrdersERC20(parameters);
                         break;
-                    case METHODS.addOrder:
-                        await this.orderService.addOrder(parameters);
+                    case METHODS.addOrderERC20:
+                        await this.orderService.addOrderERC20(parameters);
                         this.peers.broadcast(request.method, request.url, request.body);
                         result = new SuccessResponse("Added");
                         response.status(201);

@@ -18,14 +18,14 @@ describe("Order service", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getOrders: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
-            getOrder: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
-            getOrderBy: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
-            getFilters: jest.fn(() => Promise.resolve({ signerToken: { "ETH": { min: BigInt(10), max: BigInt(10) } }, senderToken: { "dai": { min: BigInt(5), max: BigInt(5) } } } as unknown as Filters) as Promise<Filters>),
+            getOrdersERC20: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
+            getOrderERC20: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
+            getOrderERC20By: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
+            getFiltersERC20: jest.fn(() => Promise.resolve({ signerToken: { "ETH": { min: BigInt(10), max: BigInt(10) } }, senderToken: { "dai": { min: BigInt(5), max: BigInt(5) } } } as unknown as Filters) as Promise<Filters>),
             addOrder: jest.fn(() => Promise.resolve()),
-            orderExists: jest.fn(() => Promise.resolve(true)),
+            orderERC20Exists: jest.fn(() => Promise.resolve(true)),
             generateHash: jest.fn(),
-            deleteOrder: jest.fn(() => Promise.resolve()),
+            deleteOrderERC20: jest.fn(() => Promise.resolve()),
         };
         fakeWeb3SwapClient = {
             addContractIfNotExists: jest.fn()
@@ -36,9 +36,9 @@ describe("Order service", () => {
         test("get all", async () => {
             const expected = forgeOrderResponse();
 
-            const result = await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).getOrders({});
+            const result = await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).getOrdersERC20({});
 
-            expect(fakeDb.getOrders).toHaveBeenCalled();
+            expect(fakeDb.getOrdersERC20).toHaveBeenCalled();
             expect(result).toEqual(expected);
         });
 
@@ -56,19 +56,19 @@ describe("Order service", () => {
             }
             const expected = forgeOrderResponse(expectedFilters);
 
-            const result = await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).getOrders({ filters: true } as Record<string, any>);
+            const result = await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).getOrdersERC20({ filters: true } as Record<string, any>);
 
-            expect(fakeDb.getOrders).toHaveBeenCalled();
-            expect(fakeDb.getFilters).toHaveBeenCalledTimes(1);
+            expect(fakeDb.getOrdersERC20).toHaveBeenCalled();
+            expect(fakeDb.getFiltersERC20).toHaveBeenCalledTimes(1);
             expect(result).toEqual(expected);
         });
 
         test("get by hash", async () => {
             const expected = forgeOrderResponse();
 
-            const result = await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).getOrders({ hash: "aze" });
+            const result = await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).getOrdersERC20({ hash: "aze" });
 
-            expect(fakeDb.getOrder).toHaveBeenCalledWith("aze");
+            expect(fakeDb.getOrderERC20).toHaveBeenCalledWith("aze");
             expect(result).toEqual(expected);
         });
 
@@ -84,9 +84,9 @@ describe("Order service", () => {
 
             const expected = forgeOrderResponse();
 
-            const result = await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).getOrders(body);
+            const result = await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).getOrdersERC20(body);
 
-            expect(fakeDb.getOrderBy).toHaveBeenCalledWith({
+            expect(fakeDb.getOrderERC20By).toHaveBeenCalledWith({
                 maxSenderAmount: BigInt(20),
                 maxSignerAmount: BigInt(200),
                 minSenderAmount: BigInt(2),
@@ -102,10 +102,10 @@ describe("Order service", () => {
         test("get but data are null", async () => {
             await expect(async () => {
                 // @ts-ignore
-                await new OrderService(fakeDb as Database).getOrders(null, undefined)
+                await new OrderService(fakeDb as Database).getOrdersERC20(null, undefined)
             }).rejects.toThrow("Incorrect query");
 
-            expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
+            expect(fakeDb.orderERC20Exists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
         });
     });
@@ -123,12 +123,12 @@ describe("Order service", () => {
                 return "a";
             });
             //@ts-ignore
-            fakeDb.orderExists.mockImplementation(() => false);
+            fakeDb.orderERC20Exists.mockImplementation(() => false);
 
-            await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(order);
+            await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrderERC20(order);
 
             expect(fakeDb.generateHash).toHaveBeenCalledTimes(1);
-            expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
+            expect(fakeDb.orderERC20Exists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
             expect(fakeWeb3SwapClient.addContractIfNotExists).toHaveBeenCalledWith(AddressZero, "5");
             
@@ -140,10 +140,10 @@ describe("Order service", () => {
             orderMissingExpiry.order.expiry = undefined;
 
             await expect(async () => {
-                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(orderMissingExpiry)
+                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrderERC20(orderMissingExpiry)
             }).rejects.toThrow();
 
-            expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
+            expect(fakeDb.orderERC20Exists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
         });
 
@@ -155,13 +155,13 @@ describe("Order service", () => {
             orderBadValueSignerAmount.signerAmount = "a";
 
             await expect(async () => {
-                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(orderBadValueSenderAmount)
+                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrderERC20(orderBadValueSenderAmount)
             }).rejects.toThrow();
             await expect(async () => {
-                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(orderBadValueSignerAmount)
+                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrderERC20(orderBadValueSignerAmount)
             }).rejects.toThrow("Number fields are incorrect");
 
-            expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
+            expect(fakeDb.orderERC20Exists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
         });
 
@@ -170,19 +170,19 @@ describe("Order service", () => {
             orderDateNotInRange.expiry = `${new Date().getTime()}${1000 * 3600 * 24 * 100}`;
 
             await expect(async () => {
-                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(orderDateNotInRange)
+                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrderERC20(orderDateNotInRange)
             }).rejects.toThrow("Invalid expiry date");
 
-            expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
+            expect(fakeDb.orderERC20Exists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
         });
 
         test("Missing order", async () => {
             await expect(async () => {
-                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder({})
+                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrderERC20({})
             }).rejects.toThrow("No body");
 
-            expect(fakeDb.orderExists).toHaveBeenCalledTimes(0);
+            expect(fakeDb.orderERC20Exists).toHaveBeenCalledTimes(0);
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
         });
 
@@ -192,18 +192,18 @@ describe("Order service", () => {
             //@ts-ignore
             fakeDb.generateHash.mockImplementation(() => "a");
             //@ts-ignore
-            fakeDb.orderExists.mockImplementation(() => true);
+            fakeDb.orderERC20Exists.mockImplementation(() => true);
 
             const expected = forgeIndexedOrder(1653900784706, 1653900784796);
             //@ts-ignore
             expected.hash = undefined;
 
             await expect(async () => {
-                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrder(order)
+                await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapClient).addOrderERC20(order)
             }).rejects.toThrow("Already exists");
 
             expect(fakeDb.generateHash).toHaveBeenCalledWith(expected);
-            expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
+            expect(fakeDb.orderERC20Exists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
         });
     });
