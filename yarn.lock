@@ -67,6 +67,13 @@
   dependencies:
     "@openzeppelin/contracts" "^4.8.1"
 
+"@airswap/types@^4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@airswap/types/-/types-4.0.2.tgz#b169f217f87c7c80f0eafcbc74bb6c81b5cbf18f"
+  integrity sha512-0OpTEak7N+iCJuoX1LogP1NKvMV+w7qMaVocewg1knT0+TeOQpBAuVxaQ+4iHojm3N58WBqlMkQwWVqMxZFy9g==
+  dependencies:
+    "@uniswap/token-lists" "^1.0.0-beta.31"
+
 "@airswap/typescript@3.0.3":
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@airswap/typescript/-/typescript-3.0.3.tgz#3a52d4e436a23a4324340581f2a6c544e4f92387"
@@ -1889,7 +1896,7 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@uniswap/token-lists@^1.0.0-beta.26":
+"@uniswap/token-lists@^1.0.0-beta.26", "@uniswap/token-lists@^1.0.0-beta.31":
   version "1.0.0-beta.31"
   resolved "https://registry.yarnpkg.com/@uniswap/token-lists/-/token-lists-1.0.0-beta.31.tgz#ff3852bd505ec7b4c276625c762ea79a93a919ec"
   integrity sha512-BQVoelKCRf64IToPEs1wxiXOnhr/ukwPOF78XG11PrTAOL4F8umjYKFb8ZPv1/dIJsPaC7GhLSriEqyp94SasQ==

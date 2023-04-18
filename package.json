@@ -18,6 +18,7 @@
     "@airswap/indexer-registry": "3.1.2",
     "@airswap/libraries": "3.4.0",
     "@airswap/swap-erc20": "3.0.1",
+    "@airswap/types": "^4.0.2",
     "@airswap/typescript": "3.0.3",
     "@airswap/utils": "3.0.8",
     "@babel/preset-env": "7.20.2",
