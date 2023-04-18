@@ -50,7 +50,7 @@ export class Peers {
     } catch (_) {
       return false;
     }
-    return url.protocol === "https:";
+    return url.protocol === "https:" || url.protocol === "http:";
   }
 
 

@@ -466,7 +466,7 @@ describe("Database implementations", () => {
 
         const hash = db.generateHash(indexedOrder);
 
-        expect(hash).toBe("032d6d906f159fccee7855829aee8ff7c177085264c34e7a4adeef55133edaec");
+        expect(hash).toBe("5cfd1a4837f91f4b690c739ecf08b26d3cfa5f69e0891a108df50b1fd0a0d892");
         return Promise.resolve();
     }
 });

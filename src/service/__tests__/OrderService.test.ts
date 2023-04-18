@@ -130,7 +130,7 @@ describe("Order service", () => {
             expect(fakeDb.generateHash).toHaveBeenCalledTimes(1);
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
-            expect(fakeWeb3SwapClient.addContractIfNotExists).toHaveBeenCalledWith(AddressZero, "5");
+            expect(fakeWeb3SwapClient.addContractIfNotExists).toHaveBeenCalledWith(AddressZero, 5);
             
         });
 
