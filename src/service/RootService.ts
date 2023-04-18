@@ -1,6 +1,7 @@
 import { Database } from '../database/Database.js';
 import { Peers } from '../peer/Peers.js';
-import { HealthCheckResponse } from '@airswap/libraries';
+import { HealthCheckResponse } from '../client/getHealthCheck.js';
+
 export class RootService {
 
     private peers: Peers;

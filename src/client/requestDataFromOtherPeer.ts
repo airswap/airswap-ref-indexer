@@ -1,4 +1,4 @@
-import { NodeIndexer } from '@airswap/libraries';
+import { Server } from '@airswap/libraries';
 import { Database } from '../database/Database.js';
 import { mapAllIndexedOrderResponseToDbOrder } from '../mapper/mapIndexedOrderResponseToDbOrder.js';
 import { Peers } from './../peer/Peers.js';
@@ -11,7 +11,7 @@ export async function requestDataFromOtherPeer(peersFromRegistry: string[], data
     for (let peerUrl of peerUrls) {
         try {
             console.log("Requesting from", peerUrl);
-            const { orders } = await new NodeIndexer(peerUrl).getOrdersERC20();
+            const { orders } = await new Server(peerUrl).getOrdersERC20();
             await database.addAll(mapAllIndexedOrderResponseToDbOrder(orders));
             console.log("Asked all queries to", peerUrl);
             return Promise.resolve();

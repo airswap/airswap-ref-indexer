@@ -1,4 +1,4 @@
-import { IndexedOrderResponse, OrderResponse, RequestFilter, SortField, SortOrder } from '@airswap/libraries';
+import { IndexedOrder as IndexedOrderResponse, OrderResponse, RequestFilter, SortField, SortOrder } from '@airswap/types';
 import { AceBase, AceBaseLocalSettings, DataReference } from 'acebase';
 import crypto from "crypto";
 import fs from "fs";
@@ -7,6 +7,7 @@ import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
+import { FullOrderERC20 } from '@airswap/typescript';
 
 const ENTRY_REF = "otcOrders";
 const elementPerPage = 20;
@@ -46,7 +47,7 @@ export class AceBaseClient implements Database {
         return Promise.resolve(this.filters);
     }
 
-    async getOrderERC20By(requestFilter: RequestFilter): Promise<OrderResponse> {
+    async getOrderERC20By(requestFilter: RequestFilter): Promise<OrderResponse<FullOrderERC20>> {
         const query = this.ref.query();
 
         if (requestFilter.signerTokens != undefined) {
@@ -84,7 +85,7 @@ export class AceBaseClient implements Database {
         const mapped = data.reduce((total, indexedOrder) => {
             const mapped = this.datarefToRecord(indexedOrder.val());
             return { ...total, ...mapped };
-        }, {} as Record<string, IndexedOrderResponse>);
+        }, {} as Record<string, IndexedOrderResponse<FullOrderERC20>>);
         const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
         return Promise.resolve({
             orders: mapped,
@@ -129,7 +130,7 @@ export class AceBaseClient implements Database {
         return Promise.resolve();
     }
 
-    async getOrderERC20(hash: string): Promise<OrderResponse> {
+    async getOrderERC20(hash: string): Promise<OrderResponse<FullOrderERC20>> {
         const query = await this.ref.query()
             .filter('hash', '==', hash)
             .get();
@@ -141,7 +142,7 @@ export class AceBaseClient implements Database {
                 ordersForQuery: 0
             });
         }
-        const result: Record<string, IndexedOrderResponse> = {};
+        const result: Record<string, IndexedOrderResponse<FullOrderERC20>> = {};
         result[hash] = this.datarefToRecord(serializedOrder)[hash];
         return Promise.resolve({
             orders: result,
@@ -150,10 +151,10 @@ export class AceBaseClient implements Database {
         });
     }
 
-    async getOrdersERC20(): Promise<OrderResponse> {
+    async getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>> {
         const data = await this.ref.query().take(1000000).get(); // bypass default limitation 
         const totalResults = await this.ref.query().take(1000000).count();
-        let mapped = {} as Record<string, IndexedOrderResponse>;
+        let mapped = {} as Record<string, IndexedOrderResponse<FullOrderERC20>>;
         data.forEach(dataSnapshot => {
             const mapp = this.datarefToRecord(dataSnapshot.val());
             mapped = { ...mapped, ...mapp };
@@ -170,8 +171,8 @@ export class AceBaseClient implements Database {
         return await this.db.ref(ENTRY_REF).remove();
     }
 
-    private datarefToRecord(data: any): Record<string, IndexedOrderResponse> {
-        const mapped: Record<string, IndexedOrderResponse> = {};
+    private datarefToRecord(data: any): Record<string, IndexedOrderResponse<FullOrderERC20>> {
+        const mapped: Record<string, IndexedOrderResponse<FullOrderERC20>> = {};
         mapped[data.hash] = {
             order: mapAnyToFullOrder(data),
             addedOn: data.addedOn,

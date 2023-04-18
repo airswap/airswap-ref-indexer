@@ -1,4 +1,3 @@
-import { HealthCheckResponse } from '@airswap/libraries';
 import { OrderERC20 } from '@airswap/typescript';
 import bodyParser from "body-parser";
 import express from 'express';
@@ -10,6 +9,7 @@ import { ClientError } from './../../model/error/ClientError';
 import { OrderService } from './../../service/OrderService';
 import { RootService } from './../../service/RootService';
 import { IndexerServer } from './../IndexerServer';
+import { HealthCheckResponse } from 'client/getHealthCheck';
 
 jest
     .useFakeTimers()

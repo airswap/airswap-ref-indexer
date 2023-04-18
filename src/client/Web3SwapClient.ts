@@ -15,7 +15,7 @@ export class Web3SwapClient {
         this.apiKey = apiKey;
     }
 
-    public addContractIfNotExists(registryAddress: string, network: string) {
+    public addContractIfNotExists(registryAddress: string, network: number|string) {
         const mappedNetwork = getNetwork(network);
         if (!mappedNetwork) {
             console.warn("Tried to add this pair but it does not work :", registryAddress, network)

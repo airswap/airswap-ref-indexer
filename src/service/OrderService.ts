@@ -1,5 +1,5 @@
-import { AmountLimitFilterResponse, FiltersResponse, OrderResponse } from '@airswap/libraries';
-import { OrderERC20 } from '@airswap/typescript';
+import { AmountLimitFilterResponse, FiltersResponse, OrderResponse } from '@airswap/types';
+import { FullOrderERC20, OrderERC20 } from '@airswap/typescript';
 import { isValidFullOrderERC20 } from '@airswap/utils';
 import { Filters } from './../database/filter/Filters';
 import { Database } from '../database/Database.js';
@@ -59,11 +59,11 @@ export class OrderService {
         return Promise.resolve();
     }
 
-    public async getOrdersERC20(query: Record<string, any>): Promise<OrderResponse> {
+    public async getOrdersERC20(query: Record<string, any>): Promise<OrderResponse<FullOrderERC20>> {
         if (query === undefined || query === null) {
             throw new ClientError("Incorrect query");
         }
-        let orders: OrderResponse;
+        let orders: OrderResponse<FullOrderERC20>;
         if (query.hash) {
             orders = await this.database.getOrderERC20(query.hash);
         }

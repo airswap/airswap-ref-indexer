@@ -2,6 +2,7 @@ import { Database } from '../../database/Database';
 import { forgeIndexedOrderResponse } from '../../Fixtures';
 import { Peers } from '../../peer/Peers';
 import { RootService } from '../RootService';
+
 describe("Root service", () => {
 
     let fakeDb: Partial<Database>;

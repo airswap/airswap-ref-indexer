@@ -1,6 +1,6 @@
 import { Database } from './../../database/Database';
 import { Peers } from './../../peer/Peers';
-import { NodeIndexer } from '@airswap/libraries';
+import { Server } from '@airswap/libraries';
 import { requestDataFromOtherPeer } from "../requestDataFromOtherPeer";
 import { forgeDbOrder, forgeFullOrderERC20 } from '../../Fixtures';
 
@@ -8,7 +8,7 @@ let fakeDb: Partial<Database>;
 let fakePeers: Partial<Peers>;
 
 jest.mock('@airswap/libraries');
-const mockNodeIndexer = jest.mocked(NodeIndexer);
+const mockNodeIndexer = jest.mocked(Server);
 
 describe("requestDataFromOtherPeer", () => {
     beforeEach(() => {

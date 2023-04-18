@@ -36,7 +36,7 @@ describe("Web3SwapClient", () => {
             }
 
             const client = new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database);
-            client.addContractIfNotExists("another_address", "5");
+            client.addContractIfNotExists("another_address", 5);
     
             expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
             expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).toHaveBeenCalledWith("a_custom", "apikey");
@@ -60,7 +60,7 @@ describe("Web3SwapClient", () => {
             }
 
             const client = new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database);
-            client.addContractIfNotExists("another_address", "5");
+            client.addContractIfNotExists("another_address", 5);
     
             expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
             expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).not.toHaveBeenCalled();
@@ -84,8 +84,8 @@ describe("Web3SwapClient", () => {
             }
 
             const client = new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database);
-            client.addContractIfNotExists("another_address", "5");
-            client.addContractIfNotExists("another_address", "5");
+            client.addContractIfNotExists("another_address", 5);
+            client.addContractIfNotExists("another_address", 5);
     
             expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
             expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).not.toHaveBeenCalled();

@@ -23,7 +23,7 @@ export class IndexerServer {
     async run() {
         this.server.get('*', async (request: Request, response: Response) => {
             console.log("R<---", request.method, request.url, request.body);
-            const result = await this.rootService.get();
+            const result = await this.rootService.get() as any;
             response.json(new JsonRpcResponse("-1", result));
         });
 

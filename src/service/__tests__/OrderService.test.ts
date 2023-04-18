@@ -1,4 +1,4 @@
-import { FiltersResponse } from '@airswap/libraries';
+import { FiltersResponse } from '@airswap/types';
 import { AddressZero } from '@ethersproject/constants';
 import { Web3SwapClient } from '../../client/Web3SwapClient';
 import { Database } from '../../database/Database';

@@ -1,10 +1,11 @@
-import { IndexedOrderResponse, OrderResponse, RequestFilter, SortField, SortOrder } from '@airswap/libraries';
+import { IndexedOrder as IndexedOrderResponse, OrderResponse, RequestFilter, SortField, SortOrder } from '@airswap/types';
 import crypto from "crypto";
 import { computePagination } from '../mapper/pagination/index.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
+import { FullOrderERC20 } from '@airswap/typescript';
 
 const elementPerPage = 20;
 export class InMemoryDatabase implements Database {
@@ -19,7 +20,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  getOrderERC20By(requestFilter: RequestFilter): Promise<OrderResponse> {
+  getOrderERC20By(requestFilter: RequestFilter): Promise<OrderResponse<FullOrderERC20>> {
     const totalResults = Object.values(this.database).filter((indexedOrder: IndexedOrder) => {
       const order = indexedOrder.order;
       let isFound = true;
@@ -51,7 +52,7 @@ export class InMemoryDatabase implements Database {
         return Number(b.order.approximatedSenderAmount - a.order.approximatedSenderAmount)
       });
     const totalResultsCount = totalResults.length;
-    const orders: Record<string, IndexedOrderResponse> = totalResults
+    const orders: Record<string, IndexedOrderResponse<FullOrderERC20>> = totalResults
       .slice((requestFilter.page - 1) * elementPerPage, requestFilter.page * elementPerPage)
       .reduce((total, indexedOrder) => {
         const orderId = indexedOrder['hash'];
@@ -103,8 +104,8 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  getOrderERC20(hash: string): Promise<OrderResponse> {
-    const result: Record<string, IndexedOrderResponse> = {};
+  getOrderERC20(hash: string): Promise<OrderResponse<FullOrderERC20>> {
+    const result: Record<string, IndexedOrderResponse<FullOrderERC20>> = {};
     if (this.database[hash]) {
       result[hash] = this.mapToIndexedOrderResponse(this.database[hash]);
       return Promise.resolve({
@@ -120,9 +121,9 @@ export class InMemoryDatabase implements Database {
     });
   }
 
-  async getOrdersERC20(): Promise<OrderResponse> {
+  async getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>> {
     const size = Object.keys(this.database).length;
-    const results: Record<string, IndexedOrderResponse> = {};
+    const results: Record<string, IndexedOrderResponse<FullOrderERC20>> = {};
     Object.keys(this.database).forEach(key => {
       results[key] = this.mapToIndexedOrderResponse(this.database[key])
     })
@@ -162,7 +163,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  private mapToIndexedOrderResponse(indexedOrder: IndexedOrder): IndexedOrderResponse {
+  private mapToIndexedOrderResponse(indexedOrder: IndexedOrder): IndexedOrderResponse<FullOrderERC20> {
     return {
       hash: indexedOrder.hash,
       addedOn:indexedOrder.addedOn,

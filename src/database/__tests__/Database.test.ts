@@ -6,7 +6,7 @@ import { AceBaseClient } from "../AcebaseClient";
 import { Database } from '../Database';
 import { InMemoryDatabase } from '../InMemoryDatabase';
 import { DbOrder } from './../../model/DbOrder';
-import { IndexedOrderResponse, SortField, SortOrder } from '@airswap/libraries';
+import { IndexedOrder as IndexedOrderResponse, SortField, SortOrder } from '@airswap/types';
 
 describe("Database implementations", () => {
     let inMemoryDatabase: InMemoryDatabase;
@@ -100,7 +100,7 @@ describe("Database implementations", () => {
             v: "v",
             r: "r",
             s: "s",
-            chainId: "5",
+            chainId: 5,
             swapContract: AddressZero,
             protocolFee: "4",
             senderWallet: AddressZero,
@@ -134,7 +134,7 @@ describe("Database implementations", () => {
             v: "v",
             r: "r",
             s: "s",
-            chainId: "5",
+            chainId: 5,
             swapContract: AddressZero,
             protocolFee: "4",
             senderWallet: AddressZero,
@@ -168,7 +168,7 @@ describe("Database implementations", () => {
             v: "v",
             r: "r",
             s: "s",
-            chainId: "5",
+            chainId: 5,
             swapContract: AddressZero,
             protocolFee: "4",
             senderWallet: AddressZero,
@@ -191,11 +191,11 @@ describe("Database implementations", () => {
         };
 
         const otcOrder1 = new IndexedOrder(dbOrder1, 1653138423537, "id1");
-        const expectedOtcOrder1: IndexedOrderResponse = { order: order1, addedOn: 1653138423537, hash: "id1" };
+        const expectedOtcOrder1: IndexedOrderResponse<FullOrderERC20> = { order: order1, addedOn: 1653138423537, hash: "id1" };
         const otcOrder2 = new IndexedOrder(dbOrder2, 1653138423527, "id2");
-        const expectedOtcOrder2: IndexedOrderResponse = { order: order2, addedOn: 1653138423527, hash: "id2" };
+        const expectedOtcOrder2: IndexedOrderResponse<FullOrderERC20> = { order: order2, addedOn: 1653138423527, hash: "id2" };
         const otcOrder3 = new IndexedOrder(dbOrder3, 1653138423517, "id3");
-        const expectedOtcOrder3: IndexedOrderResponse = { order: order3, addedOn: 1653138423517, hash: "id3" };
+        const expectedOtcOrder3: IndexedOrderResponse<FullOrderERC20> = { order: order3, addedOn: 1653138423517, hash: "id3" };
         await db.addOrder(otcOrder1);
         await db.addOrder(otcOrder2);
         await db.addOrder(otcOrder3);
