@@ -1,16 +1,17 @@
 import { Database } from '../database/Database.js';
 import { Peers } from '../peer/Peers.js';
 import { HealthCheckResponse } from '../client/getHealthCheck.js';
+import { Registry } from '@airswap/libraries';
 
 export class RootService {
 
     private peers: Peers;
-    private registry: string;
+    private network: number;
     private database: Database;
 
-    constructor(peers: Peers, database: Database, registry: string) {
+    constructor(peers: Peers, database: Database, network: number) {
         this.peers = peers;
-        this.registry = registry;
+        this.network = network;
         this.database = database;
     }
 
@@ -18,7 +19,7 @@ export class RootService {
         const orders = await this.database.getOrdersERC20();
         return {
             peers: this.peers.getPeers(),
-            registry: this.registry,
+            registry: Registry.addresses[this.network],
             databaseOrders: orders.ordersForQuery
         }
     }

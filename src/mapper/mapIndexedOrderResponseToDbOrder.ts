@@ -1,7 +1,7 @@
 import { IndexedOrder as IndexedOrderResponse } from '@airswap/types';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { mapAnyToDbOrder } from './mapAnyToDbOrder.js';
-import { FullOrderERC20 } from '@airswap/typescript';
+import { FullOrderERC20 } from '@airswap/types';
 
 
 function mapIndexedOrderResponseToDbOrder(indexedOrderResponse: IndexedOrderResponse<FullOrderERC20>): Record<string, IndexedOrder> | undefined {

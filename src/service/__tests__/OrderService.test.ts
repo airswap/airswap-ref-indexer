@@ -28,7 +28,7 @@ describe("Order service", () => {
             deleteOrderERC20: jest.fn(() => Promise.resolve()),
         };
         fakeWeb3SwapClient = {
-            addContractIfNotExists: jest.fn()
+            connectToChain: jest.fn()
         }
     })
 
@@ -130,7 +130,7 @@ describe("Order service", () => {
             expect(fakeDb.generateHash).toHaveBeenCalledTimes(1);
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
-            expect(fakeWeb3SwapClient.addContractIfNotExists).toHaveBeenCalledWith(AddressZero, 5);
+            expect(fakeWeb3SwapClient.connectToChain).toHaveBeenCalledWith(AddressZero, 5);
             
         });
 

@@ -33,10 +33,10 @@ describe("Root service", () => {
         {
             databaseOrders: 1,
             peers: [],
-            registry: "registry",
+            network: 1,
         };
 
-        const result = await new RootService(fakePeers as Peers, fakeDb as Database, registryAddress).get();
+        const result = await new RootService(fakePeers as Peers, fakeDb as Database, 1).get();
 
         expect(result).toEqual(expected);
     });

@@ -1,5 +1,5 @@
 import { JsonRpcResponse } from "@airswap/libraries"
-import { FullOrderERC20 } from "@airswap/typescript"
+import { FullOrderERC20 } from "@airswap/types"
 import axios, { AxiosResponse } from "axios"
 
 export type HealthCheckResponse = {

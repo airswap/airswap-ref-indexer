@@ -1,5 +1,5 @@
 import { AddressZero } from '@ethersproject/constants';
-import { FullOrderERC20 } from '@airswap/typescript';
+import { FullOrderERC20 } from '@airswap/types';
 import { forgeDbOrder, forgeIndexedOrder, forgeIndexedOrderResponse } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
 import { AceBaseClient } from "../AcebaseClient";

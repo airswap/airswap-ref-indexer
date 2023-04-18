@@ -7,7 +7,6 @@ const mockedEther = ethers as jest.Mocked<typeof ethers>;
 
 describe("Web3SwapClient", () => {
     const apiKey = "apikey";
-    const registryAddress = "registryAddress";
     const network = "rinkeby";
     const abi = [] as ContractInterface;
     let fakeDatabase: Partial<Database>;
@@ -23,10 +22,10 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
-                InfuraProvider : {
+                InfuraProvider: {
                     getWebSocketProvider: jest.fn()
                 },
-                getNetwork: jest.fn(() => ({chainId: 5, name: "a_custom"}))
+                getNetwork: jest.fn(() => ({ chainId: 5, name: "a_custom" }))
             };
             //@ts-ignore
             mockedEther.Contract = function () {
@@ -35,9 +34,9 @@ describe("Web3SwapClient", () => {
                 });
             }
 
-            const client = new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database);
-            client.addContractIfNotExists("another_address", 5);
-    
+            const client = new Web3SwapClient(apiKey, fakeDatabase as Database);
+            client.connectToChain(5);
+
             expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
             expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).toHaveBeenCalledWith("a_custom", "apikey");
         });
@@ -46,7 +45,7 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
-                InfuraProvider : {
+                InfuraProvider: {
                     getWebSocketProvider: jest.fn()
                 },
                 //@ts-ignore
@@ -59,9 +58,9 @@ describe("Web3SwapClient", () => {
                 });
             }
 
-            const client = new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database);
-            client.addContractIfNotExists("another_address", 5);
-    
+            const client = new Web3SwapClient(apiKey, fakeDatabase as Database);
+            client.connectToChain(5);
+
             expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
             expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).not.toHaveBeenCalled();
         });
@@ -70,7 +69,7 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
-                InfuraProvider : {
+                InfuraProvider: {
                     getWebSocketProvider: jest.fn()
                 },
                 //@ts-ignore
@@ -83,18 +82,18 @@ describe("Web3SwapClient", () => {
                 });
             }
 
-            const client = new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database);
-            client.addContractIfNotExists("another_address", 5);
-            client.addContractIfNotExists("another_address", 5);
-    
+            const client = new Web3SwapClient(apiKey, fakeDatabase as Database);
+            client.connectToChain(5);
+            client.connectToChain(5);
+
             expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
             expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).not.toHaveBeenCalled();
         });
     });
 
-    it("Should remove order on event Swap", async () => {
+    it("Should remove order on event SwapERC20", async () => {
         const mockedOn = jest.fn((eventName, callback) => {
-            if (eventName === "Swap") {
+            if (eventName === "SwapERC20") {
                 callback({ _hex: "0xf5", _isBigNumber: true }, 3221654, "a_wallet");
             }
         });
@@ -108,7 +107,7 @@ describe("Web3SwapClient", () => {
                 on: mockedOn,
             });
         }
-        new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
+        new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledTimes(1);
         expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledWith("245", "a_wallet");
@@ -130,7 +129,7 @@ describe("Web3SwapClient", () => {
                 on: mockedOn,
             });
         }
-        new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
+        new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledTimes(1);
         expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledWith("245", "a_wallet");
@@ -151,10 +150,10 @@ describe("Web3SwapClient", () => {
                     on: mockedOn,
                 });
             }
-            new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
+            new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
             expect(fakeDatabase.deleteOrderERC20).not.toHaveBeenCalled();
         });
-        
+
         it("empty nonce", () => {
             const mockedOn = jest.fn((eventName, callback) => {
                 callback({});
@@ -169,7 +168,7 @@ describe("Web3SwapClient", () => {
                     on: mockedOn,
                 });
             }
-            new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
+            new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
             expect(fakeDatabase.deleteOrderERC20).not.toHaveBeenCalled();
         });
 
@@ -187,7 +186,7 @@ describe("Web3SwapClient", () => {
                     on: mockedOn,
                 });
             }
-            new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
+            new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
             expect(fakeDatabase.deleteOrderERC20).not.toHaveBeenCalled();
         });
     });

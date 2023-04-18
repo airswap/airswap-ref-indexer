@@ -8,8 +8,7 @@ const mockedEther = ethers as jest.Mocked<typeof ethers>;
 
 describe("Web3RegistryClient", () => {
     const apiKey = "apikey";
-    const registryAddress = "registryAddress";
-    const network = "rinkeby";
+    const network = 5;
     const abi = [] as ContractInterface;
     let fakePeers: Partial<Peers>;
 
@@ -33,7 +32,7 @@ describe("Web3RegistryClient", () => {
                 on: jest.fn(),
             });
         }
-        const web3Client = new Web3RegistryClient(apiKey, registryAddress, abi as ContractInterface, network, fakePeers as Peers);
+        const web3Client = new Web3RegistryClient(apiKey, network, fakePeers as Peers);
 
         const peers = await web3Client.getPeersFromRegistry();
 
@@ -52,7 +51,7 @@ describe("Web3RegistryClient", () => {
                 on: jest.fn(),
             });
         }
-        const web3Client = new Web3RegistryClient(apiKey, registryAddress, abi as ContractInterface, network, fakePeers as Peers);
+        const web3Client = new Web3RegistryClient(apiKey, network, fakePeers as Peers);
 
         const peers = await web3Client.getPeersFromRegistry();
 
@@ -79,7 +78,7 @@ describe("Web3RegistryClient", () => {
                 on: mockedOn,
             });
         }
-        new Web3RegistryClient(apiKey, registryAddress, abi as ContractInterface, network, fakePeers as Peers);
+        new Web3RegistryClient(apiKey, network, fakePeers as Peers);
         expect(mockedOn).toHaveBeenCalledTimes(1);
         expect(fakePeers.addPeer).toHaveBeenCalledWith('http://localhost/');
     });
@@ -99,7 +98,7 @@ describe("Web3RegistryClient", () => {
             });
         }
 
-        await new Web3RegistryClient(apiKey, registryAddress, abi as ContractInterface, network, fakePeers as Peers)
+        await new Web3RegistryClient(apiKey, network, fakePeers as Peers)
             .onSetURLEvent("from", "to", {
                 args: {
                     account: "an_account",

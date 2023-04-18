@@ -11,12 +11,12 @@ describe("getRegistry", () => {
 
     test("Conf is not complete", () => {
         expect(getRegistry({}, {} as Peers)).toBe(null);
-        expect(getRegistry({ REGISTRY: "registryAddress", NETWORK: "rinkeby" }, {} as Peers)).toBe(null);
-        expect(getRegistry({ REGISTRY: "registryAddress", API_KEY: "infura"}, {} as Peers)).toBe(null);
+        expect(getRegistry({ NETWORK: "rinkeby" }, {} as Peers)).toBe(null);
+        expect(getRegistry({ API_KEY: "infura"}, {} as Peers)).toBe(null);
     });    
 
     test("ok smart contract", () => {
-        const newLocal = getRegistry({ REGISTRY: "registryAddress", API_KEY: "infura", NETWORK: "rinkeby" }, {} as Peers);
+        const newLocal = getRegistry({ API_KEY: "infura", NETWORK: "rinkeby" }, {} as Peers);
         expect(newLocal!.constructor.name).toBe("Web3RegistryClient");
     });
 });

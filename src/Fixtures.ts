@@ -1,5 +1,5 @@
 import { IndexedOrder as IndexedOrderResponse, OrderResponse, FiltersResponse } from '@airswap/types';
-import { FullOrderERC20 } from '@airswap/typescript';
+import { FullOrderERC20 } from '@airswap/types';
 import { AddressZero } from '@ethersproject/constants';
 import { DbOrder } from './model/DbOrder.js';
 import { IndexedOrder } from './model/IndexedOrder';

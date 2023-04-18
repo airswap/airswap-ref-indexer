@@ -7,7 +7,7 @@ import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
-import { FullOrderERC20 } from '@airswap/typescript';
+import { FullOrderERC20 } from '@airswap/types';
 
 const ENTRY_REF = "otcOrders";
 const elementPerPage = 20;

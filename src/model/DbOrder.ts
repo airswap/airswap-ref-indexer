@@ -1,4 +1,4 @@
-import { FullOrderERC20, Order, OrderParty } from "@airswap/typescript";
+import { FullOrderERC20, Order, OrderParty } from "@airswap/types";
 
 type Modify<T, R> = Omit<T, keyof R> & R;
 

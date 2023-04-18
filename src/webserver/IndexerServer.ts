@@ -13,7 +13,7 @@ export class IndexerServer {
     private rootService: RootService;
     private peers: Peers;
 
-    constructor(server: Express, orderService: OrderService, rootService: RootService, peers: Peers) {
+    constructor(server: Express, orderService: OrderService, rootService: RootService, peers: Peers,) {
         this.server = server;
         this.rootService = rootService;
         this.orderService = orderService;

@@ -1,5 +1,5 @@
 import { AmountLimitFilterResponse, FiltersResponse, OrderResponse } from '@airswap/types';
-import { FullOrderERC20, OrderERC20 } from '@airswap/typescript';
+import { FullOrderERC20, OrderERC20 } from '@airswap/types';
 import { isValidFullOrderERC20 } from '@airswap/utils';
 import { Filters } from './../database/filter/Filters';
 import { Database } from '../database/Database.js';
@@ -55,7 +55,7 @@ export class OrderService {
         indexedOrder.hash = hash;
         await this.database.addOrder(indexedOrder);
         console.log("Added", indexedOrder.order)
-        this.web3SwapClient.addContractIfNotExists(indexedOrder.order.swapContract, indexedOrder.order.chainId)
+        this.web3SwapClient.connectToChain(indexedOrder.order.chainId)
         return Promise.resolve();
     }
 

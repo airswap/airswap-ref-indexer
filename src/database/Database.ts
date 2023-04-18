@@ -1,7 +1,7 @@
 import { OrderResponse, RequestFilter } from '@airswap/types';
 import { IndexedOrder as IndexedOrderERC20 } from '../model/IndexedOrder.js';
 import { Filters } from './filter/Filters.js';
-import { FullOrderERC20 } from '@airswap/typescript';
+import { FullOrderERC20 } from '@airswap/types';
 
 export interface Database {
     addOrder(IndexedOrderERC20: IndexedOrderERC20): Promise<void>;
