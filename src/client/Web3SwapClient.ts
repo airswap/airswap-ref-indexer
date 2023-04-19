@@ -17,7 +17,7 @@ export class Web3SwapClient {
     public connectToChain(network: number|string) {
         const chainId = ethers.providers.getNetwork(network)?.chainId;
         if (!chainId) {
-            console.warn("Tried to add this pair but it does not work :", network)
+            console.warn("Tried to add this network but it does not work :", network)
             return;
         }
         if (this.keyExists(String(chainId))) {

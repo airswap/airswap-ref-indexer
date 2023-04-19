@@ -4,6 +4,7 @@ import axios, { AxiosResponse } from "axios"
 
 export type HealthCheckResponse = {
     registry: string, 
+    network: number, 
     peers: string[], 
     databaseOrders: number
 }

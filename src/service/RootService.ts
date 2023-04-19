@@ -19,6 +19,7 @@ export class RootService {
         const orders = await this.database.getOrdersERC20();
         return {
             peers: this.peers.getPeers(),
+            network: this.network,
             registry: Registry.addresses[this.network],
             databaseOrders: orders.ordersForQuery
         }

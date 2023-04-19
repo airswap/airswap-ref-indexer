@@ -7,7 +7,6 @@ describe("Root service", () => {
 
     let fakeDb: Partial<Database>;
     let fakePeers: Partial<Peers>;
-    let registryAddress = "registry";
     const indexedOrderResponse = forgeIndexedOrderResponse(1653854738949, 1653854738959);
 
     beforeEach(() => {
@@ -33,10 +32,11 @@ describe("Root service", () => {
         {
             databaseOrders: 1,
             peers: [],
-            network: 1,
+            network: 5,
+            registry: '0x6787cD07B0E6934BA9c3D1eBf3866eF091697128',
         };
 
-        const result = await new RootService(fakePeers as Peers, fakeDb as Database, 1).get();
+        const result = await new RootService(fakePeers as Peers, fakeDb as Database, 5).get();
 
         expect(result).toEqual(expected);
     });

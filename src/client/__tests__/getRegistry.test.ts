@@ -1,7 +1,6 @@
 import { getRegistry } from "../getRegistry";
 import { Peers } from './../../peer/Peers';
 
-jest.mock('../../indexers/index');
 jest.mock('./../Web3RegistryClient');
 
 describe("getRegistry", () => {
