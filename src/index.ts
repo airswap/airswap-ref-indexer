@@ -3,7 +3,7 @@ import { isNumeric } from "./validator/index.js";
 import { BroadcastClient } from './client/BroadcastClient.js';
 import { getRegistry } from "./client/getRegistry.js";
 import { requestDataFromOtherPeer } from "./client/requestDataFromOtherPeer.js";
-import { Web3SwapClient } from './client/Web3SwapERC20Client.js';
+import { Web3SwapERC20Client } from './client/Web3SwapERC20Client.js';
 import { Database } from './database/Database';
 import { getDatabase } from "./database/getDatabase.js";
 import { Peers } from "./peer/Peers.js";
@@ -79,7 +79,7 @@ process.on("SIGINT", () => {
 
 function getWeb3SwapClient(database: Database, network: number) {
   const apiKey: string = process.env.API_KEY as string;
-  const client = new Web3SwapClient(apiKey, database);
+  const client = new Web3SwapERC20Client(apiKey, database);
   if (!network) {
     return null;
   }

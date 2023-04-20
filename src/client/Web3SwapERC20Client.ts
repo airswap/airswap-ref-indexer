@@ -3,7 +3,7 @@ import { Database } from '../database/Database.js';
 import { SwapERC20 } from '@airswap/libraries'
 
 
-export class Web3SwapClient {
+export class Web3SwapERC20Client {
     private contracts: Contract[] = [];
     private database: Database;
     private apiKey: string;
