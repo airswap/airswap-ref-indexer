@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { Database } from '../../database/Database';
-import { Web3SwapClient } from './../Web3SwapClient';
+import { Web3SwapClient } from './../Web3SwapERC20Client';
 import { SwapERC20 } from '@airswap/libraries';
 
 jest.mock('@airswap/libraries', () => ({

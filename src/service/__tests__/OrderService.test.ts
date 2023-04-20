@@ -1,6 +1,5 @@
 import { FiltersResponse } from '@airswap/types';
-import { AddressZero } from '@ethersproject/constants';
-import { Web3SwapClient } from '../../client/Web3SwapClient';
+import { Web3SwapClient } from '../../client/Web3SwapERC20Client';
 import { Database } from '../../database/Database';
 import { forgeDbOrder, forgeFullOrderERC20, forgeIndexedOrder, forgeIndexedOrderResponse, forgeOrderResponse } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';

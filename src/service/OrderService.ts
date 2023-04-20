@@ -9,7 +9,7 @@ import { isDateInRange, isNumeric } from '../validator/index.js';
 import { AlreadyExistsError } from './../model/error/AlreadyExists.js';
 import { ClientError } from './../model/error/ClientError.js';
 import { IndexedOrder } from './../model/IndexedOrder.js';
-import { Web3SwapClient } from '../client/Web3SwapClient.js';
+import { Web3SwapClient } from '../client/Web3SwapERC20Client.js';
 
 const validationDurationInWeek = 1;
 

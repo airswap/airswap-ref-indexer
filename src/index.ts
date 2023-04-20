@@ -3,7 +3,7 @@ import { isNumeric } from "./validator/index.js";
 import { BroadcastClient } from './client/BroadcastClient.js';
 import { getRegistry } from "./client/getRegistry.js";
 import { requestDataFromOtherPeer } from "./client/requestDataFromOtherPeer.js";
-import { Web3SwapClient } from './client/Web3SwapClient.js';
+import { Web3SwapClient } from './client/Web3SwapERC20Client.js';
 import { Database } from './database/Database';
 import { getDatabase } from "./database/getDatabase.js";
 import { Peers } from "./peer/Peers.js";
