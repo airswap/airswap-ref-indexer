@@ -1,10 +1,9 @@
-import { FullOrder, IndexedOrder as IndexedOrderResponse, OrderResponse, RequestFilterERC20, RequestFilter, SortField, SortOrder } from '@airswap/types';
+import { FullOrder, IndexedOrder, OrderResponse, RequestFilterERC20, RequestFilter, SortField, SortOrder } from '@airswap/types';
 import { AceBase, AceBaseLocalSettings, DataReference } from 'acebase';
 import crypto from "crypto";
 import fs from "fs";
 import { computePagination } from '../mapper/pagination/index.js';
 import { mapAnyToFullOrderERC20 } from '../mapper/mapAnyToFullOrderERC20.js';
-import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
 import { FullOrderERC20 } from '@airswap/types';
@@ -90,7 +89,7 @@ export class AceBaseClient implements Database {
                 ordersForQuery: 0
             });
         }
-        const result: Record<string, IndexedOrderResponse<FullOrder>> = {};
+        const result: Record<string, IndexedOrder<FullOrder>> = {};
         result[hash] = this.datarefToOrder(serializedOrder)[hash];
         return Promise.resolve({
             orders: result,
@@ -101,7 +100,7 @@ export class AceBaseClient implements Database {
     async getOrders(): Promise<OrderResponse<FullOrder>> {
         const data = await this.refOrders.query().take(1000000).get(); // bypass default limitation 
         const totalResults = await this.refOrders.query().take(1000000).count();
-        let mapped = {} as Record<string, IndexedOrderResponse<FullOrder>>;
+        let mapped = {} as Record<string, IndexedOrder<FullOrder>>;
         data.forEach(dataSnapshot => {
             const mapp = this.datarefToOrder(dataSnapshot.val());
             mapped = { ...mapped, ...mapp };
@@ -137,7 +136,7 @@ export class AceBaseClient implements Database {
         const mapped = data.reduce((total, indexedOrder) => {
             const mapped = this.datarefToOrder(indexedOrder.val());
             return { ...total, ...mapped };
-        }, {} as Record<string, IndexedOrderResponse<FullOrder>>);
+        }, {} as Record<string, IndexedOrder<FullOrder>>);
         const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
         return Promise.resolve({
             orders: mapped,
@@ -192,7 +191,7 @@ export class AceBaseClient implements Database {
         const mapped = data.reduce((total, indexedOrder) => {
             const mapped = this.datarefToERC20(indexedOrder.val());
             return { ...total, ...mapped };
-        }, {} as Record<string, IndexedOrderResponse<FullOrderERC20>>);
+        }, {} as Record<string, IndexedOrder<FullOrderERC20>>);
         const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
         return Promise.resolve({
             orders: mapped,
@@ -247,7 +246,7 @@ export class AceBaseClient implements Database {
                 ordersForQuery: 0
             });
         }
-        const result: Record<string, IndexedOrderResponse<FullOrderERC20>> = {};
+        const result: Record<string, IndexedOrder<FullOrderERC20>> = {};
         result[hash] = this.datarefToERC20(serializedOrder)[hash];
         return Promise.resolve({
             orders: result,
@@ -259,7 +258,7 @@ export class AceBaseClient implements Database {
     async getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>> {
         const data = await this.refERC20.query().take(1000000).get(); // bypass default limitation 
         const totalResults = await this.refERC20.query().take(1000000).count();
-        let mapped = {} as Record<string, IndexedOrderResponse<FullOrderERC20>>;
+        let mapped = {} as Record<string, IndexedOrder<FullOrderERC20>>;
         data.forEach(dataSnapshot => {
             const mapp = this.datarefToERC20(dataSnapshot.val());
             mapped = { ...mapped, ...mapp };
@@ -277,8 +276,8 @@ export class AceBaseClient implements Database {
         return await this.db.ref(ENTRY_REF_ORDERS).remove();
     }
 
-    private datarefToERC20(data: any): Record<string, IndexedOrderResponse<FullOrderERC20>> {
-        const mapped: Record<string, IndexedOrderResponse<FullOrderERC20>> = {};
+    private datarefToERC20(data: any): Record<string, IndexedOrder<FullOrderERC20>> {
+        const mapped: Record<string, IndexedOrder<FullOrderERC20>> = {};
         mapped[data.hash] = {
             order: mapAnyToFullOrderERC20(data.order),
             addedOn: data.addedOn,
@@ -287,8 +286,8 @@ export class AceBaseClient implements Database {
         return mapped;
     }
 
-    private datarefToOrder(data: any): Record<string, IndexedOrderResponse<FullOrder>> {
-        const mapped: Record<string, IndexedOrderResponse<FullOrder>> = {};
+    private datarefToOrder(data: any): Record<string, IndexedOrder<FullOrder>> {
+        const mapped: Record<string, IndexedOrder<FullOrder>> = {};
         mapped[data.hash] = {
             order: mapAnyToFullOrder(data.order),
             addedOn: data.addedOn,

@@ -1,12 +1,11 @@
 import { AddressZero } from '@ethersproject/constants';
 import { FullOrder, FullOrderERC20 } from '@airswap/types';
 import { forgeDbOrderERC20, forgeDbOrder, forgeFullOrder, forgeIndexedOrderERC20, forgeIndexedOrder, forgeIndexedOrderResponseERC20, forgeIndexedOrderResponse } from '../../Fixtures';
-import { IndexedOrder } from '../../model/IndexedOrder';
 import { AceBaseClient } from "../AcebaseClient";
 import { Database } from '../Database';
 import { InMemoryDatabase } from '../InMemoryDatabase';
 import { DbOrderERC20, DbOrder } from '../../model/DbOrderTypes';
-import { IndexedOrder as IndexedOrderResponse, SortField, SortOrder } from '@airswap/types';
+import { IndexedOrder, SortField, SortOrder } from '@airswap/types';
 
 describe("Database implementations", () => {
     let inMemoryDatabase: InMemoryDatabase;
@@ -242,13 +241,12 @@ describe("Database implementations", () => {
             chainId: 5,
             swapContract: AddressZero
         };
-
-        const erc20Order1 = new IndexedOrder(dbOrder1, 1653138423537, "id1");
-        const expectedERC20Order1: IndexedOrderResponse<FullOrderERC20> = { order: order1, addedOn: 1653138423537, hash: "id1" };
-        const erc20Order2 = new IndexedOrder(dbOrder2, 1653138423527, "id2");
-        const expectedERC20Order2: IndexedOrderResponse<FullOrderERC20> = { order: order2, addedOn: 1653138423527, hash: "id2" };
-        const erc20Order3 = new IndexedOrder(dbOrder3, 1653138423517, "id3");
-        const expectedERC20Order3: IndexedOrderResponse<FullOrderERC20> = { order: order3, addedOn: 1653138423517, hash: "id3" };
+        const erc20Order1: IndexedOrder<DbOrderERC20> = { order: dbOrder1, addedOn: 1653138423537, hash: "id1" };
+        const expectedERC20Order1: IndexedOrder<FullOrderERC20> = { order: order1, addedOn: 1653138423537, hash: "id1" };
+        const erc20Order2: IndexedOrder<DbOrderERC20> = { order: dbOrder2, addedOn: 1653138423527, hash: "id2" }
+        const erc20Order3: IndexedOrder<DbOrderERC20> = { order: dbOrder3, addedOn: 1653138423517, hash: "id3" }
+        const expectedERC20Order2: IndexedOrder<FullOrderERC20> = { order: order2, addedOn: 1653138423527, hash: "id2" };
+        const expectedERC20Order3: IndexedOrder<FullOrderERC20> = { order: order3, addedOn: 1653138423517, hash: "id3" };
         await db.addOrderERC20(erc20Order1);
         await db.addOrderERC20(erc20Order2);
         await db.addOrderERC20(erc20Order3);
@@ -395,19 +393,19 @@ describe("Database implementations", () => {
         order3.sender.amount = "3"
         order3.signer.amount = "2"
 
-        const erc20Order1 = new IndexedOrder(dbOrder1, 1653138423537, "id1");
-        const expectedERC20Order1: IndexedOrderResponse<FullOrder> = { order: order1, addedOn: 1653138423537, hash: "id1" };
-        const erc20Order2 = new IndexedOrder(dbOrder2, 1653138423527, "id2");
-        const expectedERC20Order2: IndexedOrderResponse<FullOrder> = { order: order2, addedOn: 1653138423527, hash: "id2" };
-        const erc20Order3 = new IndexedOrder(dbOrder3, 1653138423517, "id3");
-        const expectedERC20Order3: IndexedOrderResponse<FullOrder> = { order: order3, addedOn: 1653138423517, hash: "id3" };
-        await db.addOrder(erc20Order1);
-        await db.addOrder(erc20Order2);
-        await db.addOrder(erc20Order3);
+        const indexedOrder1: IndexedOrder<DbOrder> = { order: dbOrder1, addedOn: 1653138423537, hash: "id1" }
+        const expectedIndexedOrder1: IndexedOrder<FullOrder> = { order: order1, addedOn: 1653138423537, hash: "id1" };
+        const indexedOrder2: IndexedOrder<DbOrder> = { order: dbOrder2, addedOn: 1653138423527, hash: "id2" }
+        const expectedIndexedOrder2: IndexedOrder<FullOrder> = { order: order2, addedOn: 1653138423527, hash: "id2" };
+        const indexedOrder3: IndexedOrder<DbOrder> = { order: dbOrder3, addedOn: 1653138423517, hash: "id3" }
+        const expectedIndexedOrder3: IndexedOrder<FullOrder> = { order: order3, addedOn: 1653138423517, hash: "id3" };
+        await db.addOrder(indexedOrder1);
+        await db.addOrder(indexedOrder2);
+        await db.addOrder(indexedOrder3);
 
         const ordersFromSignerAddress = await db.getOrderBy({ page: 1, signerAddress: "aWalletAddress" });
         expect(ordersFromSignerAddress).toEqual({
-            orders: { "id1": expectedERC20Order1, "id3": expectedERC20Order3 },
+            orders: { "id1": expectedIndexedOrder1, "id3": expectedIndexedOrder3 },
             pagination: {
                 first: "1",
                 last: "1"
@@ -417,7 +415,7 @@ describe("Database implementations", () => {
 
         const ordersFromOtherSenderAddress = await db.getOrderBy({ page: 1, senderAddress: "anotherWalletAddress" });
         expect(ordersFromOtherSenderAddress).toEqual({
-            orders: { "id2": expectedERC20Order2 },
+            orders: { "id2": expectedIndexedOrder2 },
             pagination: {
                 first: "1",
                 last: "1"
@@ -451,7 +449,7 @@ describe("Database implementations", () => {
             senderAddress: "aWalletAddress",
         });
         expect(specificOne).toEqual({
-            orders: { "id1": expectedERC20Order1, },
+            orders: { "id1": expectedIndexedOrder1, },
             pagination: {
                 first: "1",
                 last: "1"
@@ -732,7 +730,7 @@ describe("Database implementations", () => {
     }
 
     async function hashObject(db: Database) {
-        const indexedOrder = new IndexedOrder(forgeDbOrderERC20(1653138423547), new Date(1653138423537).getTime(), "hash");
+        const indexedOrder = { order: forgeDbOrderERC20(1653138423547), addedOn: new Date(1653138423537).getTime(), hash: "hash" }
 
         const hash = db.generateHash(indexedOrder);
 

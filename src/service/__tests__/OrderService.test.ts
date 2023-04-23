@@ -1,8 +1,7 @@
-import { FiltersResponse } from '@airswap/types';
+import { IndexedOrder, FiltersResponse } from '@airswap/types';
 import { Web3SwapERC20Client } from '../../client/Web3SwapERC20Client';
 import { Database } from '../../database/Database';
 import { forgeDbOrderERC20, forgeFullOrderERC20, forgeIndexedOrderERC20, forgeIndexedOrderResponseERC20, forgeOrderResponse } from '../../Fixtures';
-import { IndexedOrder } from '../../model/IndexedOrder';
 import { Filters } from './../../database/filter/Filters';
 import { OrderService } from './../../service/OrderService';
 
@@ -112,7 +111,7 @@ describe("Order service", () => {
     describe("Add Order", () => {
         test("Add order nominal & broadcast", async () => {
             const order = forgeFullOrderERC20(1653900784796);
-            const expectedForgeHash = new IndexedOrder(forgeDbOrderERC20(1653900784796), 1653900784706, undefined);
+            const expectedForgeHash = { order: forgeDbOrderERC20(1653900784796), addedOn: 1653900784706 }
             const expected = forgeIndexedOrderERC20(1653900784706, 1653900784796);
             expected.hash = "a";
 
@@ -129,7 +128,7 @@ describe("Order service", () => {
             expect(fakeDb.generateHash).toHaveBeenCalledTimes(1);
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrderERC20).toHaveBeenCalledWith(expected);
-            expect(fakeWeb3SwapClient.connectToChain).toHaveBeenCalledWith(5); 
+            expect(fakeWeb3SwapClient.connectToChain).toHaveBeenCalledWith(5);
         });
 
         test("Add order missing data", async () => {

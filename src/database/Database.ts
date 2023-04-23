@@ -1,5 +1,4 @@
-import { FullOrder, OrderResponse, RequestFilterERC20 } from '@airswap/types';
-import { IndexedOrder } from '../model/IndexedOrder.js';
+import { FullOrder, OrderResponse, RequestFilterERC20, IndexedOrder } from '@airswap/types';
 import { Filters } from './filter/Filters.js';
 import { FullOrderERC20, RequestFilter } from '@airswap/types';
 import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';

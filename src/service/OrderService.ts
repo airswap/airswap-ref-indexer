@@ -1,4 +1,4 @@
-import { AmountLimitFilterResponse, FiltersResponse, FullOrder, OrderResponse } from '@airswap/types';
+import { IndexedOrder, AmountLimitFilterResponse, FiltersResponse, FullOrder, OrderResponse } from '@airswap/types';
 import { FullOrderERC20 } from '@airswap/types';
 import { isValidFullOrder, isValidFullOrderERC20 } from '@airswap/utils';
 import { Filters } from '../database/filter/Filters';
@@ -8,7 +8,6 @@ import { mapAnyToRequestFilterERC20 } from '../mapper/mapAnyToRequestFilterERC20
 import { isDateInRange, isNumeric } from '../validator/index.js';
 import { AlreadyExistsError } from '../model/error/AlreadyExists.js';
 import { ClientError } from '../model/error/ClientError.js';
-import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Web3SwapERC20Client } from '../client/Web3SwapERC20Client.js';
 import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
@@ -16,11 +15,11 @@ import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
 
 const validationDurationInWeek = 1;
 
-export const METHODS = { 
-    getOrdersERC20: "getOrdersERC20", 
+export const METHODS = {
+    getOrdersERC20: "getOrdersERC20",
     addOrderERC20: "addOrderERC20",
-    getOrders: "getOrders", 
-    addOrder: "addOrder" ,
+    getOrders: "getOrders",
+    addOrder: "addOrder",
 } as Record<string, string>;
 
 export class OrderService {
@@ -54,7 +53,7 @@ export class OrderService {
 
         const dbOrder = mapAnyToDbOrderERC20(body);
         const addedTimestamp = isNumeric(body.addedOn) ? +body.addedOn : new Date().getTime();
-        const indexedOrder = new IndexedOrder<DbOrderERC20>(dbOrder, addedTimestamp);
+        const indexedOrder: IndexedOrder<DbOrderERC20> = { order: dbOrder, addedOn: addedTimestamp }
         const hash = this.database.generateHash(indexedOrder);
         const orderExists = await this.database.orderERC20Exists(hash);
         if (orderExists) {
@@ -105,7 +104,7 @@ export class OrderService {
         }
         const dbOrder = mapAnyToDbOrder(body);
         const addedTimestamp = isNumeric(body.addedOn) ? +body.addedOn : new Date().getTime();
-        const indexedOrder = new IndexedOrder<DbOrder>(dbOrder, addedTimestamp);
+        const indexedOrder: IndexedOrder<DbOrder> = { order: dbOrder, addedOn: addedTimestamp };
         const hash = this.database.generateHash(indexedOrder);
         const orderExists = await this.database.orderExists(hash);
         if (orderExists) {
@@ -135,8 +134,8 @@ export class OrderService {
         }
 
         // if (query.filters) {
-            // const filters = await this.database.getFiltersMarketPlace();
-            // orders.filters = toFilterResponse(filters)
+        // const filters = await this.database.getFiltersMarketPlace();
+        // orders.filters = toFilterResponse(filters)
         // }
         /////////////////////
         return Promise.resolve(orders)
