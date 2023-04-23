@@ -1,3 +1,4 @@
+import { toBigInt } from '../converter/index.js';
 import { DbOrderMarketPlace, DbOrderParty } from 'model/DbOrderTypes.js';
 
 export function mapAnyToDbOrderMarketPlace(data: any): DbOrderMarketPlace {
@@ -23,6 +24,7 @@ function mapToOrderParty(field: any): DbOrderParty {
         token: String(field.token),
         kind: String(field.kind),
         id: String(field.id),
-        amount: Number(field.amount)
+        amount: String(field.amount),
+        approximatedAmount: toBigInt(field.amount)!
     }
 }

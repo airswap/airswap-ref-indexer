@@ -231,15 +231,15 @@ export class InMemoryDatabase implements Database {
       .sort((a, b) => {
         if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
           if (requestFilter.sortOrder == SortOrder.ASC) {
-            return Number(a.order.signer.amount - b.order.signer.amount)
+            return Number(a.order.signer.approximatedAmount - b.order.signer.approximatedAmount)
           }
-          return Number(b.order.signer.amount - a.order.signer.amount)
+          return Number(b.order.signer.approximatedAmount - a.order.signer.approximatedAmount)
         }
         else if (requestFilter.sortField == SortField.SENDER_AMOUNT) {
           if (requestFilter.sortOrder == SortOrder.ASC) {
-            return Number(a.order.sender.amount - b.order.sender.amount)
+            return Number(a.order.sender.approximatedAmount - b.order.sender.approximatedAmount)
           }
-          return Number(b.order.sender.amount - a.order.sender.amount)
+          return Number(b.order.sender.approximatedAmount - a.order.sender.approximatedAmount)
         }
         if (requestFilter.sortOrder == SortOrder.ASC) {
           return Number(a.order.expiry - b.order.expiry)

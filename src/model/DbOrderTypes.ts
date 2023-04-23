@@ -15,7 +15,7 @@ export type DbOrderERC20 = Modify<FullOrderERC20, {
 }>
 
 export type DbOrderParty = Modify<OrderParty, {
-    amount: number;
+    approximatedAmount: bigint;
 }>
 export type DbOrderMarketPlace = Modify<FullOrder, {
     expiry: number;

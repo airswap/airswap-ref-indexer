@@ -46,6 +46,8 @@ export class AceBaseClient implements Database {
                 this.db.indexes.create(`${ENTRY_REF_MartketPlace}`, "order/expiry");
                 this.db.indexes.create(`${ENTRY_REF_MartketPlace}`, "order/signer/wallet");
                 this.db.indexes.create(`${ENTRY_REF_MartketPlace}`, "order/sender/wallet");
+                this.db.indexes.create(`${ENTRY_REF_MartketPlace}`, "order/sender/approximatedAmount");
+                this.db.indexes.create(`${ENTRY_REF_MartketPlace}`, "order/signer/approximatedAmount");
                 resolve();
             });
         });
@@ -123,9 +125,9 @@ export class AceBaseClient implements Database {
 
         const isAscSort = requestFilter.sortOrder == SortOrder.ASC;
         if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
-            query.sort('order/signer/amount', isAscSort)
+            query.sort('order/signer/approximatedAmount', isAscSort)
         } else if (requestFilter.sortField == SortField.SENDER_AMOUNT) {
-            query.sort('order/sender/amount', isAscSort)
+            query.sort('order/sender/approximatedAmount', isAscSort)
         } else if (requestFilter.sortField == SortField.EXPIRY) {
             query.sort('order/expiry', isAscSort)
         }

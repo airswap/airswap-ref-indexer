@@ -59,14 +59,16 @@ export function forgeDbOrderMarketPlace(expiryDate: number): DbOrderMarketPlace 
             token: AddressZero,
             kind: "aKind",
             id: "aId",
-            amount: 100
+            amount: "100",
+            approximatedAmount: BigInt("100")
         },
         sender: {
             wallet: AddressZero,
             token: AddressZero,
             kind: "aKind",
             id: "aId",
-            amount: 100
+            amount: "100",
+            approximatedAmount: BigInt("100")
         },
         r: "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",
         s: "0x5a12fdf12c2b966a98d238916a670bdfd83e207e54a9c7d0af923839582de79f",
