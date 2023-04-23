@@ -2,7 +2,7 @@ import { FullOrder, OrderResponse, RequestFilterERC20 } from '@airswap/types';
 import { IndexedOrderMarkeplace } from '../model/IndexedOrderMarkeplace.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Filters } from './filter/Filters.js';
-import { FullOrderERC20, RequestFilterMarketPlace } from '@airswap/types';
+import { FullOrderERC20, RequestFilter } from '@airswap/types';
 import { DbOrderERC20, DbOrderMarketPlace } from '../model/DbOrderTypes.js';
 
 export interface Database {
@@ -25,7 +25,7 @@ export interface Database {
     getOrdersMarketPlace(): Promise<OrderResponse<FullOrder>>;
 
     getOrderERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>>;
-    getOrderMarketPlaceBy(requestFilter: RequestFilterMarketPlace): Promise<OrderResponse<FullOrder>>;
+    getOrderMarketPlaceBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>>;
 
 
     orderERC20Exists(hash: string): Promise<boolean>;

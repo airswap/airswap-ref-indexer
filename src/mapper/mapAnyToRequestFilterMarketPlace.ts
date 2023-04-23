@@ -1,7 +1,7 @@
-import { RequestFilterMarketPlace } from "@airswap/types";
+import { RequestFilter } from "@airswap/types";
 import { toSortField, toSortOrder } from '@airswap/libraries';
 
-export function mapAnyToRequestFilterMarletPlace(data: any): RequestFilterMarketPlace {
+export function mapAnyToRequestFilterMarletPlace(data: any): RequestFilter {
     return {
         sortField: toSortField(data.sortField),
         sortOrder: toSortOrder(data.sortOrder),

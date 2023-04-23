@@ -1,4 +1,4 @@
-import { FullOrder, FullOrderERC20, IndexedOrder as IndexedOrderResponse, OrderResponse, RequestFilterERC20, SortField, SortOrder, RequestFilterMarketPlace } from '@airswap/types';
+import { FullOrder, FullOrderERC20, IndexedOrder as IndexedOrderResponse, OrderResponse, RequestFilterERC20, SortField, SortOrder, RequestFilter } from '@airswap/types';
 import crypto from "crypto";
 import { computePagination } from '../mapper/pagination/index.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
@@ -220,7 +220,7 @@ export class InMemoryDatabase implements Database {
     });
   }
 
-  getOrderMarketPlaceBy(requestFilter: RequestFilterMarketPlace): Promise<OrderResponse<FullOrder>> {
+  getOrderMarketPlaceBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
     const totalResults = Object.values(this.marketPlaceDatabase).filter((indexedOrder: IndexedOrder<DbOrderMarketPlace>) => {
       const order = indexedOrder.order;
       let isFound = true;

@@ -1,4 +1,4 @@
-import { FullOrder, IndexedOrder as IndexedOrderResponse, OrderResponse, RequestFilterERC20, RequestFilterMarketPlace, SortField, SortOrder } from '@airswap/types';
+import { FullOrder, IndexedOrder as IndexedOrderResponse, OrderResponse, RequestFilterERC20, RequestFilter, SortField, SortOrder } from '@airswap/types';
 import { AceBase, AceBaseLocalSettings, DataReference } from 'acebase';
 import crypto from "crypto";
 import fs from "fs";
@@ -113,7 +113,7 @@ export class AceBaseClient implements Database {
             ordersForQuery: totalResults
         });
     }
-    async getOrderMarketPlaceBy(requestFilter: RequestFilterMarketPlace): Promise<OrderResponse<FullOrder>> {
+    async getOrderMarketPlaceBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
         const query = this.refMarketPlace.query();
 
         if (requestFilter.senderAddress != undefined) {
