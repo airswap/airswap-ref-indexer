@@ -39,7 +39,7 @@ export class Web3SwapERC20Client {
     }
 
     private keyExists(network: string): boolean {
-        return this.registeredChains.indexOf(network) !== -1;
+        return this.registeredChains.includes(network);
     }
 
     private onEvent(nonce: { _hex: string, _isBigNumber: boolean }, signerWallet: string) {
