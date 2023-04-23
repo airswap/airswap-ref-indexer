@@ -1,7 +1,7 @@
-import { forgeDbOrder, forgeFullOrderERC20 } from "../../Fixtures";
-import { mapAllIndexedOrderResponseToDbOrder } from "../mapIndexedOrderResponseToDbOrder";
+import { forgeDbOrderERC20, forgeFullOrderERC20 } from "../../Fixtures";
+import { mapAllIndexedOrderResponseToDbOrderERC20 } from "../mapIndexedOrderResponseToDbOrderERC20";
 
-describe("mapIndexedOrderResponseToDbOrder", () => {
+describe("mapIndexedOrderResponseToDbOrderERC20", () => {
     it("Nominal", () => {
         const parameter = {
             "hash": {
@@ -13,12 +13,12 @@ describe("mapIndexedOrderResponseToDbOrder", () => {
         const expected = {
             "hash": {
                 hash:"hash",
-                order: forgeDbOrder(1),
+                order: forgeDbOrderERC20(1),
                 addedOn: 1
             }
         }
 
-        const result = mapAllIndexedOrderResponseToDbOrder(parameter);
+        const result = mapAllIndexedOrderResponseToDbOrderERC20(parameter);
 
         expect(result).toEqual(expected);
     });
@@ -49,13 +49,13 @@ describe("mapIndexedOrderResponseToDbOrder", () => {
         const expected = {
             "hash": {
                 hash:"hash",
-                order: forgeDbOrder(1),
+                order: forgeDbOrderERC20(1),
                 addedOn: 1
             }
         }
 
         //@ts-ignore
-        const result = mapAllIndexedOrderResponseToDbOrder(parameter);
+        const result = mapAllIndexedOrderResponseToDbOrderERC20(parameter);
 
         expect(result).toEqual(expected);
     })

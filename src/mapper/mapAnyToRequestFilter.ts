@@ -1,9 +1,9 @@
 import { toNumber, toArray, toBigInt } from "../converter/index.js";
 import { isNumeric } from '../validator/index.js';
 import { toSortField, toSortOrder } from '@airswap/libraries';
-import { RequestFilter } from '@airswap/types';
+import { RequestFilterERC20 } from '@airswap/types';
 
-export function mapAnyToRequestFilter(data: any): RequestFilter {
+export function mapAnyToRequestFilter(data: any): RequestFilterERC20 {
     return {
         signerTokens: toArray(data.signerTokens),
         senderTokens: toArray(data.senderTokens),

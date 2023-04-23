@@ -1,7 +1,7 @@
 import { FiltersResponse } from '@airswap/types';
 import { Web3SwapERC20Client } from '../../client/Web3SwapERC20Client';
 import { Database } from '../../database/Database';
-import { forgeDbOrder, forgeFullOrderERC20, forgeIndexedOrder, forgeIndexedOrderResponse, forgeOrderResponse } from '../../Fixtures';
+import { forgeDbOrderERC20, forgeFullOrderERC20, forgeIndexedOrderERC20, forgeIndexedOrderResponseERC20, forgeOrderResponse } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
 import { Filters } from './../../database/filter/Filters';
 import { OrderService } from './../../service/OrderService';
@@ -17,11 +17,11 @@ describe("Order service", () => {
 
     beforeEach(() => {
         fakeDb = {
-            getOrdersERC20: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
-            getOrderERC20: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
-            getOrderERC20By: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponse(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
+            getOrdersERC20: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponseERC20(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
+            getOrderERC20: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponseERC20(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
+            getOrderERC20By: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponseERC20(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
             getFiltersERC20: jest.fn(() => Promise.resolve({ signerToken: { "ETH": { min: BigInt(10), max: BigInt(10) } }, senderToken: { "dai": { min: BigInt(5), max: BigInt(5) } } } as unknown as Filters) as Promise<Filters>),
-            addOrder: jest.fn(() => Promise.resolve()),
+            addOrderERC20: jest.fn(() => Promise.resolve()),
             orderERC20Exists: jest.fn(() => Promise.resolve(true)),
             generateHash: jest.fn(),
             deleteOrderERC20: jest.fn(() => Promise.resolve()),
@@ -105,15 +105,15 @@ describe("Order service", () => {
             }).rejects.toThrow("Incorrect query");
 
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledTimes(0);
-            expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
+            expect(fakeDb.addOrderERC20).toHaveBeenCalledTimes(0);
         });
     });
 
     describe("Add Order", () => {
         test("Add order nominal & broadcast", async () => {
             const order = forgeFullOrderERC20(1653900784796);
-            const expectedForgeHash = new IndexedOrder(forgeDbOrder(1653900784796), 1653900784706, undefined);
-            const expected = forgeIndexedOrder(1653900784706, 1653900784796);
+            const expectedForgeHash = new IndexedOrder(forgeDbOrderERC20(1653900784796), 1653900784706, undefined);
+            const expected = forgeIndexedOrderERC20(1653900784706, 1653900784796);
             expected.hash = "a";
 
             //@ts-ignore
@@ -128,13 +128,12 @@ describe("Order service", () => {
 
             expect(fakeDb.generateHash).toHaveBeenCalledTimes(1);
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledWith("a");
-            expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
-            expect(fakeWeb3SwapClient.connectToChain).toHaveBeenCalledWith(5);
-            
+            expect(fakeDb.addOrderERC20).toHaveBeenCalledWith(expected);
+            expect(fakeWeb3SwapClient.connectToChain).toHaveBeenCalledWith(5); 
         });
 
         test("Add order missing data", async () => {
-            const orderMissingExpiry = forgeIndexedOrder(1653900784696, 1653900784706);
+            const orderMissingExpiry = forgeIndexedOrderERC20(1653900784696, 1653900784706);
             // @ts-ignore
             orderMissingExpiry.order.expiry = undefined;
 
@@ -143,7 +142,7 @@ describe("Order service", () => {
             }).rejects.toThrow();
 
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledTimes(0);
-            expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
+            expect(fakeDb.addOrderERC20).toHaveBeenCalledTimes(0);
         });
 
         test("Add order invalid data", async () => {
@@ -161,7 +160,7 @@ describe("Order service", () => {
             }).rejects.toThrow("Number fields are incorrect");
 
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledTimes(0);
-            expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
+            expect(fakeDb.addOrderERC20).toHaveBeenCalledTimes(0);
         });
 
         test("Add order invalid date", async () => {
@@ -173,7 +172,7 @@ describe("Order service", () => {
             }).rejects.toThrow("Invalid expiry date");
 
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledTimes(0);
-            expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
+            expect(fakeDb.addOrderERC20).toHaveBeenCalledTimes(0);
         });
 
         test("Missing order", async () => {
@@ -182,7 +181,7 @@ describe("Order service", () => {
             }).rejects.toThrow("No body");
 
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledTimes(0);
-            expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
+            expect(fakeDb.addOrderERC20).toHaveBeenCalledTimes(0);
         });
 
         test("Add: already added", async () => {
@@ -193,7 +192,7 @@ describe("Order service", () => {
             //@ts-ignore
             fakeDb.orderERC20Exists.mockImplementation(() => true);
 
-            const expected = forgeIndexedOrder(1653900784706, 1653900784796);
+            const expected = forgeIndexedOrderERC20(1653900784706, 1653900784796);
             //@ts-ignore
             expected.hash = undefined;
 
@@ -203,7 +202,7 @@ describe("Order service", () => {
 
             expect(fakeDb.generateHash).toHaveBeenCalledWith(expected);
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledWith("a");
-            expect(fakeDb.addOrder).toHaveBeenCalledTimes(0);
+            expect(fakeDb.addOrderERC20).toHaveBeenCalledTimes(0);
         });
     });
 

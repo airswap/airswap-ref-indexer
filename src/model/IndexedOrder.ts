@@ -1,11 +1,9 @@
-import { DbOrder } from 'model/DbOrder.js';
-
-export class IndexedOrder {
+export class IndexedOrder <T> {
     hash: string | undefined;
-    order: DbOrder;
+    order: T;
     addedOn: number;
 
-    constructor(dbOrder: DbOrder, addedOn: number, hash?: string) {
+    constructor(dbOrder: T, addedOn: number, hash?: string) {
         this.hash = hash;
         this.order = dbOrder;
         this.addedOn = addedOn;

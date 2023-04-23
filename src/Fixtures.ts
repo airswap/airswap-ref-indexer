@@ -1,23 +1,34 @@
-import { IndexedOrder as IndexedOrderResponse, OrderResponse, FiltersResponse } from '@airswap/types';
+import { IndexedOrder as IndexedOrderResponse, OrderResponse, FiltersResponse, FullOrder } from '@airswap/types';
 import { FullOrderERC20 } from '@airswap/types';
 import { AddressZero } from '@ethersproject/constants';
-import { DbOrder } from './model/DbOrder.js';
+import { DbOrderERC20, DbOrderMarketPlace } from './model/DbOrderTypes.js';
 import { IndexedOrder } from './model/IndexedOrder';
 import { JsonRpcResponse } from '@airswap/libraries';
 
-export function forgeIndexedOrder(expectedAddedDate: number, expiryDate: number): IndexedOrder {
-    return new IndexedOrder(forgeDbOrder(expiryDate), expectedAddedDate, "hash");
+export function forgeIndexedOrderERC20(expectedAddedDate: number, expiryDate: number): IndexedOrder<DbOrderERC20> {
+    return new IndexedOrder(forgeDbOrderERC20(expiryDate), expectedAddedDate, "hash");
 }
 
-export function forgeIndexedOrderResponse(expectedAddedDate: number, expiryDate: number): IndexedOrderResponse<FullOrderERC20> {
+export function forgeIndexedOrderMarketPlace(expectedAddedDate: number, expiryDate: number): IndexedOrder<DbOrderMarketPlace> {
+    return new IndexedOrder(forgeDbOrderMarketPlace(expiryDate), expectedAddedDate, "hash");
+}
+
+export function forgeIndexedOrderResponseERC20(expectedAddedDate: number, expiryDate: number): IndexedOrderResponse<FullOrderERC20> {
     return {
         hash: "hash",
         addedOn: expectedAddedDate,
         order: forgeFullOrderERC20(expiryDate)
     }
 }
+export function forgeIndexedOrderResponseMarketPlace(expectedAddedDate: number, expiryDate: number): IndexedOrderResponse<FullOrder> {
+    return {
+        hash: "hash",
+        addedOn: expectedAddedDate,
+        order: forgeFullOrderMarketPlace(expiryDate)
+    }
+}
 
-export function forgeDbOrder(expiryDate: number): DbOrder {
+export function forgeDbOrderERC20(expiryDate: number): DbOrderERC20 {
     return {
         nonce: "nonce",
         expiry: expiryDate / 1000,
@@ -38,6 +49,36 @@ export function forgeDbOrder(expiryDate: number): DbOrder {
     };
 }
 
+export function forgeDbOrderMarketPlace(expiryDate: number): DbOrderMarketPlace {
+    return {
+        nonce: "nonce",
+        expiry: expiryDate / 1000,
+        protocolFee: "100",
+        signer: {
+            wallet: AddressZero,
+            token: AddressZero,
+            kind: "aKind",
+            id: "aId",
+            amount: 100
+        },
+        sender: {
+            wallet: AddressZero,
+            token: AddressZero,
+            kind: "aKind",
+            id: "aId",
+            amount: 100
+        },
+        r: "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",
+        s: "0x5a12fdf12c2b966a98d238916a670bdfd83e207e54a9c7d0af923839582de79f",
+        v: "28",
+        chainId: 5,
+        swapContract: AddressZero,
+        affiliateWallet: AddressZero,
+        affiliateAmount: "13"
+    };
+}
+
+
 
 export function forgeFullOrderERC20(expiryDate: number): FullOrderERC20 {
     return {
@@ -55,6 +96,35 @@ export function forgeFullOrderERC20(expiryDate: number): FullOrderERC20 {
         v: "28",
         chainId: 5,
         swapContract: AddressZero
+    };
+}
+
+export function forgeFullOrderMarketPlace(expiryDate: number): FullOrder {
+    return {
+        nonce: "nonce",
+        expiry: String(expiryDate / 1000),
+        protocolFee: "100",
+        signer: {
+            wallet: AddressZero,
+            token: AddressZero,
+            kind: "aKind",
+            id: "aId",
+            amount: "100"
+        },
+        sender: {
+            wallet: AddressZero,
+            token: AddressZero,
+            kind: "aKind",
+            id: "aId",
+            amount: "100"
+        },
+        r: "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",
+        s: "0x5a12fdf12c2b966a98d238916a670bdfd83e207e54a9c7d0af923839582de79f",
+        v: "28",
+        chainId: 5,
+        swapContract: AddressZero,
+        affiliateWallet: AddressZero,
+        affiliateAmount: "13"
     };
 }
 

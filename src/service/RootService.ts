@@ -16,12 +16,13 @@ export class RootService {
     }
 
     public async get(): Promise<HealthCheckResponse> {
-        const orders = await this.database.getOrdersERC20();
+        const ordersERC20 = await this.database.getOrdersERC20();
+        const orders = await this.database.getOrdersMarketPlace();
         return {
             peers: this.peers.getPeers(),
             network: this.network,
             registry: Registry.addresses[this.network],
-            databaseOrders: orders.ordersForQuery
+            databaseOrders: ordersERC20.ordersForQuery +  orders.ordersForQuery 
         }
     }
 

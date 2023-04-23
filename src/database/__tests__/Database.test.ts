@@ -1,11 +1,11 @@
 import { AddressZero } from '@ethersproject/constants';
-import { FullOrderERC20 } from '@airswap/types';
-import { forgeDbOrder, forgeIndexedOrder, forgeIndexedOrderResponse } from '../../Fixtures';
+import { FullOrder, FullOrderERC20 } from '@airswap/types';
+import { forgeDbOrderERC20, forgeDbOrderMarketPlace, forgeFullOrderMarketPlace, forgeIndexedOrderERC20, forgeIndexedOrderMarketPlace, forgeIndexedOrderResponseERC20, forgeIndexedOrderResponseMarketPlace } from '../../Fixtures';
 import { IndexedOrder } from '../../model/IndexedOrder';
 import { AceBaseClient } from "../AcebaseClient";
 import { Database } from '../Database';
 import { InMemoryDatabase } from '../InMemoryDatabase';
-import { DbOrder } from './../../model/DbOrder';
+import { DbOrderERC20, DbOrderMarketPlace } from '../../model/DbOrderTypes';
 import { IndexedOrder as IndexedOrderResponse, SortField, SortOrder } from '@airswap/types';
 
 describe("Database implementations", () => {
@@ -31,14 +31,27 @@ describe("Database implementations", () => {
         await acebaseClient.close();
     });
 
-    describe('get IndexedOrder by filter', () => {
-        test("inMemoryDb", async () => { await getOtcOrderByFilter(inMemoryDatabase); });
-        test("acebaseDb", async () => { await getOtcOrderByFilter(acebaseClient); });
+    describe('get IndexedOrder by Request Filters', () => {
+        describe('erc20', () => {
+            test("inMemoryDb", async () => { await getOrderERC20By(inMemoryDatabase); });
+            test("acebaseDb", async () => { await getOrderERC20By(acebaseClient); });
+        })
+        describe('erc20', () => {
+            test("inMemoryDb", async () => { await getOrderMarketPlaceBy(inMemoryDatabase); });
+            test("acebaseDb", async () => { await getOrderMarketPlaceBy(acebaseClient); });
+        })
     });
 
     describe("Should add & get IndexedOrder", () => {
-        test("inMemoryDb", async () => { await getAndAddOtcOrder(inMemoryDatabase); });
-        test("acebaseDb", async () => { await getAndAddOtcOrder(acebaseClient); });
+        describe('erc20', () => {
+
+            test("inMemoryDb", async () => { await getAndAddOtcOrder(inMemoryDatabase); });
+            test("acebaseDb", async () => { await getAndAddOtcOrder(acebaseClient); });
+        })
+        describe("markeplace", () => {
+            test("inMemoryDb", async () => { await getAndAddOrderMarketPlace(inMemoryDatabase); });
+            test("acebaseDb", async () => { await getAndAddOrderMarketPlace(acebaseClient); });
+        })
     });
 
     describe("Should set filters when adding IndexedOrder", () => {
@@ -52,33 +65,73 @@ describe("Database implementations", () => {
     });
 
     describe("Should delete IndexedOrder", () => {
-        test("inMemoryDb", async () => { await shouldDeleteOtcOrder(inMemoryDatabase); });
-        test("acebaseDb", async () => { await shouldDeleteOtcOrder(acebaseClient); });
+        describe('erc20', () => {
+            test("inMemoryDb", async () => { await shouldDeleteOtcOrder(inMemoryDatabase); });
+            test("acebaseDb", async () => { await shouldDeleteOtcOrder(acebaseClient); });
+        })
+        describe('marketplace', () => {
+            test("inMemoryDb", async () => { await shouldDeleteOrderMarketPlace(inMemoryDatabase); });
+            test("acebaseDb", async () => { await shouldDeleteOrderMarketPlace(acebaseClient); });
+        })
     });
 
     describe("Should delete expired IndexedOrder", () => {
-        test("inMemoryDb", async () => { await shouldDeleteExpiredOtcOrder(inMemoryDatabase); });
-        test("acebaseDb", async () => { await shouldDeleteExpiredOtcOrder(acebaseClient); });
+        describe('erc20', () => {
+            test("inMemoryDb", async () => { await shouldDeleteExpiredOtcOrder(inMemoryDatabase); });
+            test("acebaseDb", async () => { await shouldDeleteExpiredOtcOrder(acebaseClient); });
+        })
+
+        describe('marketplace', () => {
+            test("inMemoryDb", async () => { await shouldDeleteExpiredMarketPlaceOrder(inMemoryDatabase); });
+            test("acebaseDb", async () => { await shouldDeleteExpiredMarketPlaceOrder(acebaseClient); });
+        })
     });
 
-    describe("Should return true if IndexedOrder exists", () => {
-        test("inMemoryDb", async () => { await otcOrderExists(inMemoryDatabase); });
-        test("acebaseDb", async () => { await otcOrderExists(acebaseClient); });
+    describe("Should return true if IndexedOrder erc20 exists", () => {
+        describe('erc20', () => {
+            test("inMemoryDb", async () => { await ERC20OrderExists(inMemoryDatabase); });
+            test("acebaseDb", async () => { await ERC20OrderExists(acebaseClient); });
+        })
+
+        describe('marketplace', () => {
+            test("inMemoryDb", async () => { await marketPlaceOrderExists(inMemoryDatabase); });
+            test("acebaseDb", async () => { await marketPlaceOrderExists(acebaseClient); });
+        })
     });
 
     describe("Should return false if IndexedOrder does not exist", () => {
-        test("inMemoryDb", async () => { await otcOrderDoesNotExist(inMemoryDatabase); });
-        test("acebaseDb", async () => { await otcOrderDoesNotExist(acebaseClient); });
+        describe('erc20', () => {
+            test("inMemoryDb", async () => { await ERC20OrderDoesNotExist(inMemoryDatabase); });
+            test("acebaseDb", async () => { await ERC20OrderDoesNotExist(acebaseClient); });
+        })
+
+        describe('marketplace', () => {
+            test("inMemoryDb", async () => { await marketPlaceOrderDoesNotExist(inMemoryDatabase); });
+            test("acebaseDb", async () => { await marketPlaceOrderDoesNotExist(acebaseClient); });
+        })
     });
 
     describe("Should return IndexedOrder", () => {
-        test("inMemoryDb", async () => { await addOtcOrder(inMemoryDatabase); });
-        test("acebaseDb", async () => { await addOtcOrder(acebaseClient); });
+        describe('erc20', () => {
+            test("inMemoryDb", async () => { await addERC20Order(inMemoryDatabase); });
+            test("acebaseDb", async () => { await addERC20Order(acebaseClient); });
+        })
+        describe('marketPlace', () => {
+            test("inMemoryDb", async () => { await addMarketPlaceOrder(inMemoryDatabase); });
+            test("acebaseDb", async () => { await addMarketPlaceOrder(acebaseClient); });
+        })
     });
 
+
     describe("Should not return IndexedOrder", () => {
-        test("inMemoryDb", async () => { await renturnsNullOnUnknownHash(inMemoryDatabase); });
-        test("acebaseDb", async () => { await renturnsNullOnUnknownHash(acebaseClient); });
+        describe('erc20', () => {
+            test("inMemoryDb", async () => { await renturnsNullOnUnknownHashERC20(inMemoryDatabase); });
+            test("acebaseDb", async () => { await renturnsNullOnUnknownHashERC20(acebaseClient); });
+        })
+        describe('marketplace', () => {
+            test("inMemoryDb", async () => { await renturnsNullOnUnknownHashMarketPlace(inMemoryDatabase); });
+            test("acebaseDb", async () => { await renturnsNullOnUnknownHashMarketPlace(acebaseClient); });
+        })
     });
 
     describe("sha 256 does not change", () => {
@@ -86,8 +139,8 @@ describe("Database implementations", () => {
         test("acebaseDb", async () => { await hashObject(acebaseClient); });
     });
 
-    async function getOtcOrderByFilter(db: Database) {
-        const dbOrder1: DbOrder = {
+    async function getOrderERC20By(db: Database) {
+        const dbOrder1: DbOrderERC20 = {
             nonce: "nonce",
             expiry: 1653138423537,
             signerWallet: "signerWallet",
@@ -121,7 +174,7 @@ describe("Database implementations", () => {
             chainId: 5,
             swapContract: AddressZero
         };
-        const dbOrder2: DbOrder = {
+        const dbOrder2: DbOrderERC20 = {
             nonce: "nonce",
             expiry: 1653138423537,
             signerWallet: "signerWallet",
@@ -155,7 +208,7 @@ describe("Database implementations", () => {
             chainId: 5,
             swapContract: AddressZero
         };
-        const dbOrder3: DbOrder = {
+        const dbOrder3: DbOrderERC20 = {
             nonce: "nonce",
             expiry: 1653138423537,
             signerWallet: "signerWallet",
@@ -196,9 +249,9 @@ describe("Database implementations", () => {
         const expectedOtcOrder2: IndexedOrderResponse<FullOrderERC20> = { order: order2, addedOn: 1653138423527, hash: "id2" };
         const otcOrder3 = new IndexedOrder(dbOrder3, 1653138423517, "id3");
         const expectedOtcOrder3: IndexedOrderResponse<FullOrderERC20> = { order: order3, addedOn: 1653138423517, hash: "id3" };
-        await db.addOrder(otcOrder1);
-        await db.addOrder(otcOrder2);
-        await db.addOrder(otcOrder3);
+        await db.addOrderERC20(otcOrder1);
+        await db.addOrderERC20(otcOrder2);
+        await db.addOrderERC20(otcOrder3);
 
         const ordersFromToken = await db.getOrderERC20By({ page: 1, signerTokens: ["signerToken"] });
         expect(ordersFromToken).toEqual({
@@ -306,11 +359,108 @@ describe("Database implementations", () => {
         return Promise.resolve();
     }
 
-    async function getAndAddOtcOrder(db: Database) {
-        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
-        const expectedIndexedOrder = forgeIndexedOrderResponse(addedOn, expiryDate);
+    async function getOrderMarketPlaceBy(db: Database) {
+        const dbOrder1: DbOrderMarketPlace = forgeDbOrderMarketPlace(5);
+        dbOrder1.signer.wallet = "aWalletAddress"
+        dbOrder1.sender.wallet = "aWalletAddress"
+        dbOrder1.sender.amount = 1
+        dbOrder1.signer.amount = 1
+        const order1: FullOrder = forgeFullOrderMarketPlace(5);
+        order1.signer.wallet = "aWalletAddress"
+        order1.sender.wallet = "aWalletAddress"
+        order1.sender.amount = "1"
+        order1.signer.amount = "1"
 
-        await db.addOrder(indexedOrder);
+        const dbOrder2: DbOrderMarketPlace = forgeDbOrderMarketPlace(1);
+        dbOrder2.sender.wallet = "anotherWalletAddress"
+        dbOrder2.sender.amount = 2
+        dbOrder2.sender.amount = 3
+        const order2: FullOrder = forgeFullOrderMarketPlace(1);
+        order2.sender.wallet = "anotherWalletAddress"
+        order2.sender.amount = "2"
+        order2.sender.amount = "3"
+
+        const dbOrder3: DbOrderMarketPlace = forgeDbOrderMarketPlace(3);
+        dbOrder3.signer.wallet = "aWalletAddress"
+        dbOrder3.sender.amount = 3
+        dbOrder3.signer.amount = 2
+        const order3: FullOrder = forgeFullOrderMarketPlace(3);
+        order3.signer.wallet = "aWalletAddress"
+        order3.sender.amount = "3"
+        order3.signer.amount = "2"
+
+        const indexedOrder1 = new IndexedOrder(dbOrder1, 1653138423537, "id1");
+        const expectedOtcOrder1: IndexedOrderResponse<FullOrder> = { order: order1, addedOn: 1653138423537, hash: "id1" };
+        const indexedOrder2 = new IndexedOrder(dbOrder2, 1653138423527, "id2");
+        const expectedOtcOrder2: IndexedOrderResponse<FullOrder> = { order: order2, addedOn: 1653138423527, hash: "id2" };
+        const indexedOrder3 = new IndexedOrder(dbOrder3, 1653138423517, "id3");
+        const expectedOtcOrder3: IndexedOrderResponse<FullOrder> = { order: order3, addedOn: 1653138423517, hash: "id3" };
+        await db.addOrderMarketPlace(indexedOrder1);
+        await db.addOrderMarketPlace(indexedOrder2);
+        await db.addOrderMarketPlace(indexedOrder3);
+
+        const ordersFromSignerAddress = await db.getOrderMarketPlaceBy({ page: 1, signerAddress: "aWalletAddress" });
+        expect(ordersFromSignerAddress).toEqual({
+            orders: { "id1": expectedOtcOrder1, "id3": expectedOtcOrder3 },
+            pagination: {
+                first: "1",
+                last: "1"
+            },
+            ordersForQuery: 2
+        });
+
+        const ordersFromOtherSenderAddress = await db.getOrderMarketPlaceBy({ page: 1, senderAddress: "anotherWalletAddress" });
+        expect(ordersFromOtherSenderAddress).toEqual({
+            orders: { "id2": expectedOtcOrder2 },
+            pagination: {
+                first: "1",
+                last: "1"
+            },
+            ordersForQuery: 1
+        });
+
+        const senderAmountAsc = await db.getOrderMarketPlaceBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.ASC });
+        expect(Object.keys(senderAmountAsc.orders)).toEqual(["id1", "id2", "id3"]);
+
+        const senderAmountDesc = await db.getOrderMarketPlaceBy({ page: 1, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.DESC, signerAddress: "aWalletAddress" });
+        expect(Object.keys(senderAmountDesc.orders)).toEqual(["id3", "id1"]);
+
+        const signerAmountAsc = await db.getOrderMarketPlaceBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.ASC });
+        expect(Object.keys(signerAmountAsc.orders)).toEqual(["id1", "id3", "id2"]);
+
+        const signerAmountDesc = await db.getOrderMarketPlaceBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC, signerAddress: "aWalletAddress" });
+        expect(Object.keys(signerAmountDesc.orders)).toEqual(["id3", "id1"]);
+
+        const minSignerAmountDesc = await db.getOrderMarketPlaceBy({ page: 1, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC });
+        expect(Object.keys(minSignerAmountDesc.orders)).toEqual(["id2", "id3", "id1"]);
+
+        const orderByExpiryASC = await db.getOrderMarketPlaceBy({ page: 1, sortField: SortField.EXPIRY, sortOrder: SortOrder.ASC });
+        expect(Object.keys(orderByExpiryASC.orders)).toEqual(["id2", "id3", "id1"]);
+        const orderByExpiryDESC = await db.getOrderMarketPlaceBy({ page: 1, sortField: SortField.EXPIRY, sortOrder: SortOrder.DESC });
+        expect(Object.keys(orderByExpiryDESC.orders)).toEqual(["id1", "id3", "id2"]);
+
+        const specificOne = await db.getOrderMarketPlaceBy({
+            page: 1,
+            signerAddress: "aWalletAddress",
+            senderAddress: "aWalletAddress",
+        });
+        expect(specificOne).toEqual({
+            orders: { "id1": expectedOtcOrder1, },
+            pagination: {
+                first: "1",
+                last: "1"
+            },
+            ordersForQuery: 1
+        });
+
+        return Promise.resolve();
+    }
+
+    async function getAndAddOtcOrder(db: Database) {
+        const indexedOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
+        const expectedIndexedOrder = forgeIndexedOrderResponseERC20(addedOn, expiryDate);
+
+        await db.addOrderERC20(indexedOrder);
         const orders = await db.getOrdersERC20();
 
         expect(orders).toEqual({
@@ -324,15 +474,33 @@ describe("Database implementations", () => {
         return Promise.resolve();
     }
 
+    async function getAndAddOrderMarketPlace(db: Database) {
+        const indexedOrder = forgeIndexedOrderMarketPlace(addedOn, expiryDate);
+        const expectedIndexedOrder = forgeIndexedOrderResponseMarketPlace(addedOn, expiryDate);
+
+        await db.addOrderMarketPlace(indexedOrder);
+        const orders = await db.getOrdersMarketPlace();
+
+        expect(orders).toEqual({
+            orders: { hash: expectedIndexedOrder, },
+            pagination: {
+                first: "1",
+                last: "1"
+            },
+            ordersForQuery: 1
+        });
+        return Promise.resolve();
+    }
+
     async function addAllAndGetOrders(db: Database) {
-        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
-        const anotherOrder = forgeIndexedOrder(addedOn, expiryDate);
-        const expectedIndexedOrder = forgeIndexedOrderResponse(addedOn, expiryDate);
-        const expectedAnotherOrder = forgeIndexedOrderResponse(addedOn, expiryDate);
+        const indexedOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
+        const anotherOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
+        const expectedIndexedOrder = forgeIndexedOrderResponseERC20(addedOn, expiryDate);
+        const expectedAnotherOrder = forgeIndexedOrderResponseERC20(addedOn, expiryDate);
         anotherOrder.hash = "another_hash";
         expectedAnotherOrder.hash = "another_hash";
 
-        await db.addAll({ "hash": indexedOrder, "another_hash": anotherOrder });
+        await db.addAllOrderERC20({ "hash": indexedOrder, "another_hash": anotherOrder });
         const orders = await db.getOrdersERC20();
 
         expect(orders).toEqual({
@@ -347,15 +515,15 @@ describe("Database implementations", () => {
     }
 
     async function shouldAddfiltersOnOtcAdd(db: Database) {
-        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
-        const anotherOrder = forgeIndexedOrder(addedOn, expiryDate);
+        const indexedOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
+        const anotherOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
         anotherOrder.hash = "another_hash";
-        anotherOrder.order.senderAmount = "15";
-        anotherOrder.order.approximatedSenderAmount = BigInt(15);
-        anotherOrder.order.signerAmount = "50";
-        anotherOrder.order.approximatedSignerAmount = BigInt(50);
+        (anotherOrder.order as DbOrderERC20).senderAmount = "15";
+        (anotherOrder.order as DbOrderERC20).approximatedSenderAmount = BigInt(15);
+        (anotherOrder.order as DbOrderERC20).signerAmount = "50";
+        (anotherOrder.order as DbOrderERC20).approximatedSignerAmount = BigInt(50);
 
-        await db.addAll({ "hash": indexedOrder, "another_hash": anotherOrder });
+        await db.addAllOrderERC20({ "hash": indexedOrder, "another_hash": anotherOrder });
         const filters = await db.getFiltersERC20();
 
         expect(filters).toEqual({
@@ -366,8 +534,8 @@ describe("Database implementations", () => {
     }
 
     async function shouldDeleteOtcOrder(db: Database) {
-        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
-        await db.addOrder(indexedOrder);
+        const indexedOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
+        await db.addOrderERC20(indexedOrder);
 
         await db.deleteOrderERC20("nonce", AddressZero);
         const orders = await db.getOrdersERC20();
@@ -383,14 +551,32 @@ describe("Database implementations", () => {
         return Promise.resolve();
     }
 
+    async function shouldDeleteOrderMarketPlace(db: Database) {
+        const indexedOrder: IndexedOrder<DbOrderMarketPlace> = forgeIndexedOrderMarketPlace(addedOn, expiryDate);
+        await db.addOrderMarketPlace(indexedOrder);
+
+        await db.deleteOrderMarketplace("nonce", AddressZero);
+        const orders = await db.getOrdersMarketPlace();
+
+        expect(orders).toEqual({
+            orders: {},
+            pagination: {
+                first: "1",
+                last: "1"
+            },
+            ordersForQuery: 0
+        });
+        return Promise.resolve();
+    }
+
     async function shouldDeleteExpiredOtcOrder(db: Database) {
-        const indexedOrder = forgeIndexedOrder(1000, 2000);
-        const indexedOrder2 = forgeIndexedOrder(1000, 1000);
-        const indexedOrder3 = forgeIndexedOrder(1000, 500000);
-        await db.addOrder(indexedOrder);
-        await db.addOrder(indexedOrder2);
-        await db.addOrder(indexedOrder3);
-        const expected = forgeIndexedOrderResponse(1000, 500000);
+        const indexedOrder: IndexedOrder<DbOrderERC20> = forgeIndexedOrderERC20(1000, 2000);
+        const indexedOrder2 = forgeIndexedOrderERC20(1000, 1000);
+        const indexedOrder3 = forgeIndexedOrderERC20(1000, 500000);
+        await db.addOrderERC20(indexedOrder);
+        await db.addOrderERC20(indexedOrder2);
+        await db.addOrderERC20(indexedOrder3);
+        const expected = forgeIndexedOrderResponseERC20(1000, 500000);
 
         await db.deleteExpiredOrderERC20(300);
         const orders = await db.getOrdersERC20();
@@ -406,9 +592,32 @@ describe("Database implementations", () => {
         return Promise.resolve();
     }
 
-    async function otcOrderExists(db: Database) {
-        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
-        await db.addOrder(indexedOrder);
+    async function shouldDeleteExpiredMarketPlaceOrder(db: Database) {
+        const indexedOrder: IndexedOrder<DbOrderMarketPlace> = forgeIndexedOrderMarketPlace(1000, 2000);
+        const indexedOrder2 = forgeIndexedOrderMarketPlace(1000, 1000);
+        const indexedOrder3 = forgeIndexedOrderMarketPlace(1000, 500000);
+        await db.addOrderMarketPlace(indexedOrder);
+        await db.addOrderMarketPlace(indexedOrder2);
+        await db.addOrderMarketPlace(indexedOrder3);
+        const expected = forgeIndexedOrderResponseMarketPlace(1000, 500000);
+
+        await db.deleteExpiredOrderMarketPlace(300);
+        const orders = await db.getOrdersMarketPlace();
+
+        expect(orders).toEqual({
+            orders: { hash: expected },
+            pagination: {
+                first: "1",
+                last: "1"
+            },
+            ordersForQuery: 1
+        });
+        return Promise.resolve();
+    }
+
+    async function ERC20OrderExists(db: Database) {
+        const indexedOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
+        await db.addOrderERC20(indexedOrder);
 
         const orderExists = await db.orderERC20Exists("hash");
 
@@ -416,9 +625,19 @@ describe("Database implementations", () => {
         return Promise.resolve();
     }
 
-    async function otcOrderDoesNotExist(db: Database) {
-        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
-        await db.addOrder(indexedOrder);
+    async function marketPlaceOrderExists(db: Database) {
+        const indexedOrder = forgeIndexedOrderMarketPlace(addedOn, expiryDate);
+        await db.addOrderMarketPlace(indexedOrder);
+
+        const orderExists = await db.orderMarketPlaceExists("hash");
+
+        expect(orderExists).toBe(true);
+        return Promise.resolve();
+    }
+
+    async function ERC20OrderDoesNotExist(db: Database) {
+        const indexedOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
+        await db.addOrderERC20(indexedOrder);
 
         const orderExists = await db.orderERC20Exists("unknownHash");
 
@@ -426,10 +645,20 @@ describe("Database implementations", () => {
         return Promise.resolve();
     }
 
-    async function addOtcOrder(db: Database) {
-        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
-        const expectedIndexedOrder = forgeIndexedOrderResponse(addedOn, expiryDate);
-        await db.addOrder(indexedOrder);
+    async function marketPlaceOrderDoesNotExist(db: Database) {
+        const indexedOrder = forgeIndexedOrderMarketPlace(addedOn, expiryDate);
+        await db.addOrderMarketPlace(indexedOrder);
+
+        const orderExists = await db.orderMarketPlaceExists("unknownHash");
+
+        expect(orderExists).toBe(false);
+        return Promise.resolve();
+    }
+
+    async function addERC20Order(db: Database) {
+        const indexedOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
+        const expectedIndexedOrder = forgeIndexedOrderResponseERC20(addedOn, expiryDate);
+        await db.addOrderERC20(indexedOrder);
 
         const orderExists = await db.getOrderERC20("hash");
 
@@ -444,9 +673,27 @@ describe("Database implementations", () => {
         return Promise.resolve();
     }
 
-    async function renturnsNullOnUnknownHash(db: Database) {
-        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
-        await db.addOrder(indexedOrder);
+    async function addMarketPlaceOrder(db: Database) {
+        const indexedOrder = forgeIndexedOrderMarketPlace(addedOn, expiryDate);
+        const expectedIndexedOrder = forgeIndexedOrderResponseMarketPlace(addedOn, expiryDate);
+        await db.addOrderMarketPlace(indexedOrder);
+
+        const orderExists = await db.getOrderMarketPlace("hash");
+
+        expect(orderExists).toEqual({
+            orders: { hash: expectedIndexedOrder },
+            pagination: {
+                first: "1",
+                last: "1"
+            },
+            ordersForQuery: 1
+        });
+        return Promise.resolve();
+    }
+
+    async function renturnsNullOnUnknownHashERC20(db: Database) {
+        const indexedOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
+        await db.addOrderERC20(indexedOrder);
 
         const orderExists = await db.getOrderERC20("unknownHash");
 
@@ -461,8 +708,25 @@ describe("Database implementations", () => {
         return Promise.resolve();
     }
 
+    async function renturnsNullOnUnknownHashMarketPlace(db: Database) {
+        const indexedOrder = forgeIndexedOrderMarketPlace(addedOn, expiryDate);
+        await db.addOrderMarketPlace(indexedOrder);
+
+        const orderExists = await db.getOrderMarketPlace("unknownHash");
+
+        expect(orderExists).toEqual({
+            orders: {},
+            pagination: {
+                first: "1",
+                last: "1"
+            },
+            ordersForQuery: 0
+        });
+        return Promise.resolve();
+    }
+
     async function hashObject(db: Database) {
-        const indexedOrder = new IndexedOrder(forgeDbOrder(1653138423547), new Date(1653138423537).getTime(), "hash");
+        const indexedOrder = new IndexedOrder(forgeDbOrderERC20(1653138423547), new Date(1653138423537).getTime(), "hash");
 
         const hash = db.generateHash(indexedOrder);
 
