@@ -4,8 +4,7 @@ import { computePagination } from '../mapper/pagination/index.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
-import { IndexedOrderMarkeplace } from '../model/IndexedOrderMarkeplace.js';
-import { DbOrderERC20, DbOrderMarketPlace } from '../model/DbOrderTypes.js';
+import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
 import { mapAnyToFullOrderERC20 } from '../mapper/mapAnyToFullOrderERC20.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 
@@ -13,12 +12,12 @@ const elementPerPage = 20;
 
 export class InMemoryDatabase implements Database {
   erc20Database: Record<string, IndexedOrder<DbOrderERC20>>;
-  marketPlaceDatabase: Record<string, IndexedOrderMarkeplace>;
+  orderDatabase: Record<string, IndexedOrder<DbOrder>>;
   filters: Filters;
 
   constructor() {
     this.erc20Database = {};
-    this.marketPlaceDatabase = {};
+    this.orderDatabase = {};
     this.filters = new Filters();
   }
 
@@ -146,7 +145,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve(Object.keys(this.erc20Database).indexOf(hash) != -1);
   }
 
-  generateHash(indexedOrder: IndexedOrder<DbOrderERC20 | DbOrderMarketPlace>): string {
+  generateHash(indexedOrder: IndexedOrder<DbOrderERC20 | DbOrder>): string {
     const lightenOrder = { ...indexedOrder.order };
     //@ts-ignore
     delete lightenOrder.approximatedSenderAmount
@@ -158,42 +157,42 @@ export class InMemoryDatabase implements Database {
   }
 
   ////////////////////////////// Market Place 
-  addOrderMarketPlace(indexedOrderMarketPlace: IndexedOrderMarkeplace): Promise<void> {
-    this.marketPlaceDatabase[indexedOrderMarketPlace.hash!] = indexedOrderMarketPlace;
+  addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {
+    this.orderDatabase[indexedOrder.hash!] = indexedOrder;
     return Promise.resolve()
   }
 
-  async addAllOrderMarketPlace(indexedOrdersMarketPlace: Record<string, IndexedOrderMarkeplace>): Promise<void> {
-    await Promise.all(Object.keys(indexedOrdersMarketPlace).map(async hash => {
-      await this.addOrderMarketPlace(indexedOrdersMarketPlace[hash]);
+  async addAllOrder(indexedOrders: Record<string, IndexedOrder<DbOrder>>): Promise<void> {
+    await Promise.all(Object.keys(indexedOrders).map(async hash => {
+      await this.addOrder(indexedOrders[hash]);
     }));
     return Promise.resolve();
   }
 
-  deleteOrderMarketplace(nonce: string, signerWallet: string): Promise<void> {
-    const orderToDelete = Object.values(this.marketPlaceDatabase).find((indexedOrder) => {
-      const order = indexedOrder.order as DbOrderMarketPlace
+  deleteOrder(nonce: string, signerWallet: string): Promise<void> {
+    const orderToDelete = Object.values(this.orderDatabase).find((indexedOrder) => {
+      const order = indexedOrder.order as DbOrder
       return order.nonce === nonce
     });
     if (orderToDelete && orderToDelete.hash) {
-      delete this.marketPlaceDatabase[orderToDelete.hash];
+      delete this.orderDatabase[orderToDelete.hash];
     }
     return Promise.resolve();
   }
-  deleteExpiredOrderMarketPlace(timestampInSeconds: number): Promise<void> {
+  deleteExpiredOrder(timestampInSeconds: number): Promise<void> {
     const hashToDelete: string[] = Object.keys(this.erc20Database).filter((key: string) => {
-      return this.marketPlaceDatabase[key].order.expiry < timestampInSeconds;
+      return this.orderDatabase[key].order.expiry < timestampInSeconds;
     });
     hashToDelete.forEach(hash => {
-      delete this.marketPlaceDatabase[hash];
+      delete this.orderDatabase[hash];
     })
     return Promise.resolve();
   }
 
-  getOrderMarketPlace(hash: string): Promise<OrderResponse<FullOrder>> {
+  getOrder(hash: string): Promise<OrderResponse<FullOrder>> {
     const result: Record<string, IndexedOrderResponse<FullOrder>> = {};
-    if (this.marketPlaceDatabase[hash]) {
-      result[hash] = this.mapToMarketPlaceIndexedOrderResponse(this.marketPlaceDatabase[hash]);
+    if (this.orderDatabase[hash]) {
+      result[hash] = this.mapToIndexedOrderResponse(this.orderDatabase[hash]);
       return Promise.resolve({
         orders: result,
         pagination: computePagination(elementPerPage, 1),
@@ -207,11 +206,11 @@ export class InMemoryDatabase implements Database {
     });
   }
 
-  getOrdersMarketPlace(): Promise<OrderResponse<FullOrder>> {
-    const size = Object.keys(this.marketPlaceDatabase).length;
+  getOrders(): Promise<OrderResponse<FullOrder>> {
+    const size = Object.keys(this.orderDatabase).length;
     const results: Record<string, IndexedOrderResponse<FullOrder>> = {};
-    Object.keys(this.marketPlaceDatabase).forEach(key => {
-      results[key] = this.mapToMarketPlaceIndexedOrderResponse(this.marketPlaceDatabase[key])
+    Object.keys(this.orderDatabase).forEach(key => {
+      results[key] = this.mapToIndexedOrderResponse(this.orderDatabase[key])
     })
     return Promise.resolve({
       orders: results,
@@ -220,8 +219,8 @@ export class InMemoryDatabase implements Database {
     });
   }
 
-  getOrderMarketPlaceBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
-    const totalResults = Object.values(this.marketPlaceDatabase).filter((indexedOrder: IndexedOrder<DbOrderMarketPlace>) => {
+  getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
+    const totalResults = Object.values(this.orderDatabase).filter((indexedOrder: IndexedOrder<DbOrder>) => {
       const order = indexedOrder.order;
       let isFound = true;
       if (requestFilter.signerAddress != undefined) { isFound = isFound && requestFilter.signerAddress.indexOf(order.signer.wallet) !== -1; }
@@ -252,7 +251,7 @@ export class InMemoryDatabase implements Database {
       .reduce((total, indexedOrder) => {
         const orderId = indexedOrder['hash'];
         if (orderId) {
-          return { ...total, [orderId]: this.mapToMarketPlaceIndexedOrderResponse(indexedOrder) };
+          return { ...total, [orderId]: this.mapToIndexedOrderResponse(indexedOrder) };
         }
         console.warn("InMemoryDb - Defect Object:", indexedOrder);
         return { ...total };
@@ -265,14 +264,14 @@ export class InMemoryDatabase implements Database {
     });
   }
 
-  orderMarketPlaceExists(hash: string): Promise<boolean> {
-    return Promise.resolve(!!this.marketPlaceDatabase[hash])
+  orderExists(hash: string): Promise<boolean> {
+    return Promise.resolve(!!this.orderDatabase[hash])
   }
 
   /////////////////////////////
   erase() {
     this.erc20Database = {};
-    this.marketPlaceDatabase = {};
+    this.orderDatabase = {};
     this.filters = new Filters();
     return Promise.resolve();
   }
@@ -289,7 +288,7 @@ export class InMemoryDatabase implements Database {
     };
   }
 
-  private mapToMarketPlaceIndexedOrderResponse(indexedOrder: IndexedOrder<DbOrderMarketPlace>): IndexedOrderResponse<FullOrder> {
+  private mapToIndexedOrderResponse(indexedOrder: IndexedOrder<DbOrder>): IndexedOrderResponse<FullOrder> {
     return {
       hash: indexedOrder.hash,
       addedOn: indexedOrder.addedOn,

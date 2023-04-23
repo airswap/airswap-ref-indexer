@@ -1,7 +1,7 @@
 import { IndexedOrder as IndexedOrderResponse, OrderResponse, FiltersResponse, FullOrder } from '@airswap/types';
 import { FullOrderERC20 } from '@airswap/types';
 import { AddressZero } from '@ethersproject/constants';
-import { DbOrderERC20, DbOrderMarketPlace } from './model/DbOrderTypes.js';
+import { DbOrderERC20, DbOrder } from './model/DbOrderTypes.js';
 import { IndexedOrder } from './model/IndexedOrder';
 import { JsonRpcResponse } from '@airswap/libraries';
 
@@ -9,8 +9,8 @@ export function forgeIndexedOrderERC20(expectedAddedDate: number, expiryDate: nu
     return new IndexedOrder(forgeDbOrderERC20(expiryDate), expectedAddedDate, "hash");
 }
 
-export function forgeIndexedOrderMarketPlace(expectedAddedDate: number, expiryDate: number): IndexedOrder<DbOrderMarketPlace> {
-    return new IndexedOrder(forgeDbOrderMarketPlace(expiryDate), expectedAddedDate, "hash");
+export function forgeIndexedOrder(expectedAddedDate: number, expiryDate: number): IndexedOrder<DbOrder> {
+    return new IndexedOrder(forgeDbOrder(expiryDate), expectedAddedDate, "hash");
 }
 
 export function forgeIndexedOrderResponseERC20(expectedAddedDate: number, expiryDate: number): IndexedOrderResponse<FullOrderERC20> {
@@ -20,11 +20,11 @@ export function forgeIndexedOrderResponseERC20(expectedAddedDate: number, expiry
         order: forgeFullOrderERC20(expiryDate)
     }
 }
-export function forgeIndexedOrderResponseMarketPlace(expectedAddedDate: number, expiryDate: number): IndexedOrderResponse<FullOrder> {
+export function forgeIndexedOrderResponse(expectedAddedDate: number, expiryDate: number): IndexedOrderResponse<FullOrder> {
     return {
         hash: "hash",
         addedOn: expectedAddedDate,
-        order: forgeFullOrderMarketPlace(expiryDate)
+        order: forgeFullOrder(expiryDate)
     }
 }
 
@@ -49,7 +49,7 @@ export function forgeDbOrderERC20(expiryDate: number): DbOrderERC20 {
     };
 }
 
-export function forgeDbOrderMarketPlace(expiryDate: number): DbOrderMarketPlace {
+export function forgeDbOrder(expiryDate: number): DbOrder {
     return {
         nonce: "nonce",
         expiry: expiryDate / 1000,
@@ -101,7 +101,7 @@ export function forgeFullOrderERC20(expiryDate: number): FullOrderERC20 {
     };
 }
 
-export function forgeFullOrderMarketPlace(expiryDate: number): FullOrder {
+export function forgeFullOrder(expiryDate: number): FullOrder {
     return {
         nonce: "nonce",
         expiry: String(expiryDate / 1000),

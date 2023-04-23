@@ -1,9 +1,9 @@
-import { mapAnyToRequestFilter } from '../mapAnyToRequestFilter';
+import { mapAnyToRequestFilterERC20 } from '../mapAnyToRequestFilterERC20';
 import { SortField, SortOrder } from '@airswap/types';
 
 describe("mapAnyToRequestFilter", () => {
     test("should map all string values", () => {
-        expect(mapAnyToRequestFilter({
+        expect(mapAnyToRequestFilterERC20({
             maxSenderAmount: "20",
             maxSignerAmount: "200",
             minSenderAmount: "2",
@@ -29,7 +29,7 @@ describe("mapAnyToRequestFilter", () => {
     });
 
     test("should default page to 1", () => {
-        expect(mapAnyToRequestFilter({
+        expect(mapAnyToRequestFilterERC20({
             maxSenderAmount: "20",
             maxSignerAmount: "200",
             minSenderAmount: "2",

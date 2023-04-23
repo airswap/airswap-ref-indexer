@@ -1,4 +1,4 @@
-import { DbOrderERC20, DbOrderMarketPlace as DbOrder, DbOrderParty } from 'model/DbOrderTypes.js';
+import { DbOrderERC20, DbOrder as DbOrder, DbOrderParty } from 'model/DbOrderTypes.js';
 import { toBigInt, toNumber } from '../converter/index.js';
 
 /**

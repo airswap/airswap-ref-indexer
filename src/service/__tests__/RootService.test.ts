@@ -1,5 +1,5 @@
 import { Database } from '../../database/Database';
-import { forgeIndexedOrderResponseERC20, forgeIndexedOrderResponseMarketPlace } from '../../Fixtures';
+import { forgeIndexedOrderResponseERC20, forgeIndexedOrderResponse } from '../../Fixtures';
 import { Peers } from '../../peer/Peers';
 import { RootService } from '../RootService';
 
@@ -8,7 +8,7 @@ describe("Root service", () => {
     let fakeDb: Partial<Database>;
     let fakePeers: Partial<Peers>;
     const indexedOrderResponseERC20 = forgeIndexedOrderResponseERC20(1653854738949, 1653854738959);
-    const indexedOrderResponseMarketPlace = forgeIndexedOrderResponseMarketPlace(1653854738949, 1653854738959);
+    const indexedOrderResponse = forgeIndexedOrderResponse(1653854738949, 1653854738959);
 
     beforeEach(() => {
         fakeDb = {
@@ -22,9 +22,9 @@ describe("Root service", () => {
                     ordersForQuery: 1
                 }
             )),
-            getOrdersMarketPlace: jest.fn(() => Promise.resolve(
+            getOrders: jest.fn(() => Promise.resolve(
                 {
-                    orders: { "aze": indexedOrderResponseMarketPlace },
+                    orders: { "aze": indexedOrderResponse },
                     pagination: {
                         first: "1",
                         last: "1"

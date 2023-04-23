@@ -1,7 +1,7 @@
 import { toBigInt } from '../converter/index.js';
-import { DbOrderMarketPlace, DbOrderParty } from 'model/DbOrderTypes.js';
+import { DbOrder, DbOrderParty } from 'model/DbOrderTypes.js';
 
-export function mapAnyToDbOrderMarketPlace(data: any): DbOrderMarketPlace {
+export function mapAnyToDbOrder(data: any): DbOrder {
     return {
         nonce: String(data.nonce),
         expiry: Number(data.expiry),

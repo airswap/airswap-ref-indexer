@@ -2,7 +2,7 @@ import { Database } from './../../database/Database';
 import { Peers } from './../../peer/Peers';
 import { Server } from '@airswap/libraries';
 import { requestDataFromOtherPeer } from "../requestDataFromOtherPeer";
-import { forgeDbOrderERC20, forgeDbOrderMarketPlace, forgeFullOrderERC20, forgeFullOrderMarketPlace } from '../../Fixtures';
+import { forgeDbOrderERC20, forgeDbOrder, forgeFullOrderERC20, forgeFullOrder } from '../../Fixtures';
 
 let fakeDb: Partial<Database>;
 let fakePeers: Partial<Peers>;
@@ -22,7 +22,7 @@ describe("requestDataFromOtherPeer", () => {
         };
         fakeDb = {
             addAllOrderERC20: jest.fn(),
-            addAllOrderMarketPlace: jest.fn(),
+            addAllOrder: jest.fn(),
         };
         //@ts-ignore
         Server.at.mockClear()
@@ -34,12 +34,12 @@ describe("requestDataFromOtherPeer", () => {
         const mockGetOrdersERC20 = jest.fn()
             .mockResolvedValueOnce(undefined)
             .mockResolvedValueOnce({ orders: [{ hash: "hash", addedOn: 123, order: forgeFullOrderERC20(1) }] })
-        const mockGetOrdersMarketPlace = jest.fn()
+        const mockGetOrders = jest.fn()
             .mockResolvedValueOnce(undefined)
-            .mockResolvedValueOnce({ orders: [{ hash: "hash", addedOn: 123, order: forgeFullOrderMarketPlace(1) }] })
+            .mockResolvedValueOnce({ orders: [{ hash: "hash", addedOn: 123, order: forgeFullOrder(1) }] })
         // @ts-ignore
         Server.at.mockImplementation(() => ({
-            getOrdersERC20: mockGetOrdersERC20, getOrders: mockGetOrdersMarketPlace
+            getOrdersERC20: mockGetOrdersERC20, getOrders: mockGetOrders
         }))
 
         await requestDataFromOtherPeer(["http://first_node/", "http://second_node/"], fakeDb as Database, fakePeers as Peers);
@@ -49,9 +49,9 @@ describe("requestDataFromOtherPeer", () => {
         expect(Server.at).toHaveBeenNthCalledWith(1, "http://first_node/");
         expect(Server.at).toHaveBeenNthCalledWith(2, "http://second_node/");
         expect(mockGetOrdersERC20).toHaveBeenCalledTimes(2);
-        expect(mockGetOrdersMarketPlace).toHaveBeenCalledTimes(2);
+        expect(mockGetOrders).toHaveBeenCalledTimes(2);
         expect(fakeDb.addAllOrderERC20).toHaveBeenCalledWith({ hash: { hash: "hash", addedOn: 123, order: forgeDbOrderERC20(1) } });
-        expect(fakeDb.addAllOrderMarketPlace).toHaveBeenCalledWith({ hash: { hash: "hash", addedOn: 123, order: forgeDbOrderMarketPlace(1) } });
+        expect(fakeDb.addAllOrder).toHaveBeenCalledWith({ hash: { hash: "hash", addedOn: 123, order: forgeDbOrder(1) } });
     });
 
     test("No connectable peers", async () => {
@@ -71,7 +71,7 @@ describe("requestDataFromOtherPeer", () => {
         expect(mockGetOrdersERC20).not.toHaveBeenCalled();
         expect(mockGetOrders).not.toHaveBeenCalled();
         expect(fakeDb.addAllOrderERC20).not.toHaveBeenCalled();
-        expect(fakeDb.addAllOrderMarketPlace).not.toHaveBeenCalled();
+        expect(fakeDb.addAllOrder).not.toHaveBeenCalled();
     });
 
     test("No peers", async () => {
@@ -90,6 +90,6 @@ describe("requestDataFromOtherPeer", () => {
         expect(fakePeers.getConnectablePeers).toHaveBeenCalledTimes(1);
         expect(Server.at).not.toHaveBeenCalled();
         expect(fakeDb.addAllOrderERC20).not.toHaveBeenCalled();
-        expect(fakeDb.addAllOrderMarketPlace).not.toHaveBeenCalled();
+        expect(fakeDb.addAllOrder).not.toHaveBeenCalled();
     });
 });

@@ -4,15 +4,15 @@ import { isValidFullOrder, isValidFullOrderERC20 } from '@airswap/utils';
 import { Filters } from '../database/filter/Filters';
 import { Database } from '../database/Database.js';
 import { mapAnyToDbOrderERC20 } from '../mapper/mapAnyToDbOrderERC20.js';
-import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
+import { mapAnyToRequestFilterERC20 } from '../mapper/mapAnyToRequestFilterERC20.js';
 import { isDateInRange, isNumeric } from '../validator/index.js';
 import { AlreadyExistsError } from '../model/error/AlreadyExists.js';
 import { ClientError } from '../model/error/ClientError.js';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Web3SwapERC20Client } from '../client/Web3SwapERC20Client.js';
-import { DbOrderERC20, DbOrderMarketPlace } from '../model/DbOrderTypes.js';
-import { mapAnyToDbOrderMarketPlace } from '../mapper/mapAnyToDbOrder.js';
-import { mapAnyToRequestFilterMarletPlace } from '../mapper/mapAnyToRequestFilterMarketPlace.js';
+import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
+import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
+import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
 
 const validationDurationInWeek = 1;
 
@@ -80,7 +80,7 @@ export class OrderService {
             orders = await this.database.getOrdersERC20();
         }
         else {
-            orders = await this.database.getOrderERC20By(mapAnyToRequestFilter(query));
+            orders = await this.database.getOrderERC20By(mapAnyToRequestFilterERC20(query));
         }
 
         if (query.filters) {
@@ -97,23 +97,23 @@ export class OrderService {
         if (!isValidFullOrder(body)) {
             throw new ClientError("Missing fields");
         }
-        if (!areMarketPlaceNumberFieldsValid(body)) {
+        if (!areOrderNumberFieldsValid(body)) {
             throw new ClientError("Number fields are incorrect");
         }
         if (!isDateInRange(body.expiry, validationDurationInWeek)) {
             throw new ClientError("Invalid expiry date");
         }
-        const dbOrder = mapAnyToDbOrderMarketPlace(body);
+        const dbOrder = mapAnyToDbOrder(body);
         const addedTimestamp = isNumeric(body.addedOn) ? +body.addedOn : new Date().getTime();
-        const indexedOrder = new IndexedOrder<DbOrderMarketPlace>(dbOrder, addedTimestamp);
+        const indexedOrder = new IndexedOrder<DbOrder>(dbOrder, addedTimestamp);
         const hash = this.database.generateHash(indexedOrder);
-        const orderExists = await this.database.orderMarketPlaceExists(hash);
+        const orderExists = await this.database.orderExists(hash);
         if (orderExists) {
             throw new AlreadyExistsError();
         }
 
         indexedOrder.hash = hash;
-        await this.database.addOrderMarketPlace(indexedOrder);
+        await this.database.addOrder(indexedOrder);
         console.log("Added", indexedOrder.order)
         this.web3SwapClient.connectToChain(indexedOrder.order.chainId)
         return Promise.resolve();
@@ -125,13 +125,13 @@ export class OrderService {
         }
         let orders: OrderResponse<FullOrder>;
         if (query.hash) {
-            orders = await this.database.getOrderMarketPlace(query.hash);
+            orders = await this.database.getOrder(query.hash);
         }
         else if (Object.keys(query).filter(key => key !== "filters").length === 0) {
-            orders = await this.database.getOrdersMarketPlace();
+            orders = await this.database.getOrders();
         }
         else {
-            orders = await this.database.getOrderMarketPlaceBy(mapAnyToRequestFilterMarletPlace(query));
+            orders = await this.database.getOrderBy(mapAnyToRequestFilter(query));
         }
 
         // if (query.filters) {
@@ -165,6 +165,6 @@ function toFilterResponse(filters: Filters): FiltersResponse {
 function areERC20NumberFieldsValid(order: FullOrderERC20) {
     return isNumeric(order.senderAmount) && isNumeric(order.signerAmount) && isNumeric(order.expiry)
 }
-function areMarketPlaceNumberFieldsValid(order: FullOrder) {
+function areOrderNumberFieldsValid(order: FullOrder) {
     return isNumeric(order.sender.amount) && isNumeric(order.signer.amount) && isNumeric(order.expiry) && isNumeric(order.affiliateAmount)
 }

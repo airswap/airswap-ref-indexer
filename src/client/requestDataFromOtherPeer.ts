@@ -1,7 +1,7 @@
 import { Server } from '@airswap/libraries';
 import { Database } from '../database/Database.js';
 import { mapAllIndexedOrderResponseToDbOrderERC20 } from '../mapper/mapIndexedOrderResponseToDbOrderERC20.js';
-import { mapAllIndexedOrderResponseToDbOrderMarketPlace } from '../mapper/mapIndexedOrderResponseToDbOrderMarketPlace.js';
+import { mapAllIndexedOrderResponseToDbOrder } from '../mapper/mapIndexedOrderResponseToDbOrder.js';
 import { Peers } from './../peer/Peers.js';
 
 export async function requestDataFromOtherPeer(peersFromRegistry: string[], database: Database, peers: Peers) {
@@ -13,10 +13,10 @@ export async function requestDataFromOtherPeer(peersFromRegistry: string[], data
         try {
             const server = await Server.at(peerUrl);
             const erc20Orders = await server.getOrdersERC20();
-            const marketPlaceOrders = await server.getOrders();
-            if (erc20Orders && marketPlaceOrders) {
+            const orders = await server.getOrders();
+            if (erc20Orders && orders) {
                 await database.addAllOrderERC20(mapAllIndexedOrderResponseToDbOrderERC20(erc20Orders.orders));
-                await database.addAllOrderMarketPlace(mapAllIndexedOrderResponseToDbOrderMarketPlace(marketPlaceOrders.orders));
+                await database.addAllOrder(mapAllIndexedOrderResponseToDbOrder(orders.orders));
                 console.log("Asked all queries to", peerUrl);
                 return Promise.resolve();
             } else {

@@ -8,12 +8,11 @@ import { IndexedOrder } from '../model/IndexedOrder.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
 import { FullOrderERC20 } from '@airswap/types';
-import { IndexedOrderMarkeplace } from '../model/IndexedOrderMarkeplace.js';
-import { DbOrderERC20, DbOrderMarketPlace } from '../model/DbOrderTypes.js';
+import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 
-const ENTRY_REF_ERC20 = "otcOrders";
-const ENTRY_REF_MartketPlace = "marketplace";
+const ENTRY_REF_ERC20 = "erc20Orders";
+const ENTRY_REF_ORDERS = "orders";
 const elementPerPage = 20;
 
 export class AceBaseClient implements Database {
@@ -21,7 +20,7 @@ export class AceBaseClient implements Database {
     private db!: AceBase;
     private filters!: Filters;
     private refERC20!: DataReference;
-    private refMarketPlace!: DataReference;
+    private refOrders!: DataReference;
 
     public async connect(databaseName: string, deleteOnStart = false): Promise<void> {
         const options = { storage: { path: '.' }, logLevel: 'error' } as AceBaseLocalSettings;
@@ -40,14 +39,14 @@ export class AceBaseClient implements Database {
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/signerToken");
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/senderToken");
 
-                this.refMarketPlace = this.db.ref(ENTRY_REF_MartketPlace);
-                this.db.indexes.create(`${ENTRY_REF_MartketPlace}`, 'hash');
-                this.db.indexes.create(`${ENTRY_REF_MartketPlace}`, 'addedOn');
-                this.db.indexes.create(`${ENTRY_REF_MartketPlace}`, "order/expiry");
-                this.db.indexes.create(`${ENTRY_REF_MartketPlace}`, "order/signer/wallet");
-                this.db.indexes.create(`${ENTRY_REF_MartketPlace}`, "order/sender/wallet");
-                this.db.indexes.create(`${ENTRY_REF_MartketPlace}`, "order/sender/approximatedAmount");
-                this.db.indexes.create(`${ENTRY_REF_MartketPlace}`, "order/signer/approximatedAmount");
+                this.refOrders = this.db.ref(ENTRY_REF_ORDERS);
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, 'hash');
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, 'addedOn');
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/expiry");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/wallet");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/wallet");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/approximatedAmount");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/approximatedAmount");
                 resolve();
             });
         });
@@ -57,30 +56,30 @@ export class AceBaseClient implements Database {
         this.filters = new Filters();
     }
 
-    async addOrderMarketPlace(indexedOrderMarketPlace: IndexedOrder<DbOrderMarketPlace>): Promise<void> {
-        await this.refMarketPlace.push(indexedOrderMarketPlace);
+    async addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {
+        await this.refOrders.push(indexedOrder);
         return Promise.resolve();
     }
-    async addAllOrderMarketPlace(indexedOrdersMarketPlace: Record<string, IndexedOrderMarkeplace>): Promise<void> {
-        await Promise.all(Object.keys(indexedOrdersMarketPlace).map(async hash => {
-            await this.addOrderMarketPlace(indexedOrdersMarketPlace[hash]);
+    async addAllOrder(indexedOrders: Record<string, IndexedOrder<DbOrder>>): Promise<void> {
+        await Promise.all(Object.keys(indexedOrders).map(async hash => {
+            await this.addOrder(indexedOrders[hash]);
         }));
         return Promise.resolve();
     }
-    async deleteOrderMarketplace(nonce: string, signerWallet: string): Promise<void> {
-        await this.refMarketPlace.query()
+    async deleteOrder(nonce: string, signerWallet: string): Promise<void> {
+        await this.refOrders.query()
             .filter('order/nonce', '==', nonce)
             .remove();
         return Promise.resolve();
     }
-    async deleteExpiredOrderMarketPlace(timestampInSeconds: number): Promise<void> {
-        await this.refMarketPlace.query()
+    async deleteExpiredOrder(timestampInSeconds: number): Promise<void> {
+        await this.refOrders.query()
             .filter('order/expiry', '<', timestampInSeconds)
             .remove();
         return Promise.resolve();
     }
-    async getOrderMarketPlace(hash: string): Promise<OrderResponse<FullOrder>> {
-        const query = await this.refMarketPlace.query()
+    async getOrder(hash: string): Promise<OrderResponse<FullOrder>> {
+        const query = await this.refOrders.query()
             .filter('hash', '==', hash)
             .get();
         const serializedOrder = query.values()?.next()?.value?.val();
@@ -92,19 +91,19 @@ export class AceBaseClient implements Database {
             });
         }
         const result: Record<string, IndexedOrderResponse<FullOrder>> = {};
-        result[hash] = this.datarefToMarketPlace(serializedOrder)[hash];
+        result[hash] = this.datarefToOrder(serializedOrder)[hash];
         return Promise.resolve({
             orders: result,
             pagination: computePagination(elementPerPage, 1),
             ordersForQuery: 1
         });
     }
-    async getOrdersMarketPlace(): Promise<OrderResponse<FullOrder>> {
-        const data = await this.refMarketPlace.query().take(1000000).get(); // bypass default limitation 
-        const totalResults = await this.refMarketPlace.query().take(1000000).count();
+    async getOrders(): Promise<OrderResponse<FullOrder>> {
+        const data = await this.refOrders.query().take(1000000).get(); // bypass default limitation 
+        const totalResults = await this.refOrders.query().take(1000000).count();
         let mapped = {} as Record<string, IndexedOrderResponse<FullOrder>>;
         data.forEach(dataSnapshot => {
-            const mapp = this.datarefToMarketPlace(dataSnapshot.val());
+            const mapp = this.datarefToOrder(dataSnapshot.val());
             mapped = { ...mapped, ...mapp };
         });
         return Promise.resolve({
@@ -113,8 +112,8 @@ export class AceBaseClient implements Database {
             ordersForQuery: totalResults
         });
     }
-    async getOrderMarketPlaceBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
-        const query = this.refMarketPlace.query();
+    async getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
+        const query = this.refOrders.query();
 
         if (requestFilter.senderAddress != undefined) {
             query.filter('order/sender/wallet', '==', requestFilter.senderAddress);
@@ -136,7 +135,7 @@ export class AceBaseClient implements Database {
         const entriesSkipped = (requestFilter.page - 1) * elementPerPage;
         const data = await query.skip(entriesSkipped).take(elementPerPage).get();
         const mapped = data.reduce((total, indexedOrder) => {
-            const mapped = this.datarefToMarketPlace(indexedOrder.val());
+            const mapped = this.datarefToOrder(indexedOrder.val());
             return { ...total, ...mapped };
         }, {} as Record<string, IndexedOrderResponse<FullOrder>>);
         const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
@@ -146,8 +145,8 @@ export class AceBaseClient implements Database {
             ordersForQuery: totalResults
         });
     }
-    async orderMarketPlaceExists(hash: string): Promise<boolean> {
-        return await this.refMarketPlace.query()
+    async orderExists(hash: string): Promise<boolean> {
+        return await this.refOrders.query()
             .filter('hash', '==', hash).exists();
     }
 
@@ -275,7 +274,7 @@ export class AceBaseClient implements Database {
     async erase() {
         this.filters = new Filters();
         await this.db.ref(ENTRY_REF_ERC20).remove();
-        return await this.db.ref(ENTRY_REF_MartketPlace).remove();
+        return await this.db.ref(ENTRY_REF_ORDERS).remove();
     }
 
     private datarefToERC20(data: any): Record<string, IndexedOrderResponse<FullOrderERC20>> {
@@ -288,7 +287,7 @@ export class AceBaseClient implements Database {
         return mapped;
     }
 
-    private datarefToMarketPlace(data: any): Record<string, IndexedOrderResponse<FullOrder>> {
+    private datarefToOrder(data: any): Record<string, IndexedOrderResponse<FullOrder>> {
         const mapped: Record<string, IndexedOrderResponse<FullOrder>> = {};
         mapped[data.hash] = {
             order: mapAnyToFullOrder(data.order),
