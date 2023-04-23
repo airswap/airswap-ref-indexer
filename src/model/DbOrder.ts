@@ -1,24 +1,25 @@
-export declare type DbOrder = {
-    nonce: string
-    signerWallet: string
-    signerToken: string
-    signerAmount: string
-    protocolFee: string
-    senderWallet: string
-    senderToken: string
-    senderAmount: string
+import { FullOrderERC20, Order, OrderParty } from "@airswap/types";
+
+type Modify<T, R> = Omit<T, keyof R> & R;
+
+export declare type InternalDbOrder = {
     expiry: number;
     approximatedSignerAmount: BigInt;
     approximatedSenderAmount: BigInt;
-} & Signature & Settlement;
-
-export declare type Signature = {
-    v: string;
-    r: string;
-    s: string;
 };
 
-export type Settlement = {
-    chainId: string
-    swapContract: string
-}
+export type DbOrder = Modify<FullOrderERC20, {
+    expiry: number;
+    approximatedSignerAmount: BigInt;
+    approximatedSenderAmount: BigInt;
+}>
+
+export type DbOrderParty = Modify<OrderParty, {
+    amount: BigInt;
+}>
+export type DbOrderMarketPlace = Modify<Order, {
+    expiry: number;
+    signer: DbOrderParty;
+    sender: DbOrderParty;
+    affiliate: DbOrderParty;
+}>

@@ -1,5 +1,4 @@
-import { HealthCheckResponse } from '@airswap/libraries';
-import { OrderERC20 } from '@airswap/typescript';
+import { OrderERC20 } from '@airswap/types';
 import bodyParser from "body-parser";
 import express from 'express';
 import http from "http";
@@ -10,6 +9,7 @@ import { ClientError } from './../../model/error/ClientError';
 import { OrderService } from './../../service/OrderService';
 import { RootService } from './../../service/RootService';
 import { IndexerServer } from './../IndexerServer';
+import { HealthCheckResponse } from 'client/getHealthCheck';
 
 jest
     .useFakeTimers()
@@ -48,7 +48,7 @@ describe("Order controller", () => {
 
     describe("GET *", () => {
         test("should give basic info", done => {
-            const result: HealthCheckResponse = { registry: "registry", peers: [], databaseOrders: 100 };
+            const result: HealthCheckResponse = { registry: "registry", peers: [], databaseOrders: 100, network: 5 };
             const expected = {
                 "jsonrpc": "2.0",
                 "id": "-1",

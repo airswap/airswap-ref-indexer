@@ -22,7 +22,7 @@ export function mapAnyToDbOrder(data: any): DbOrder {
         r: String(data.r),
         s: String(data.s),
         v: String(data.v),
-        chainId: String(data.chainId),
+        chainId: Number(data.chainId),
         swapContract: String(data.swapContract)
     }
 }

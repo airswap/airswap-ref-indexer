@@ -1,6 +1,7 @@
-import { OrderResponse as OrderResponseERC20, RequestFilter } from '@airswap/libraries';
+import { OrderResponse, RequestFilter } from '@airswap/types';
 import { IndexedOrder as IndexedOrderERC20 } from '../model/IndexedOrder.js';
 import { Filters } from './filter/Filters.js';
+import { FullOrderERC20 } from '@airswap/types';
 
 export interface Database {
     addOrder(IndexedOrderERC20: IndexedOrderERC20): Promise<void>;
@@ -11,11 +12,11 @@ export interface Database {
 
     deleteExpiredOrderERC20(timestampInSeconds: number): Promise<void>;
 
-    getOrderERC20(hash: string): Promise<OrderResponseERC20>;
+    getOrderERC20(hash: string): Promise<OrderResponse<FullOrderERC20>>;
 
-    getOrdersERC20(): Promise<OrderResponseERC20>;
+    getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>>;
 
-    getOrderERC20By(requestFilter: RequestFilter): Promise<OrderResponseERC20>;
+    getOrderERC20By(requestFilter: RequestFilter): Promise<OrderResponse<FullOrderERC20>>;
 
     orderERC20Exists(hash: string): Promise<boolean>;
 

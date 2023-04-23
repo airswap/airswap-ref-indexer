@@ -42,8 +42,20 @@ export class Peers {
     return !!this.peers.filter((peerUrl) => peerUrl === address)[0];
   };
 
+  isValidHttpUrl = (stringUrl: string) => {
+    if(stringUrl == '' || !stringUrl.startsWith("http")) return false
+    let url;
+    try {
+      url = new URL(stringUrl);
+    } catch (_) {
+      return false;
+    }
+    return url.protocol === "https:" || url.protocol === "http:";
+  }
+
+
   getConnectablePeers = () => {
-    return this.peers.filter((host) => host != this.host);
+    return this.peers.filter((host) => host != this.host && this.isValidHttpUrl(host))
   };
 
   containsUnknownPeers = (peersUrl: string[]) => {

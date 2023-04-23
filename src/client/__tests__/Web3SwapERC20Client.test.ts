@@ -1,15 +1,20 @@
-import { ContractInterface, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { Database } from '../../database/Database';
-import { Web3SwapClient } from './../Web3SwapClient';
+import { Web3SwapERC20Client } from './../Web3SwapERC20Client';
+import { SwapERC20 } from '@airswap/libraries';
+
+jest.mock('@airswap/libraries', () => ({
+    SwapERC20: {
+        getContract: () => jest.fn()
+    }
+}));
 
 jest.mock('ethers');
 const mockedEther = ethers as jest.Mocked<typeof ethers>;
 
 describe("Web3SwapClient", () => {
     const apiKey = "apikey";
-    const registryAddress = "registryAddress";
-    const network = "rinkeby";
-    const abi = [] as ContractInterface;
+    const network = 5;
     let fakeDatabase: Partial<Database>;
 
     beforeEach(() => {
@@ -23,45 +28,37 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
-                InfuraProvider : {
+                InfuraProvider: {
                     getWebSocketProvider: jest.fn()
                 },
-                getNetwork: jest.fn(() => ({chainId: 5, name: "a_custom"}))
+                getNetwork: jest.fn(() => ({ chainId: 5, name: "a_custom" }))
             };
             //@ts-ignore
-            mockedEther.Contract = function () {
-                return ({
-                    on: jest.fn(),
-                });
-            }
+            SwapERC20.getContract = jest.fn(() => ({ on: jest.fn() }))
 
-            const client = new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database);
-            client.addContractIfNotExists("another_address", "5");
-    
+            const client = new Web3SwapERC20Client(apiKey, fakeDatabase as Database);
+            client.connectToChain(5);
+
             expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
-            expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).toHaveBeenCalledWith("a_custom", "apikey");
+            expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).toHaveBeenCalledWith(5, "apikey");
         });
 
         it("Network is not found", () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
-                InfuraProvider : {
+                InfuraProvider: {
                     getWebSocketProvider: jest.fn()
                 },
                 //@ts-ignore
                 getNetwork: jest.fn(() => undefined)
             };
             //@ts-ignore
-            mockedEther.Contract = function () {
-                return ({
-                    on: jest.fn(),
-                });
-            }
+            SwapERC20.getContract = jest.fn(() => ({ on: jest.fn() }))
 
-            const client = new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database);
-            client.addContractIfNotExists("another_address", "5");
-    
+            const client = new Web3SwapERC20Client(apiKey, fakeDatabase as Database);
+            client.connectToChain(5);
+
             expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
             expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).not.toHaveBeenCalled();
         });
@@ -70,45 +67,45 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
-                InfuraProvider : {
+                InfuraProvider: {
                     getWebSocketProvider: jest.fn()
                 },
                 //@ts-ignore
-                getNetwork: jest.fn(() => undefined)
+                getNetwork: jest.fn(() => ({ chainId: 5 }))
             };
             //@ts-ignore
-            mockedEther.Contract = function () {
-                return ({
-                    on: jest.fn(),
-                });
-            }
+            SwapERC20.getContract = jest.fn(() => ({ on: jest.fn() }))
 
-            const client = new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database);
-            client.addContractIfNotExists("another_address", "5");
-            client.addContractIfNotExists("another_address", "5");
-    
+            const client = new Web3SwapERC20Client(apiKey, fakeDatabase as Database);
+            client.connectToChain(5);
+            client.connectToChain(5);
+
             expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
-            expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).not.toHaveBeenCalled();
+            expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).toHaveBeenCalledTimes(1)
+            expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).toBeCalledWith(5, "apikey")
         });
     });
 
-    it("Should remove order on event Swap", async () => {
+    it("Should remove order on event SwapERC20", async () => {
         const mockedOn = jest.fn((eventName, callback) => {
-            if (eventName === "Swap") {
+            if (eventName === "SwapERC20") {
                 callback({ _hex: "0xf5", _isBigNumber: true }, 3221654, "a_wallet");
             }
         });
+
         //@ts-ignore
-        mockedEther.providers.InfuraProvider = {
-            getWebSocketProvider: jest.fn()
+        SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
+        mockedEther.providers = {
+            //@ts-ignore
+            InfuraProvider: {
+                getWebSocketProvider: jest.fn()
+            },
+            //@ts-ignore
+            getNetwork: jest.fn(() => ({ chainId: 5 }))
         };
-        //@ts-ignore
-        mockedEther.Contract = function () {
-            return ({
-                on: mockedOn,
-            });
-        }
-        new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
+
+        new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
+
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledTimes(1);
         expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledWith("245", "a_wallet");
@@ -121,16 +118,19 @@ describe("Web3SwapClient", () => {
             }
         });
         //@ts-ignore
-        mockedEther.providers.InfuraProvider = {
-            getWebSocketProvider: jest.fn()
+        mockedEther.providers = {
+            //@ts-ignore
+            InfuraProvider: {
+                getWebSocketProvider: jest.fn()
+            },
+            //@ts-ignore
+            getNetwork: jest.fn(() => ({ chainId: 5 }))
         };
         //@ts-ignore
-        mockedEther.Contract = function () {
-            return ({
-                on: mockedOn,
-            });
-        }
-        new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
+        SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
+
+        new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
+
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledTimes(1);
         expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledWith("245", "a_wallet");
@@ -146,15 +146,13 @@ describe("Web3SwapClient", () => {
                 getWebSocketProvider: jest.fn()
             };
             //@ts-ignore
-            mockedEther.Contract = function () {
-                return ({
-                    on: mockedOn,
-                });
-            }
-            new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
+            SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
+
+            new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
+
             expect(fakeDatabase.deleteOrderERC20).not.toHaveBeenCalled();
         });
-        
+
         it("empty nonce", () => {
             const mockedOn = jest.fn((eventName, callback) => {
                 callback({});
@@ -164,12 +162,10 @@ describe("Web3SwapClient", () => {
                 getWebSocketProvider: jest.fn()
             };
             //@ts-ignore
-            mockedEther.Contract = function () {
-                return ({
-                    on: mockedOn,
-                });
-            }
-            new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
+            SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
+
+            new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
+
             expect(fakeDatabase.deleteOrderERC20).not.toHaveBeenCalled();
         });
 
@@ -182,12 +178,10 @@ describe("Web3SwapClient", () => {
                 getWebSocketProvider: jest.fn()
             };
             //@ts-ignore
-            mockedEther.Contract = function () {
-                return ({
-                    on: mockedOn,
-                });
-            }
-            new Web3SwapClient(apiKey, abi as ContractInterface, fakeDatabase as Database).addContractIfNotExists(registryAddress, network);
+            SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
+
+            new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
+
             expect(fakeDatabase.deleteOrderERC20).not.toHaveBeenCalled();
         });
     });

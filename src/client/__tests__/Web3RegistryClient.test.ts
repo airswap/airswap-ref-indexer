@@ -1,16 +1,21 @@
 import { Peers } from './../../peer/Peers';
-import { ContractInterface } from 'ethers';
 import { Web3RegistryClient } from './../Web3RegistryClient';
 import { ethers } from "ethers";
+import { Registry } from '@airswap/libraries';
+
+
+jest.mock('@airswap/libraries', () => ({
+    Registry: {
+        getContract: () => jest.fn()
+    }
+}));
 
 jest.mock('ethers');
 const mockedEther = ethers as jest.Mocked<typeof ethers>;
 
 describe("Web3RegistryClient", () => {
     const apiKey = "apikey";
-    const registryAddress = "registryAddress";
-    const network = "rinkeby";
-    const abi = [] as ContractInterface;
+    const network = 5;
     let fakePeers: Partial<Peers>;
 
     beforeEach(() => {
@@ -26,15 +31,13 @@ describe("Web3RegistryClient", () => {
         mockedEther.providers.InfuraProvider = {
             getWebSocketProvider: jest.fn()
         };
-        //@ts-ignore
-        mockedEther.Contract = function () {
-            return ({
-                getURLs: () => ["peer1", ''],
-                on: jest.fn(),
-            });
-        }
-        const web3Client = new Web3RegistryClient(apiKey, registryAddress, abi as ContractInterface, network, fakePeers as Peers);
 
+        //@ts-ignore
+        Registry.getContract = jest.fn(() => ({ on: jest.fn() }))
+        //@ts-ignore
+        Registry.getServerURLs = () => ["peer1", '']
+
+        const web3Client = new Web3RegistryClient(apiKey, network, fakePeers as Peers);
         const peers = await web3Client.getPeersFromRegistry();
 
         expect(peers).toEqual(["peer1"]);
@@ -46,14 +49,11 @@ describe("Web3RegistryClient", () => {
             getWebSocketProvider: jest.fn()
         };
         //@ts-ignore
-        mockedEther.Contract = function () {
-            return ({
-                getURLs: () => undefined,
-                on: jest.fn(),
-            });
-        }
-        const web3Client = new Web3RegistryClient(apiKey, registryAddress, abi as ContractInterface, network, fakePeers as Peers);
+        Registry.getContract = jest.fn(() => ({ on: jest.fn() }))
+        //@ts-ignore
+        Registry.getServerURLs = () => undefined
 
+        const web3Client = new Web3RegistryClient(apiKey, network, fakePeers as Peers);
         const peers = await web3Client.getPeersFromRegistry();
 
         expect(peers).toEqual([]);
@@ -73,13 +73,12 @@ describe("Web3RegistryClient", () => {
             getWebSocketProvider: jest.fn()
         };
         //@ts-ignore
-        mockedEther.Contract = function () {
-            return ({
-                getURLs: () => [],
-                on: mockedOn,
-            });
-        }
-        new Web3RegistryClient(apiKey, registryAddress, abi as ContractInterface, network, fakePeers as Peers);
+        Registry.getContract = jest.fn(() => ({ on: mockedOn }))
+        //@ts-ignore
+        Registry.getServerURLs = () => []
+
+        new Web3RegistryClient(apiKey, network, fakePeers as Peers);
+
         expect(mockedOn).toHaveBeenCalledTimes(1);
         expect(fakePeers.addPeer).toHaveBeenCalledWith('http://localhost/');
     });
@@ -99,7 +98,12 @@ describe("Web3RegistryClient", () => {
             });
         }
 
-        await new Web3RegistryClient(apiKey, registryAddress, abi as ContractInterface, network, fakePeers as Peers)
+        //@ts-ignore
+        Registry.getContract = jest.fn(() => ({ on: mockedOn }))
+        //@ts-ignore
+        Registry.getServerURLs = mockGetUrl
+
+        await new Web3RegistryClient(apiKey, network, fakePeers as Peers)
             .onSetURLEvent("from", "to", {
                 args: {
                     account: "an_account",

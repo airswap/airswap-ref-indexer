@@ -33,7 +33,7 @@ describe("mapAnyToDbOrder", () => {
             r: "r",
             s: "s",
             v: "v",
-            chainId: "5",
+            chainId: 5,
             swapContract: AddressZero
         });
     });

@@ -1,21 +1,24 @@
-import { Contract, ContractInterface, ethers } from 'ethers';
+import { Contract, ethers } from 'ethers';
 import { Peers } from './../peer/Peers.js';
-import { getNetwork } from './getNetwork.js';
+import { Registry } from '@airswap/libraries';
+import { Protocols } from '@airswap/constants';
 
 export class Web3RegistryClient {
     private contract: Contract;
     private peers: Peers;
+    private provider: ethers.providers.Provider;
+    private chainId: number;
 
-    constructor(apiKey: string, registryAddress: string, abi: ContractInterface, network: string, peers: Peers) {
-        const mappedNetwork = getNetwork(network);
-        const provider = ethers.providers.InfuraProvider.getWebSocketProvider(mappedNetwork, apiKey);
+    constructor(apiKey: string, network: number, peers: Peers) {
+        this.chainId = ethers.providers.getNetwork(network)?.chainId;
+        this.provider = ethers.providers.InfuraProvider.getWebSocketProvider(this.chainId, apiKey);
         this.peers = peers;
-        this.contract = new ethers.Contract(registryAddress, abi, provider);
-        this.contract.on("SetURL", this.onSetURLEvent);
+        this.contract = Registry.getContract(this.provider, this.chainId);
+        this.contract.on("SetServerURL", this.onSetURLEvent);
     }
 
     async getPeersFromRegistry(): Promise<string[]> {
-        const urls = await this.contract.getURLs();
+        const urls = (await Registry.getServerURLs(this.provider, this.chainId, Protocols.Indexing))
         return Promise.resolve(urls?.filter((url: string) => url && url.trim() != "") || []);
     }
 

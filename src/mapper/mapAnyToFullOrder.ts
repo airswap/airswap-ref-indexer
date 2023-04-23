@@ -1,4 +1,4 @@
-import { FullOrderERC20 } from '@airswap/typescript';
+import { FullOrderERC20 } from '@airswap/types';
 
 export function mapAnyToFullOrder(data: any): FullOrderERC20 {
     return {

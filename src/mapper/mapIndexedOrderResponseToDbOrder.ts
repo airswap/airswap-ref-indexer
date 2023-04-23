@@ -1,9 +1,10 @@
-import { IndexedOrderResponse } from '@airswap/libraries';
+import { IndexedOrder as IndexedOrderResponse } from '@airswap/types';
 import { IndexedOrder } from '../model/IndexedOrder.js';
 import { mapAnyToDbOrder } from './mapAnyToDbOrder.js';
+import { FullOrderERC20 } from '@airswap/types';
 
 
-function mapIndexedOrderResponseToDbOrder(indexedOrderResponse: IndexedOrderResponse): Record<string, IndexedOrder> | undefined {
+function mapIndexedOrderResponseToDbOrder(indexedOrderResponse: IndexedOrderResponse<FullOrderERC20>): Record<string, IndexedOrder> | undefined {
     if(!indexedOrderResponse) return undefined;
 
     const { order, hash, addedOn} = indexedOrderResponse;
@@ -14,7 +15,7 @@ function mapIndexedOrderResponseToDbOrder(indexedOrderResponse: IndexedOrderResp
     return indexedOrder;
 }
 
-export function mapAllIndexedOrderResponseToDbOrder(orders: Record<string, IndexedOrderResponse>): Record<string, IndexedOrder> {
+export function mapAllIndexedOrderResponseToDbOrder(orders: Record<string, IndexedOrderResponse<FullOrderERC20>>): Record<string, IndexedOrder> {
     const mapped: Record<string, IndexedOrder> = Object.values(orders).reduce((indexedOrders, indexedOrderResponse) => {
         const indexedOrder = mapIndexedOrderResponseToDbOrder(indexedOrderResponse);
         return indexedOrder ? {...indexedOrders, ...indexedOrder} : indexedOrders;
