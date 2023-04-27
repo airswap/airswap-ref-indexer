@@ -15,9 +15,9 @@
   "type": "module",
   "license": "MIT",
   "dependencies": {
-    "@airswap/libraries": "4.0.5-beta.5",
+    "@airswap/libraries": "4.0.5-beta.7",
     "@airswap/swap-erc20": "4.0.2",
-    "@airswap/types": "4.0.3-beta.0",
+    "@airswap/types": "4.0.3-beta.1",
     "@airswap/utils": "4.0.5-beta.1",
     "@babel/preset-env": "7.20.2",
     "@babel/preset-typescript": "7.18.6",
