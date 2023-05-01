@@ -18,7 +18,7 @@ describe("Order service", () => {
         fakeDb = {
             getOrdersERC20: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponseERC20(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
             getOrderERC20: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponseERC20(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
-            getOrderERC20By: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponseERC20(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
+            getOrdersERC20By: jest.fn(() => Promise.resolve({ orders: { "aze": forgeIndexedOrderResponseERC20(1653900784696, 1653900784706) }, pagination: { first: "1", last: "1" }, ordersForQuery: 1 })),
             getFiltersERC20: jest.fn(() => Promise.resolve({ signerToken: { "ETH": { min: BigInt(10), max: BigInt(10) } }, senderToken: { "dai": { min: BigInt(5), max: BigInt(5) } } } as unknown as Filters) as Promise<Filters>),
             addOrderERC20: jest.fn(() => Promise.resolve()),
             orderERC20Exists: jest.fn(() => Promise.resolve(true)),
@@ -84,7 +84,7 @@ describe("Order service", () => {
 
             const result = await new OrderService(fakeDb as Database, fakeWeb3SwapClient as Web3SwapERC20Client).getOrdersERC20(body);
 
-            expect(fakeDb.getOrderERC20By).toHaveBeenCalledWith({
+            expect(fakeDb.getOrdersERC20By).toHaveBeenCalledWith({
                 maxSenderAmount: BigInt(20),
                 maxSignerAmount: BigInt(200),
                 minSenderAmount: BigInt(2),

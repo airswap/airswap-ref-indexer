@@ -24,7 +24,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  getOrderERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>> {
+  getOrdersERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>> {
     const totalResults = Object.values(this.erc20Database).filter((indexedOrder: IndexedOrder<DbOrderERC20>) => {
       const order = indexedOrder.order;
       let isFound = true;
@@ -218,7 +218,7 @@ export class InMemoryDatabase implements Database {
     });
   }
 
-  getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
+  getOrdersBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
     const totalResults = Object.values(this.orderDatabase).filter((indexedOrder: IndexedOrder<DbOrder>) => {
       const order = indexedOrder.order;
       let isFound = true;

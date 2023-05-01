@@ -111,7 +111,7 @@ export class AceBaseClient implements Database {
             ordersForQuery: totalResults
         });
     }
-    async getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
+    async getOrdersBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
         const query = this.refOrders.query();
 
         if (requestFilter.senderAddress != undefined) {
@@ -153,7 +153,7 @@ export class AceBaseClient implements Database {
         return Promise.resolve(this.filters);
     }
 
-    async getOrderERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>> {
+    async getOrdersERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>> {
         const query = this.refERC20.query();
 
         if (requestFilter.signerTokens != undefined) {

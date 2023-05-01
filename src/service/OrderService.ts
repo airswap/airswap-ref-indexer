@@ -79,7 +79,7 @@ export class OrderService {
             orders = await this.database.getOrdersERC20();
         }
         else {
-            orders = await this.database.getOrderERC20By(mapAnyToRequestFilterERC20(query));
+            orders = await this.database.getOrdersERC20By(mapAnyToRequestFilterERC20(query));
         }
 
         if (query.filters) {
@@ -130,7 +130,7 @@ export class OrderService {
             orders = await this.database.getOrders();
         }
         else {
-            orders = await this.database.getOrderBy(mapAnyToRequestFilter(query));
+            orders = await this.database.getOrdersBy(mapAnyToRequestFilter(query));
         }
 
         // if (query.filters) {

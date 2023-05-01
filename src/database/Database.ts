@@ -22,9 +22,8 @@ export interface Database {
     getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>>;
     getOrders(): Promise<OrderResponse<FullOrder>>;
 
-    getOrderERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>>;
-    getOrderBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>>;
-
+    getOrdersERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>>;
+    getOrdersBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>>;
 
     orderERC20Exists(hash: string): Promise<boolean>;
     orderExists(hash: string): Promise<boolean>;
