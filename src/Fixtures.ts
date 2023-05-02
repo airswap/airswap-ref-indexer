@@ -4,24 +4,24 @@ import { AddressZero } from '@ethersproject/constants';
 import { DbOrderERC20, DbOrder } from './model/DbOrderTypes.js';
 import { JsonRpcResponse } from '@airswap/libraries';
 
-export function forgeIndexedOrderERC20(expectedAddedDate: number, expiryDate: number): IndexedOrder<DbOrderERC20> {
-    return { order: forgeDbOrderERC20(expiryDate), addedOn: expectedAddedDate, hash: "hash" };
+export function forgeIndexedOrderERC20(expectedAddedDate: number, expiryDate: number, hash = 'hash'): IndexedOrder<DbOrderERC20> {
+    return { order: forgeDbOrderERC20(expiryDate), addedOn: expectedAddedDate, hash };
 }
 
-export function forgeIndexedOrder(expectedAddedDate: number, expiryDate: number): IndexedOrder<DbOrder> {
-    return { order: forgeDbOrder(expiryDate), addedOn: expectedAddedDate, hash: "hash" };
+export function forgeIndexedOrder(expectedAddedDate: number, expiryDate: number, hash = 'hash'): IndexedOrder<DbOrder> {
+    return { order: forgeDbOrder(expiryDate), addedOn: expectedAddedDate, hash };
 }
 
-export function forgeIndexedOrderResponseERC20(expectedAddedDate: number, expiryDate: number): IndexedOrder<FullOrderERC20> {
+export function forgeIndexedOrderResponseERC20(expectedAddedDate: number, expiryDate: number, hash = 'hash'): IndexedOrder<FullOrderERC20> {
     return {
-        hash: "hash",
+        hash,
         addedOn: expectedAddedDate,
         order: forgeFullOrderERC20(expiryDate)
     }
 }
-export function forgeIndexedOrderResponse(expectedAddedDate: number, expiryDate: number): IndexedOrder<FullOrder> {
+export function forgeIndexedOrderResponse(expectedAddedDate: number, expiryDate: number, hash = 'hash'): IndexedOrder<FullOrder> {
     return {
-        hash: "hash",
+        hash,
         addedOn: expectedAddedDate,
         order: forgeFullOrder(expiryDate)
     }

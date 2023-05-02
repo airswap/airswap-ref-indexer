@@ -59,8 +59,15 @@ describe("Database implementations", () => {
     });
 
     describe("Should add all & get orders", () => {
-        test("inMemoryDb", async () => { await addAllAndGetOrders(inMemoryDatabase); });
-        test("acebaseDb", async () => { await addAllAndGetOrders(acebaseClient); });
+        describe('erc20', () => {
+            test("inMemoryDb", async () => { await addAllAndGetOrdersERC20(inMemoryDatabase); });
+            test("acebaseDb", async () => { await addAllAndGetOrdersERC20(acebaseClient); });
+        })
+
+        describe('marketplace', () => {
+            test("inMemoryDb", async () => { await addAllAndGetOrders(inMemoryDatabase); });
+            test("acebaseDb", async () => { await addAllAndGetOrders(acebaseClient); });
+        })
     });
 
     describe("Should delete IndexedOrder", () => {
@@ -496,7 +503,7 @@ describe("Database implementations", () => {
         return Promise.resolve();
     }
 
-    async function addAllAndGetOrders(db: Database) {
+    async function addAllAndGetOrdersERC20(db: Database) {
         const indexedOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
         const anotherOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
         const expectedIndexedOrder = forgeIndexedOrderResponseERC20(addedOn, expiryDate);
@@ -506,6 +513,28 @@ describe("Database implementations", () => {
 
         await db.addAllOrderERC20({ "hash": indexedOrder, "another_hash": anotherOrder });
         const orders = await db.getOrdersERC20();
+
+        expect(orders).toEqual({
+            orders: { hash: expectedIndexedOrder, "another_hash": expectedAnotherOrder },
+            pagination: {
+                first: "1",
+                last: "1"
+            },
+            ordersForQuery: 2
+        });
+        return Promise.resolve();
+    }
+
+    async function addAllAndGetOrders(db: Database) {
+        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
+        const anotherOrder = forgeIndexedOrder(addedOn, expiryDate);
+        const expectedIndexedOrder = forgeIndexedOrderResponse(addedOn, expiryDate);
+        const expectedAnotherOrder = forgeIndexedOrderResponse(addedOn, expiryDate);
+        anotherOrder.hash = "another_hash";
+        expectedAnotherOrder.hash = "another_hash";
+
+        await db.addAllOrder({ "hash": indexedOrder, "another_hash": anotherOrder });
+        const orders = await db.getOrders();
 
         expect(orders).toEqual({
             orders: { hash: expectedIndexedOrder, "another_hash": expectedAnotherOrder },
@@ -574,19 +603,19 @@ describe("Database implementations", () => {
     }
 
     async function shouldDeleteExpiredERC20Order(db: Database) {
-        const indexedOrder: IndexedOrder<DbOrderERC20> = forgeIndexedOrderERC20(1000, 2000);
-        const indexedOrder2 = forgeIndexedOrderERC20(1000, 1000);
-        const indexedOrder3 = forgeIndexedOrderERC20(1000, 500000);
+        const indexedOrder: IndexedOrder<DbOrderERC20> = forgeIndexedOrderERC20(1000, 2000, 'hash1');
+        const indexedOrder2 = forgeIndexedOrderERC20(1000, 1000, 'hash2');
+        const indexedOrder3 = forgeIndexedOrderERC20(1000, 500000, 'hash3');
         await db.addOrderERC20(indexedOrder);
         await db.addOrderERC20(indexedOrder2);
         await db.addOrderERC20(indexedOrder3);
-        const expected = forgeIndexedOrderResponseERC20(1000, 500000);
+        const expected = forgeIndexedOrderResponseERC20(1000, 500000, 'hash3');
 
         await db.deleteExpiredOrderERC20(300);
         const orders = await db.getOrdersERC20();
 
         expect(orders).toEqual({
-            orders: { hash: expected },
+            orders: { "hash3": expected },
             pagination: {
                 first: "1",
                 last: "1"
@@ -597,19 +626,19 @@ describe("Database implementations", () => {
     }
 
     async function shouldDeleteExpiredOrder(db: Database) {
-        const indexedOrder: IndexedOrder<DbOrder> = forgeIndexedOrder(1000, 2000);
-        const indexedOrder2 = forgeIndexedOrder(1000, 1000);
-        const indexedOrder3 = forgeIndexedOrder(1000, 500000);
+        const indexedOrder: IndexedOrder<DbOrder> = forgeIndexedOrder(1000, 2000, 'hash1');
+        const indexedOrder2 = forgeIndexedOrder(1000, 1000, 'hash2');
+        const indexedOrder3 = forgeIndexedOrder(1000, 500000, 'hash3');
         await db.addOrder(indexedOrder);
         await db.addOrder(indexedOrder2);
         await db.addOrder(indexedOrder3);
-        const expected = forgeIndexedOrderResponse(1000, 500000);
+        const expected = forgeIndexedOrderResponse(1000, 500000, 'hash3');
 
         await db.deleteExpiredOrder(300);
         const orders = await db.getOrders();
 
         expect(orders).toEqual({
-            orders: { hash: expected },
+            orders: { "hash3": expected },
             pagination: {
                 first: "1",
                 last: "1"

@@ -1,5 +1,5 @@
 import { AddressZero } from "@ethersproject/constants";
-import { NodeIndexer } from "@airswap/libraries";
+import { Server } from "@airswap/libraries";
 
 const tokens = [
     "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", // WBTC
@@ -9,7 +9,7 @@ const tokens = [
 ];
 
 async function bench() {
-    const client = new NodeIndexer("https://airswap.mitsi.ovh/");
+    const client = Server.at("https://airswap.mitsi.ovh/");
     let lastDate = new Date().getTime();
     let shift = 0;
     for (let index = 1; index < 10000; index++) {
@@ -40,13 +40,13 @@ async function bench() {
 
         try {
             if (index % 10 === 0) {
-                await client.addOrderERC20(body);
+                await (await client).addOrderERC20(body);
                 const now = new Date().getTime();
                 const elapsed = now - lastDate;
                 console.log(index, elapsed, elapsed / 100, "ms/rq");
                 lastDate = now;
             } else {
-                await client.addOrderERC20(body);
+                await (await client).addOrderERC20(body);
             }
         } catch (error) {
             console.log(error);

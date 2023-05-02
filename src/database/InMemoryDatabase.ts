@@ -179,7 +179,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
   deleteExpiredOrder(timestampInSeconds: number): Promise<void> {
-    const hashToDelete: string[] = Object.keys(this.erc20Database).filter((key: string) => {
+    const hashToDelete: string[] = Object.keys(this.orderDatabase).filter((key: string) => {
       return this.orderDatabase[key].order.expiry < timestampInSeconds;
     });
     hashToDelete.forEach(hash => {
