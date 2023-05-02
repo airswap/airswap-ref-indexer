@@ -129,13 +129,31 @@ export function forgeFullOrder(expiryDate: number): FullOrder {
     };
 }
 
-export function forgeOrderResponse(filters?: FiltersResponse): OrderResponse<FullOrderERC20> {
+export function forgeOrderERC20Response(filters?: FiltersResponse): OrderResponse<FullOrderERC20> {
     return {
         orders: {
             aze: {
                 addedOn: 1653900784696,
                 hash: "hash",
                 order: forgeFullOrderERC20(1653900784706),
+            },
+        },
+        pagination: {
+            first: "1",
+            last: "1"
+        },
+        ordersForQuery: 1,
+        filters: filters
+    }
+}
+
+export function forgeOrderResponse(filters?: FiltersResponse): OrderResponse<FullOrder> {
+    return {
+        orders: {
+            aze: {
+                addedOn: 1653900784696,
+                hash: "hash",
+                order: forgeFullOrder(1653900784706),
             },
         },
         pagination: {

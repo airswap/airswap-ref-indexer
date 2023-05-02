@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import express from 'express';
 import http from "http";
 import supertest from "supertest";
-import { forgeJsonRpcResponse, forgeOrderResponse } from '../../Fixtures';
+import { forgeJsonRpcResponse, forgeOrderERC20Response } from '../../Fixtures';
 import { Peers } from '../../peer/Peers';
 import { ClientError } from './../../model/error/ClientError';
 import { OrderService } from './../../service/OrderService';
@@ -114,8 +114,8 @@ describe("Order controller", () => {
 
     describe('Get orders', () => {
         test("nominal", (done) => {
-            const expected = forgeJsonRpcResponse("-1", forgeOrderResponse());
-            fakeOrderService.getOrdersERC20 = jest.fn().mockResolvedValue(forgeOrderResponse());
+            const expected = forgeJsonRpcResponse("-1", forgeOrderERC20Response());
+            fakeOrderService.getOrdersERC20 = jest.fn().mockResolvedValue(forgeOrderERC20Response());
 
             new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
 
