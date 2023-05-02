@@ -11,17 +11,18 @@ import { OrderService } from './service/OrderService.js';
 import { RootService } from './service/RootService.js';
 import { Webserver } from "./webserver/index.js";
 import { IndexerServer } from "./webserver/IndexerServer.js";
+import { Web3SwapClient } from "./client/Web3SwapClient.js";
 
 // Env Variables
 if (!process.env.EXPRESS_PORT) {
   console.error("No express port defined");
   process.exit(2);
 }
-if(!(process.env.NETWORK && isNumeric(process.env.NETWORK))){
+if (!(process.env.NETWORK && isNumeric(process.env.NETWORK))) {
   if (!process.env.EXPRESS_PORT) {
     console.error("No Network defined");
     process.exit(2);
-  }  
+  }
 }
 const network = +process.env.NETWORK!;
 
@@ -44,13 +45,18 @@ const intervalId = setInterval(() => {
   database.deleteExpiredOrderERC20(currentTimestampInSeconds);
 }, 1000 * 60);
 
-const web3SwapClient = getWeb3SwapClient(database, network);
-if (web3SwapClient === null) {
-  console.log("Could connect to swap smart contract");
+const swapClients = getWeb3SwapERC20Client(database, network);
+if (swapClients?.swapClientOrderERC20 === null) {
+  console.log("Could connect to SwapERC20 smart contract");
   process.exit(4);
 }
 
-const orderService = new OrderService(database, web3SwapClient);
+if (swapClients?.swapClientOrder === null) {
+  console.log("Could connect to Smart contract");
+  process.exit(4);
+}
+
+const orderService = new OrderService(database, swapClients!.swapClientOrderERC20, swapClients!.swapClientOrder);
 const peers = new Peers(database, host, broadcastClient);
 
 const registryClient = getRegistry(process.env, peers);
@@ -77,9 +83,23 @@ process.on("SIGINT", () => {
   gracefulShutdown(webserver, database, intervalId);
 });
 
+function getWeb3SwapERC20Client(database: Database, network: number) {
+  if (!network) {
+    return null;
+  }
+  const apiKey: string = process.env.API_KEY as string;
+
+  const swapClientOrderERC20 = new Web3SwapERC20Client(apiKey, database);
+  const swapClientOrder = new Web3SwapClient(apiKey, database);
+
+  swapClientOrder.connectToChain(network);
+  swapClientOrderERC20.connectToChain(network);
+  return { swapClientOrder, swapClientOrderERC20 };
+}
+
 function getWeb3SwapClient(database: Database, network: number) {
   const apiKey: string = process.env.API_KEY as string;
-  const client = new Web3SwapERC20Client(apiKey, database);
+  const client = new Web3SwapClient(apiKey, database);
   if (!network) {
     return null;
   }
