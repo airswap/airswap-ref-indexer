@@ -165,6 +165,6 @@ export function forgeOrderResponse(filters?: FiltersResponse): OrderResponse<Ful
     }
 }
 
-export function forgeJsonRpcResponse(id: string, response: OrderResponse<FullOrderERC20>): JsonRpcResponse<FullOrderERC20> {
+export function forgeJsonRpcResponse(id: string, response: OrderResponse<FullOrderERC20 | FullOrder>): JsonRpcResponse<FullOrderERC20 | FullOrder> {
     return new JsonRpcResponse(id, response);
 }
