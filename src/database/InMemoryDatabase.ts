@@ -154,10 +154,10 @@ export class InMemoryDatabase implements Database {
     if (lightenOrder.approximatedSignerAmount) {
       delete lightenOrder.approximatedSignerAmount
     }
-    if (lightenOrder.signer.approximatedAmount) {
+    if (lightenOrder.signer?.approximatedAmount) {
       delete lightenOrder.signer.approximatedAmount
     }
-    if (lightenOrder.sender.approximatedAmount) {
+    if (lightenOrder.sender?.approximatedAmount) {
       delete lightenOrder.sender.approximatedAmount
     }
     const stringObject = JSON.stringify(lightenOrder);
