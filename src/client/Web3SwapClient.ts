@@ -14,7 +14,7 @@ export class Web3SwapClient {
         this.apiKey = apiKey;
     }
 
-    public connectToChain(network: number|string) {
+    public connectToChain(network: number | string) {
         const chainId = ethers.providers.getNetwork(network)?.chainId;
         if (!chainId) {
             console.warn("Tried to add this network but it does not work :", network)
@@ -27,7 +27,8 @@ export class Web3SwapClient {
 
         const provider = ethers.providers.InfuraProvider.getWebSocketProvider(chainId, this.apiKey);
         const contract = Swap.getContract(provider, chainId);
-        contract.on("Swap", (nonce, timestamp, signerWallet, signerToken, signerAmount, protocolFee, senderWallet, senderToken, senderAmount) => {
+        contract.on("Swap", (nonce, signerWallet, signerAmount, signerId, signerToken, senderWallet, senderAmount, senderId,
+            senderToken, affiliateWallet, affiliateAmount) => {
             this.onEvent(nonce, signerWallet);
         });
         contract.on("Cancel", (nonce, signerWallet) => {

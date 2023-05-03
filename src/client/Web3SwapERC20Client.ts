@@ -27,7 +27,7 @@ export class Web3SwapERC20Client {
 
         const provider = ethers.providers.InfuraProvider.getWebSocketProvider(chainId, this.apiKey);
         const contract = SwapERC20.getContract(provider, chainId);
-        contract.on("SwapERC20", (nonce, timestamp, signerWallet, signerToken, signerAmount, protocolFee, senderWallet, senderToken, senderAmount) => {
+        contract.on("SwapERC20", (nonce, signerWallet, signerToken, signerAmount, protocolFee, senderWallet, senderToken, senderAmount) => {
             this.onEvent(nonce, signerWallet);
         });
         contract.on("Cancel", (nonce, signerWallet) => {

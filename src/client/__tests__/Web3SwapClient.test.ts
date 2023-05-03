@@ -89,7 +89,7 @@ describe("Web3SwapClient", () => {
     it("Should remove order on event Swap", async () => {
         const mockedOn = jest.fn((eventName, callback) => {
             if (eventName === "Swap") {
-                callback({ _hex: "0xf5", _isBigNumber: true }, 3221654, "a_wallet");
+                callback({ _hex: "0xf5", _isBigNumber: true }, "a_wallet");
             }
         });
 

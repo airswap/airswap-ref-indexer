@@ -89,7 +89,7 @@ describe("Web3SwapERC20Client", () => {
     it("Should remove order on event SwapERC20", async () => {
         const mockedOn = jest.fn((eventName, callback) => {
             if (eventName === "SwapERC20") {
-                callback({ _hex: "0xf5", _isBigNumber: true }, 3221654, "a_wallet");
+                callback({ _hex: "0xf5", _isBigNumber: true }, "a_wallet");
             }
         });
 
