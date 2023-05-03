@@ -144,12 +144,22 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve(Object.keys(this.erc20Database).indexOf(hash) != -1);
   }
 
+
+
   generateHash(indexedOrder: IndexedOrder<DbOrderERC20 | DbOrder>): string {
-    const lightenOrder = { ...indexedOrder.order };
-    //@ts-ignore
-    delete lightenOrder.approximatedSenderAmount
-    //@ts-ignore
-    delete lightenOrder.approximatedSignerAmount
+    const lightenOrder = { ...indexedOrder.order } as any;
+    if (lightenOrder.approximatedSenderAmount) {
+      delete lightenOrder.approximatedSenderAmount
+    }
+    if (lightenOrder.approximatedSignerAmount) {
+      delete lightenOrder.approximatedSignerAmount
+    }
+    if (lightenOrder.signer.approximatedAmount) {
+      delete lightenOrder.signer.approximatedAmount
+    }
+    if (lightenOrder.sender.approximatedAmount) {
+      delete lightenOrder.sender.approximatedAmount
+    }
     const stringObject = JSON.stringify(lightenOrder);
     const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
     return hashed.digest("hex");

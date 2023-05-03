@@ -35,7 +35,7 @@ export class Web3SwapERC20Client {
         });
         this.contracts.push(contract);
         this.registeredChains.push(String(chainId));
-        console.log("Registered event from chain", chainId)
+        console.log("Registered event SWAP ERC20 from chain", chainId)
     }
 
     private keyExists(network: string): boolean {
