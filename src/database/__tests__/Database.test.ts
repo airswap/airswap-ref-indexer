@@ -141,8 +141,14 @@ describe("Database implementations", () => {
     });
 
     describe("sha 256 does not change", () => {
-        test("inMemoryDb", async () => { await hashObject(inMemoryDatabase); });
-        test("acebaseDb", async () => { await hashObject(acebaseClient); });
+        describe("erc20", () => {
+            test("inMemoryDb", async () => { await hashOrderERC20(inMemoryDatabase); });
+            test("acebaseDb", async () => { await hashOrderERC20(acebaseClient); });
+        })
+        describe("marketplace", () => {
+            test("inMemoryDb", async () => { await hashOrder(inMemoryDatabase); });
+            test("acebaseDb", async () => { await hashOrder(acebaseClient); });
+        })
     });
 
     async function getOrdersERC20By(db: Database) {
@@ -758,12 +764,21 @@ describe("Database implementations", () => {
         return Promise.resolve();
     }
 
-    async function hashObject(db: Database) {
+    async function hashOrderERC20(db: Database) {
         const indexedOrder = { order: forgeDbOrderERC20(1653138423547), addedOn: new Date(1653138423537).getTime(), hash: "hash" }
+
+        const hash = db.generateHashERC20(indexedOrder);
+
+        expect(hash).toBe("5cfd1a4837f91f4b690c739ecf08b26d3cfa5f69e0891a108df50b1fd0a0d892");
+        return Promise.resolve();
+    }
+
+    async function hashOrder(db: Database) {
+        const indexedOrder = { order: forgeDbOrder(1653138423547), addedOn: new Date(1653138423537).getTime(), hash: "hash" }
 
         const hash = db.generateHash(indexedOrder);
 
-        expect(hash).toBe("5cfd1a4837f91f4b690c739ecf08b26d3cfa5f69e0891a108df50b1fd0a0d892");
+        expect(hash).toBe("98c17b5644869ccf94b202c22f2ebf2d9cfa60f6938f2f1566ffd9c6bae5ff97");
         return Promise.resolve();
     }
 });

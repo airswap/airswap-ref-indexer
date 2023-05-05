@@ -7,7 +7,7 @@ import { mapAnyToFullOrderERC20 } from '../mapper/mapAnyToFullOrderERC20.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
 import { FullOrderERC20 } from '@airswap/types';
-import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
+import { DbOrderERC20, DbOrder, DbOrderParty } from '../model/DbOrderTypes.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 
 const ENTRY_REF_ERC20 = "erc20Orders";
@@ -301,14 +301,27 @@ export class AceBaseClient implements Database {
             .filter('hash', '==', hash).exists();
     }
 
-    generateHash(indexedOrder: IndexedOrder<DbOrderERC20>) {
-        const lightenOrder = { ...indexedOrder.order };
-        //@ts-ignore
-        delete lightenOrder.approximatedSenderAmount;
-        //@ts-ignore
-        delete lightenOrder.approximatedSignerAmount;
+    generateHashERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): string {
+        const lightenOrder = { ...indexedOrderERC20.order } as Partial<DbOrderERC20>;
+        if (lightenOrder.approximatedSenderAmount) {
+          delete lightenOrder.approximatedSenderAmount
+        }
+        if (lightenOrder.approximatedSignerAmount) {
+          delete lightenOrder.approximatedSignerAmount
+        }
         const stringObject = JSON.stringify(lightenOrder);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
         return hashed.digest("hex");
-    }
+      }
+    
+      generateHash(indexedOrder: IndexedOrder<DbOrder>): string {
+        const signer = { ...indexedOrder.order.signer } as Partial<DbOrderParty>;
+        const sender = { ...indexedOrder.order.sender } as Partial<DbOrderParty>;
+        delete signer.approximatedAmount
+        delete sender.approximatedAmount
+        const lightenOrder = { ...indexedOrder.order, signer, sender }
+        const stringObject = JSON.stringify(lightenOrder);
+        const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
+        return hashed.digest("hex");
+      }
 }

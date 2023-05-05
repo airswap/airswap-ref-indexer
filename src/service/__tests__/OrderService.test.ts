@@ -31,6 +31,7 @@ describe("Order service", () => {
             orderERC20Exists: jest.fn(() => Promise.resolve(true)),
             orderExists: jest.fn(() => Promise.resolve(true)),
             generateHash: jest.fn(),
+            generateHashERC20: jest.fn(),
             deleteOrderERC20: jest.fn(() => Promise.resolve()),
         };
         fakeWeb3SwapERC20Client = {
@@ -185,7 +186,7 @@ describe("Order service", () => {
             expected.hash = "a";
 
             //@ts-ignore
-            fakeDb.generateHash.mockImplementation((order) => {
+            fakeDb.generateHashERC20.mockImplementation((order) => {
                 expect(order).toEqual(expectedForgeHash); // https://github.com/facebook/jest/issues/7950
                 return "a";
             });
@@ -194,7 +195,7 @@ describe("Order service", () => {
 
             await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient).addOrderERC20(order);
 
-            expect(fakeDb.generateHash).toHaveBeenCalledTimes(1);
+            expect(fakeDb.generateHashERC20).toHaveBeenCalledTimes(1);
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrderERC20).toHaveBeenCalledWith(expected);
             expect(fakeWeb3SwapERC20Client.connectToChain).toHaveBeenCalledWith(5);
@@ -260,7 +261,7 @@ describe("Order service", () => {
             const order = forgeFullOrderERC20(1653900784796);
 
             //@ts-ignore
-            fakeDb.generateHash.mockImplementation(() => "a");
+            fakeDb.generateHashERC20.mockImplementation(() => "a");
             //@ts-ignore
             fakeDb.orderERC20Exists.mockImplementation(() => true);
 
@@ -272,7 +273,7 @@ describe("Order service", () => {
                 await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient).addOrderERC20(order)
             }).rejects.toThrow("Already exists");
 
-            expect(fakeDb.generateHash).toHaveBeenCalledWith(expected);
+            expect(fakeDb.generateHashERC20).toHaveBeenCalledWith(expected);
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrderERC20).toHaveBeenCalledTimes(0);
             expect(fakeWeb3SwapERC20Client.connectToChain).toHaveBeenCalledTimes(0);

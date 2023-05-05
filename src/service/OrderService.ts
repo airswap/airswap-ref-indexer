@@ -57,7 +57,7 @@ export class OrderService {
         const dbOrder = mapAnyToDbOrderERC20(body);
         const addedTimestamp = isNumeric(body.addedOn) ? +body.addedOn : new Date().getTime();
         const indexedOrder: IndexedOrder<DbOrderERC20> = { order: dbOrder, addedOn: addedTimestamp }
-        const hash = this.database.generateHash(indexedOrder);
+        const hash = this.database.generateHashERC20(indexedOrder);
         const orderExists = await this.database.orderERC20Exists(hash);
         if (orderExists) {
             throw new AlreadyExistsError();

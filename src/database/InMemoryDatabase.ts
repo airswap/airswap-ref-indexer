@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { computePagination } from '../mapper/pagination/index.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
-import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
+import { DbOrderERC20, DbOrder, DbOrderParty } from '../model/DbOrderTypes.js';
 import { mapAnyToFullOrderERC20 } from '../mapper/mapAnyToFullOrderERC20.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 
@@ -144,22 +144,25 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve(Object.keys(this.erc20Database).indexOf(hash) != -1);
   }
 
-
-
-  generateHash(indexedOrder: IndexedOrder<DbOrderERC20 | DbOrder>): string {
-    const lightenOrder = { ...indexedOrder.order } as any;
+  generateHashERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): string {
+    const lightenOrder = { ...indexedOrderERC20.order } as Partial<DbOrderERC20>;
     if (lightenOrder.approximatedSenderAmount) {
       delete lightenOrder.approximatedSenderAmount
     }
     if (lightenOrder.approximatedSignerAmount) {
       delete lightenOrder.approximatedSignerAmount
     }
-    if (lightenOrder.signer?.approximatedAmount) {
-      delete lightenOrder.signer.approximatedAmount
-    }
-    if (lightenOrder.sender?.approximatedAmount) {
-      delete lightenOrder.sender.approximatedAmount
-    }
+    const stringObject = JSON.stringify(lightenOrder);
+    const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
+    return hashed.digest("hex");
+  }
+
+  generateHash(indexedOrder: IndexedOrder<DbOrder>): string {
+    const signer = { ...indexedOrder.order.signer } as Partial<DbOrderParty>;
+    const sender = { ...indexedOrder.order.sender } as Partial<DbOrderParty>;
+    delete signer.approximatedAmount
+    delete sender.approximatedAmount
+    const lightenOrder = { ...indexedOrder.order, signer, sender }
     const stringObject = JSON.stringify(lightenOrder);
     const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
     return hashed.digest("hex");

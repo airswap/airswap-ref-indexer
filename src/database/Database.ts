@@ -28,7 +28,8 @@ export interface Database {
     orderERC20Exists(hash: string): Promise<boolean>;
     orderExists(hash: string): Promise<boolean>;
 
-    generateHash(indexedOrderERC20: IndexedOrder<DbOrderERC20 | DbOrder>): string;
+    generateHashERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): string;
+    generateHash(indexedOrder: IndexedOrder<DbOrder>): string;
 
     getFiltersERC20(): Promise<Filters>;
 
