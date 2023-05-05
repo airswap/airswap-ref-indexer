@@ -9,10 +9,10 @@ const tokens = [
 ];
 
 async function bench() {
-    const host = "http://localhost:4001/";
+    const host = "http://localhost:4001"//"https://airswap.mitsi.ovh/";
     let lastDate = new Date().getTime();
     let shift = 0;
-    for (let index = 1; index < 2; index++) {
+    for (let index = 1; index < 10000; index++) {
         const signerToken = tokens[Math.floor(Math.random() * tokens.length)];
         const senderToken = tokens.filter((name) => name !== signerToken)[
             Math.floor(Math.random() * (tokens.length - 1))
@@ -26,14 +26,14 @@ async function bench() {
             protocolFee: "100",
             signer: {
                 wallet: AddressZero,
-                token: AddressZero,
+                token: signerToken,
                 kind: "aKind",
                 id: "aId",
                 amount: "100"
             },
             sender: {
                 wallet: AddressZero,
-                token: AddressZero,
+                token: senderToken,
                 kind: "aKind",
                 id: "aId",
                 amount: "100"
