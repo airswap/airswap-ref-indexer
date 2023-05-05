@@ -47,7 +47,7 @@ describe("Database implementations", () => {
             test("inMemoryDb", async () => { await getAndAddERC20Order(inMemoryDatabase); });
             test("acebaseDb", async () => { await getAndAddERC20Order(acebaseClient); });
         })
-        describe("marketplace", () => {
+        describe("ERC 721", () => {
             test("inMemoryDb", async () => { await getAndAddOrder(inMemoryDatabase); });
             test("acebaseDb", async () => { await getAndAddOrder(acebaseClient); });
         })
@@ -64,7 +64,7 @@ describe("Database implementations", () => {
             test("acebaseDb", async () => { await addAllAndGetOrdersERC20(acebaseClient); });
         })
 
-        describe('marketplace', () => {
+        describe('ERC 721', () => {
             test("inMemoryDb", async () => { await addAllAndGetOrders(inMemoryDatabase); });
             test("acebaseDb", async () => { await addAllAndGetOrders(acebaseClient); });
         })
@@ -75,7 +75,7 @@ describe("Database implementations", () => {
             test("inMemoryDb", async () => { await shouldDeleteERC20Order(inMemoryDatabase); });
             test("acebaseDb", async () => { await shouldDeleteERC20Order(acebaseClient); });
         })
-        describe('marketplace', () => {
+        describe('ERC 721', () => {
             test("inMemoryDb", async () => { await shouldDeleteOrder(inMemoryDatabase); });
             test("acebaseDb", async () => { await shouldDeleteOrder(acebaseClient); });
         })
@@ -87,7 +87,7 @@ describe("Database implementations", () => {
             test("acebaseDb", async () => { await shouldDeleteExpiredERC20Order(acebaseClient); });
         })
 
-        describe('marketplace', () => {
+        describe('ERC 721', () => {
             test("inMemoryDb", async () => { await shouldDeleteExpiredOrder(inMemoryDatabase); });
             test("acebaseDb", async () => { await shouldDeleteExpiredOrder(acebaseClient); });
         })
@@ -99,7 +99,7 @@ describe("Database implementations", () => {
             test("acebaseDb", async () => { await ERC20OrderExists(acebaseClient); });
         })
 
-        describe('marketplace', () => {
+        describe('ERC 721', () => {
             test("inMemoryDb", async () => { await orderExists(inMemoryDatabase); });
             test("acebaseDb", async () => { await orderExists(acebaseClient); });
         })
@@ -111,7 +111,7 @@ describe("Database implementations", () => {
             test("acebaseDb", async () => { await ERC20OrderDoesNotExist(acebaseClient); });
         })
 
-        describe('marketplace', () => {
+        describe('ERC 721', () => {
             test("inMemoryDb", async () => { await orderDoesNotExist(inMemoryDatabase); });
             test("acebaseDb", async () => { await orderDoesNotExist(acebaseClient); });
         })
@@ -122,7 +122,7 @@ describe("Database implementations", () => {
             test("inMemoryDb", async () => { await addERC20Order(inMemoryDatabase); });
             test("acebaseDb", async () => { await addERC20Order(acebaseClient); });
         })
-        describe('marketPlace', () => {
+        describe('ERC 721', () => {
             test("inMemoryDb", async () => { await addOrder(inMemoryDatabase); });
             test("acebaseDb", async () => { await addOrder(acebaseClient); });
         })
@@ -134,7 +134,7 @@ describe("Database implementations", () => {
             test("inMemoryDb", async () => { await renturnsNullOnUnknownHashERC20(inMemoryDatabase); });
             test("acebaseDb", async () => { await renturnsNullOnUnknownHashERC20(acebaseClient); });
         })
-        describe('marketplace', () => {
+        describe('ERC 721', () => {
             test("inMemoryDb", async () => { await renturnsNullOnUnknownHash(inMemoryDatabase); });
             test("acebaseDb", async () => { await renturnsNullOnUnknownHash(acebaseClient); });
         })
@@ -145,7 +145,7 @@ describe("Database implementations", () => {
             test("inMemoryDb", async () => { await hashOrderERC20(inMemoryDatabase); });
             test("acebaseDb", async () => { await hashOrderERC20(acebaseClient); });
         })
-        describe("marketplace", () => {
+        describe("ERC 721", () => {
             test("inMemoryDb", async () => { await hashOrder(inMemoryDatabase); });
             test("acebaseDb", async () => { await hashOrder(acebaseClient); });
         })

@@ -132,7 +132,7 @@ describe("Order controller", () => {
                 });
         });
 
-        test("marketplace", (done) => {
+        test("ERC 721", (done) => {
             const expected = forgeJsonRpcResponse("-1", forgeOrderResponse());
             fakeOrderService.getOrders = jest.fn().mockResolvedValue(forgeOrderResponse());
 
@@ -201,7 +201,7 @@ describe("Order controller", () => {
             });
         });
 
-        describe('marketplace', () => {
+        describe('ERC 721', () => {
             test("Add order nominal & broadcast", done => {
                 const order = forgeFullOrder(1653900784696);
                 const payload = { id: "-1", method: "addOrder", params: [order] };
