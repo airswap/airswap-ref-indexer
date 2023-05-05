@@ -302,7 +302,7 @@ export class AceBaseClient implements Database {
     }
 
     generateHashERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): string {
-        const lightenOrder = { ...indexedOrderERC20.order } as Partial<DbOrderERC20>;
+        const lightenOrder: Partial<DbOrderERC20> = { ...indexedOrderERC20.order };
         if (lightenOrder.approximatedSenderAmount) {
           delete lightenOrder.approximatedSenderAmount
         }
@@ -315,8 +315,8 @@ export class AceBaseClient implements Database {
       }
     
       generateHash(indexedOrder: IndexedOrder<DbOrder>): string {
-        const signer = { ...indexedOrder.order.signer } as Partial<DbOrderParty>;
-        const sender = { ...indexedOrder.order.sender } as Partial<DbOrderParty>;
+        const signer: Partial<DbOrderParty> = { ...indexedOrder.order.signer };
+        const sender: Partial<DbOrderParty> = { ...indexedOrder.order.sender };
         delete signer.approximatedAmount
         delete sender.approximatedAmount
         const lightenOrder = { ...indexedOrder.order, signer, sender }
