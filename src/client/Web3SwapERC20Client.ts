@@ -2,7 +2,6 @@ import { Contract, ethers } from 'ethers';
 import { Database } from '../database/Database.js';
 import { SwapERC20 } from '@airswap/libraries'
 
-
 export class Web3SwapERC20Client {
     private contracts: Contract[] = [];
     private database: Database;

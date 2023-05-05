@@ -2,7 +2,6 @@ import { Contract, ethers } from 'ethers';
 import { Database } from '../database/Database.js';
 import { Swap } from '@airswap/libraries'
 
-
 export class Web3SwapClient {
     private contracts: Contract[] = [];
     private database: Database;
