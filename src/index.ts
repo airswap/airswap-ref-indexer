@@ -45,7 +45,7 @@ const intervalId = setInterval(() => {
   database.deleteExpiredOrderERC20(currentTimestampInSeconds);
 }, 1000 * 60);
 
-const swapClients = getWeb3SwapERC20Client(database, network);
+const swapClients = getWeb3SwapClient(database, network);
 if (swapClients?.swapClientOrderERC20 === null) {
   console.log("Could connect to SwapERC20 smart contract");
   process.exit(4);
@@ -83,7 +83,7 @@ process.on("SIGINT", () => {
   gracefulShutdown(webserver, database, intervalId);
 });
 
-function getWeb3SwapERC20Client(database: Database, network: number) {
+function getWeb3SwapClient(database: Database, network: number) {
   if (!network) {
     return null;
   }
@@ -95,17 +95,6 @@ function getWeb3SwapERC20Client(database: Database, network: number) {
   swapClientOrder.connectToChain(network);
   swapClientOrderERC20.connectToChain(network);
   return { swapClientOrder, swapClientOrderERC20 };
-}
-
-function getWeb3SwapClient(database: Database, network: number) {
-  const apiKey: string = process.env.API_KEY as string;
-  const client = new Web3SwapClient(apiKey, database);
-  if (!network) {
-    return null;
-  }
-
-  client.connectToChain(network);
-  return client;
 }
 
 async function gracefulShutdown(webserver: Webserver, database: Database, intervalId: NodeJS.Timer) {
