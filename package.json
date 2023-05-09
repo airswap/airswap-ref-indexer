@@ -10,7 +10,7 @@
     "compile": "npx tsc",
     "test": "jest --verbose --coverage --no-cache",
     "benchERC20": "node benchmarking/benchERC20.js",
-    "benchMarketplace": "node benchmarking/benchMarketPlace.js",
+    "bench": "node benchmarking/bench.js",
     "date": "node benchmarking/generateDateInRange.js"
   },
   "type": "module",

@@ -168,7 +168,7 @@ export class InMemoryDatabase implements Database {
     return hashed.digest("hex");
   }
 
-  ////////////////////////////// Market Place 
+  ////////////////////////////// Non ERC20
   addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {
     this.orderDatabase[indexedOrder.hash!] = indexedOrder;
     return Promise.resolve()
