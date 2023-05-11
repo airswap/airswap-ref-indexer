@@ -43,6 +43,7 @@ if (!database) {
 const intervalId = setInterval(() => {
   const currentTimestampInSeconds = new Date().getTime() / 1000;
   database.deleteExpiredOrderERC20(currentTimestampInSeconds);
+  database.deleteExpiredOrder(currentTimestampInSeconds);
 }, 1000 * 60);
 
 const swapClients = getWeb3SwapClient(database, network);
