@@ -1,11 +1,11 @@
 import { Peers } from './../../peer/Peers';
 import { Web3RegistryClient } from './../Web3RegistryClient';
 import { ethers } from "ethers";
-import { Registry } from '@airswap/libraries';
+import { RegistryV4 } from '@airswap/libraries';
 
 
 jest.mock('@airswap/libraries', () => ({
-    Registry: {
+    RegistryV4: {
         getContract: () => jest.fn()
     }
 }));
@@ -33,9 +33,9 @@ describe("Web3RegistryClient", () => {
         };
 
         //@ts-ignore
-        Registry.getContract = jest.fn(() => ({ on: jest.fn() }))
+        RegistryV4.getContract = jest.fn(() => ({ on: jest.fn() }))
         //@ts-ignore
-        Registry.getServerURLs = () => ["peer1", '']
+        RegistryV4.getServerURLs = () => ["peer1", '']
 
         const web3Client = new Web3RegistryClient(apiKey, network, fakePeers as Peers);
         const peers = await web3Client.getPeersFromRegistry();
@@ -49,9 +49,9 @@ describe("Web3RegistryClient", () => {
             getWebSocketProvider: jest.fn()
         };
         //@ts-ignore
-        Registry.getContract = jest.fn(() => ({ on: jest.fn() }))
+        RegistryV4.getContract = jest.fn(() => ({ on: jest.fn() }))
         //@ts-ignore
-        Registry.getServerURLs = () => undefined
+        RegistryV4.getServerURLs = () => undefined
 
         const web3Client = new Web3RegistryClient(apiKey, network, fakePeers as Peers);
         const peers = await web3Client.getPeersFromRegistry();
@@ -73,9 +73,9 @@ describe("Web3RegistryClient", () => {
             getWebSocketProvider: jest.fn()
         };
         //@ts-ignore
-        Registry.getContract = jest.fn(() => ({ on: mockedOn }))
+        RegistryV4.getContract = jest.fn(() => ({ on: mockedOn }))
         //@ts-ignore
-        Registry.getServerURLs = () => []
+        RegistryV4.getServerURLs = () => []
 
         new Web3RegistryClient(apiKey, network, fakePeers as Peers);
 
@@ -99,9 +99,9 @@ describe("Web3RegistryClient", () => {
         }
 
         //@ts-ignore
-        Registry.getContract = jest.fn(() => ({ on: mockedOn }))
+        RegistryV4.getContract = jest.fn(() => ({ on: mockedOn }))
         //@ts-ignore
-        Registry.getServerURLs = mockGetUrl
+        RegistryV4.getServerURLs = mockGetUrl
 
         await new Web3RegistryClient(apiKey, network, fakePeers as Peers)
             .onSetURLEvent("from", "to", {

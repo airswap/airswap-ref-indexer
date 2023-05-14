@@ -1,6 +1,6 @@
 import { Contract, ethers } from 'ethers';
 import { Peers } from './../peer/Peers.js';
-import { Registry } from '@airswap/libraries';
+import { RegistryV4 } from '@airswap/libraries';
 import { Protocols } from '@airswap/constants';
 
 export class Web3RegistryClient {
@@ -13,13 +13,14 @@ export class Web3RegistryClient {
         this.chainId = ethers.providers.getNetwork(network)?.chainId;
         this.provider = ethers.providers.InfuraProvider.getWebSocketProvider(this.chainId, apiKey);
         this.peers = peers;
-        this.contract = Registry.getContract(this.provider, this.chainId);
+        this.contract = RegistryV4.getContract(this.provider, this.chainId);
         this.contract.on("SetServerURL", this.onSetURLEvent);
     }
 
     async getPeersFromRegistry(): Promise<string[]> {
-        const urls = (await Registry.getServerURLs(this.provider, this.chainId, Protocols.Indexing))
-        return Promise.resolve(urls?.filter((url: string) => url && url.trim() != "") || []);
+        const erc20Urls = (await RegistryV4.getServerURLs(this.provider, this.chainId, Protocols.StorageERC20))
+        console.log(erc20Urls)
+        return Promise.resolve(erc20Urls?.filter((url: string) => url && url.trim() != "") || []);
     }
 
     onSetURLEvent = async (from: string, to: string, value: Record<any, any>): Promise<void> => {

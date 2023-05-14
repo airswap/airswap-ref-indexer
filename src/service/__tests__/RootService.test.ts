@@ -44,7 +44,7 @@ describe("Root service", () => {
             databaseOrders: 2,
             peers: [],
             network: 5,
-            registry: '0x6787cD07B0E6934BA9c3D1eBf3866eF091697128',
+            registry: '0x05545815a5579d80Bd4c380da3487EAC2c4Ce299',
         };
 
         const result = await new RootService(fakePeers as Peers, fakeDb as Database, 5).get();
