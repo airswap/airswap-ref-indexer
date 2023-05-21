@@ -1,7 +1,6 @@
-import { FullOrder, OrderResponse, RequestFilterERC20, IndexedOrder } from '@airswap/types';
+import { FullOrder, OrderResponse, FullOrderERC20, IndexedOrder } from '@airswap/types';
 import { Filters } from './filter/Filters.js';
-import { FullOrderERC20, RequestFilter } from '@airswap/types';
-import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
+import { DbOrderERC20, DbOrder, DbOrderFilter } from '../model/DbOrderTypes.js';
 
 export interface Database {
     addOrderERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): Promise<void>;
@@ -22,8 +21,8 @@ export interface Database {
     getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>>;
     getOrders(): Promise<OrderResponse<FullOrder>>;
 
-    getOrdersERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>>;
-    getOrdersBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>>;
+    getOrdersERC20By(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrderERC20>>;
+    getOrdersBy(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrder>>;
 
     orderERC20Exists(hash: string): Promise<boolean>;
     orderExists(hash: string): Promise<boolean>;

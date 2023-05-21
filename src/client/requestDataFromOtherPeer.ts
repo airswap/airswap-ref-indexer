@@ -12,8 +12,8 @@ export async function requestDataFromOtherPeer(peersFromRegistry: string[], data
     for (let peerUrl of peerUrls) {
         try {
             const server = await Server.at(peerUrl);
-            const erc20Orders = await server.getOrdersERC20();
-            const orders = await server.getOrders();
+            const erc20Orders = await server.getOrdersERC20({ offset: 0, limit: -1 });
+            const orders = await server.getOrders({ offset: 0, limit: -1 });
             if (erc20Orders && orders) {
                 await database.addAllOrderERC20(mapAllIndexedOrderResponseToDbOrderERC20(erc20Orders.orders));
                 await database.addAllOrder(mapAllIndexedOrderResponseToDbOrder(orders.orders));

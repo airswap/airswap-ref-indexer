@@ -1,9 +1,9 @@
-import { FullOrder, FullOrderERC20, IndexedOrder, OrderResponse, RequestFilterERC20, SortField, SortOrder, RequestFilter } from '@airswap/types';
+import { FullOrder, FullOrderERC20, IndexedOrder, OrderResponse, OrderFilter, SortField, SortOrder } from '@airswap/types';
 import crypto from "crypto";
 import { computePagination } from '../mapper/pagination/index.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
-import { DbOrderERC20, DbOrder, DbOrderParty } from '../model/DbOrderTypes.js';
+import { DbOrderERC20, DbOrder, DbOrderParty, DbOrderFilter } from '../model/DbOrderTypes.js';
 import { mapAnyToFullOrderERC20 } from '../mapper/mapAnyToFullOrderERC20.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 
@@ -24,36 +24,41 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  getOrdersERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>> {
+  getOrdersERC20By(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrderERC20>> {
     const totalResults = Object.values(this.erc20Database).filter((indexedOrder: IndexedOrder<DbOrderERC20>) => {
       const order = indexedOrder.order;
       let isFound = true;
-      if (requestFilter.signerTokens != undefined) { isFound = isFound && requestFilter.signerTokens.indexOf(order.signerToken) !== -1; }
-      if (requestFilter.senderTokens != undefined) { isFound = isFound && requestFilter.senderTokens.indexOf(order.senderToken) !== -1; }
-      if (requestFilter.minSenderAmount != undefined) { isFound = isFound && order.approximatedSenderAmount >= requestFilter.minSenderAmount; }
-      if (requestFilter.maxSenderAmount != undefined) { isFound = isFound && order.approximatedSenderAmount <= requestFilter.maxSenderAmount; }
-      if (requestFilter.minSignerAmount != undefined) { isFound = isFound && order.approximatedSignerAmount >= requestFilter.minSignerAmount; }
-      if (requestFilter.maxSignerAmount != undefined) { isFound = isFound && order.approximatedSignerAmount <= requestFilter.maxSignerAmount; }
-      if (requestFilter.maxAddedDate != undefined) {
-        isFound = isFound && +indexedOrder.addedOn >= requestFilter.maxAddedDate;
-      }
+      if (orderFilter.signerTokens != undefined) { isFound = isFound && orderFilter.signerTokens.indexOf(order.signerToken) !== -1; }
+      if (orderFilter.senderTokens != undefined) { isFound = isFound && orderFilter.senderTokens.indexOf(order.senderToken) !== -1; }
+      if (orderFilter.signerWallet != undefined) { isFound = isFound && orderFilter.signerWallet === order.signerWallet; }
+      if (orderFilter.senderWallet != undefined) { isFound = isFound && orderFilter.senderWallet === order.senderWallet; }
+      if (orderFilter.senderMinAmount != undefined) { isFound = isFound && order.approximatedSenderAmount >= orderFilter.senderMinAmount; }
+      if (orderFilter.senderMaxAmount != undefined) { isFound = isFound && order.approximatedSenderAmount <= orderFilter.senderMaxAmount; }
+      if (orderFilter.signerMinAmount != undefined) { isFound = isFound && order.approximatedSignerAmount >= orderFilter.signerMinAmount; }
+      if (orderFilter.signerMaxAmount != undefined) { isFound = isFound && order.approximatedSignerAmount <= orderFilter.signerMaxAmount; }
       return isFound;
     })
       .sort((a, b) => {
-        if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
-          if (requestFilter.sortOrder == SortOrder.ASC) {
+        if (orderFilter.sortField == SortField.SIGNER_AMOUNT) {
+          if (orderFilter.sortOrder == SortOrder.ASC) {
             return Number(a.order.approximatedSignerAmount - b.order.approximatedSignerAmount)
           }
           return Number(b.order.approximatedSignerAmount - a.order.approximatedSignerAmount)
         }
-        if (requestFilter.sortOrder == SortOrder.ASC) {
-          return Number(a.order.approximatedSenderAmount - b.order.approximatedSenderAmount)
+        else if (orderFilter.sortField == SortField.SENDER_AMOUNT) {
+          if (orderFilter.sortOrder == SortOrder.ASC) {
+            return Number(a.order.approximatedSenderAmount - b.order.approximatedSenderAmount)
+          }
+          return Number(b.order.approximatedSenderAmount - a.order.approximatedSenderAmount)
         }
-        return Number(b.order.approximatedSenderAmount - a.order.approximatedSenderAmount)
+        if (orderFilter.sortOrder == SortOrder.ASC) {
+          return Number(a.order.expiry - b.order.expiry)
+        }
+        return Number(b.order.expiry - a.order.expiry)
       });
     const totalResultsCount = totalResults.length;
     const orders: Record<string, IndexedOrder<FullOrderERC20>> = totalResults
-      .slice((requestFilter.page - 1) * elementPerPage, requestFilter.page * elementPerPage)
+      .slice(orderFilter.offset, orderFilter.offset + orderFilter.limit)
       .reduce((total, indexedOrder) => {
         const orderId = indexedOrder['hash'];
         if (orderId) {
@@ -65,7 +70,7 @@ export class InMemoryDatabase implements Database {
 
     return Promise.resolve({
       orders,
-      pagination: computePagination(elementPerPage, totalResultsCount, requestFilter.page),
+      pagination: computePagination(elementPerPage, totalResultsCount, orderFilter.limit),
       ordersForQuery: totalResultsCount
     });
   }
@@ -231,35 +236,41 @@ export class InMemoryDatabase implements Database {
     });
   }
 
-  getOrdersBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
+  getOrdersBy(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrder>> {
     const totalResults = Object.values(this.orderDatabase).filter((indexedOrder: IndexedOrder<DbOrder>) => {
       const order = indexedOrder.order;
       let isFound = true;
-      if (requestFilter.signerAddress != undefined) { isFound = isFound && requestFilter.signerAddress.indexOf(order.signer.wallet) !== -1; }
-      if (requestFilter.senderAddress != undefined) { isFound = isFound && requestFilter.senderAddress.indexOf(order.sender.wallet) !== -1; }
+      if (orderFilter.signerWallet != undefined) { isFound = isFound && orderFilter.signerWallet == orderFilter.signerWallet; }
+      if (orderFilter.senderWallet != undefined) { isFound = isFound && orderFilter.senderWallet == orderFilter.senderWallet; }
+      if (orderFilter.senderMinAmount != undefined) { isFound = isFound && order.sender.approximatedAmount >= orderFilter.senderMinAmount; }
+      if (orderFilter.senderMaxAmount != undefined) { isFound = isFound && order.sender.approximatedAmount <= orderFilter.senderMaxAmount; }
+      if (orderFilter.signerMinAmount != undefined) { isFound = isFound && order.signer.approximatedAmount >= orderFilter.signerMinAmount; }
+      if (orderFilter.signerMaxAmount != undefined) { isFound = isFound && order.signer.approximatedAmount <= orderFilter.signerMaxAmount; }
+      if (orderFilter.signerTokens != undefined) { isFound = isFound && orderFilter.signerTokens.indexOf(order.signer.token) !== -1; }
+      if (orderFilter.senderTokens != undefined) { isFound = isFound && orderFilter.senderTokens.indexOf(order.sender.token) !== -1; }
       return isFound;
     })
       .sort((a, b) => {
-        if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
-          if (requestFilter.sortOrder == SortOrder.ASC) {
+        if (orderFilter.sortField == SortField.SIGNER_AMOUNT) {
+          if (orderFilter.sortOrder == SortOrder.ASC) {
             return Number(a.order.signer.approximatedAmount - b.order.signer.approximatedAmount)
           }
           return Number(b.order.signer.approximatedAmount - a.order.signer.approximatedAmount)
         }
-        else if (requestFilter.sortField == SortField.SENDER_AMOUNT) {
-          if (requestFilter.sortOrder == SortOrder.ASC) {
+        else if (orderFilter.sortField == SortField.SENDER_AMOUNT) {
+          if (orderFilter.sortOrder == SortOrder.ASC) {
             return Number(a.order.sender.approximatedAmount - b.order.sender.approximatedAmount)
           }
           return Number(b.order.sender.approximatedAmount - a.order.sender.approximatedAmount)
         }
-        if (requestFilter.sortOrder == SortOrder.ASC) {
+        if (orderFilter.sortOrder == SortOrder.ASC) {
           return Number(a.order.expiry - b.order.expiry)
         }
         return Number(b.order.expiry - a.order.expiry)
       });
     const totalResultsCount = totalResults.length;
     const orders: Record<string, IndexedOrder<FullOrder>> = totalResults
-      .slice((requestFilter.page - 1) * elementPerPage, requestFilter.page * elementPerPage)
+      .slice(orderFilter.offset, orderFilter.offset + orderFilter.limit)
       .reduce((total, indexedOrder) => {
         const orderId = indexedOrder['hash'];
         if (orderId) {
@@ -271,7 +282,7 @@ export class InMemoryDatabase implements Database {
 
     return Promise.resolve({
       orders,
-      pagination: computePagination(elementPerPage, totalResultsCount, requestFilter.page),
+      pagination: computePagination(elementPerPage, totalResultsCount, orderFilter.limit),
       ordersForQuery: totalResultsCount
     });
   }

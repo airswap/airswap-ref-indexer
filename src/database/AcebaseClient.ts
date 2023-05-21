@@ -1,4 +1,4 @@
-import { FullOrder, IndexedOrder, OrderResponse, RequestFilterERC20, RequestFilter, SortField, SortOrder } from '@airswap/types';
+import { FullOrder, IndexedOrder, OrderResponse, OrderFilter, SortField, SortOrder } from '@airswap/types';
 import { AceBase, AceBaseLocalSettings, DataReference } from 'acebase';
 import crypto from "crypto";
 import fs from "fs";
@@ -7,7 +7,7 @@ import { mapAnyToFullOrderERC20 } from '../mapper/mapAnyToFullOrderERC20.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
 import { FullOrderERC20 } from '@airswap/types';
-import { DbOrderERC20, DbOrder, DbOrderParty } from '../model/DbOrderTypes.js';
+import { DbOrderERC20, DbOrder, DbOrderParty, DbOrderFilter } from '../model/DbOrderTypes.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 
 const ENTRY_REF_ERC20 = "erc20Orders";
@@ -111,33 +111,33 @@ export class AceBaseClient implements Database {
             ordersForQuery: totalResults
         });
     }
-    async getOrdersBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
+    async getOrdersBy(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrder>> {
         const query = this.refOrders.query();
 
-        if (requestFilter.senderAddress != undefined) {
-            query.filter('order/sender/wallet', '==', requestFilter.senderAddress);
+        if (orderFilter.senderWallet != undefined) {
+            query.filter('order/sender/wallet', '==', orderFilter.senderWallet);
         }
-        if (requestFilter.signerAddress != undefined) {
-            query.filter('order/signer/wallet', '==', requestFilter.signerAddress);
+        if (orderFilter.signerWallet != undefined) {
+            query.filter('order/signer/wallet', '==', orderFilter.signerWallet);
         }
 
-        const isAscSort = requestFilter.sortOrder == SortOrder.ASC;
-        if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
+        const isAscSort = orderFilter.sortOrder == SortOrder.ASC;
+        if (orderFilter.sortField == SortField.SIGNER_AMOUNT) {
             query.sort('order/signer/approximatedAmount', isAscSort)
-        } else if (requestFilter.sortField == SortField.SENDER_AMOUNT) {
+        } else if (orderFilter.sortField == SortField.SENDER_AMOUNT) {
             query.sort('order/sender/approximatedAmount', isAscSort)
-        } else if (requestFilter.sortField == SortField.EXPIRY) {
+        } else if (orderFilter.sortField == SortField.EXPIRY) {
             query.sort('order/expiry', isAscSort)
         }
 
         const totalResults = await query.take(1000000).count()
-        const entriesSkipped = (requestFilter.page - 1) * elementPerPage;
-        const data = await query.skip(entriesSkipped).take(elementPerPage).get();
+        const entriesSkipped = orderFilter.offset;
+        const data = await query.skip(entriesSkipped).take(entriesSkipped + orderFilter.limit).get();
         const mapped = data.reduce((total, indexedOrder) => {
             const mapped = this.datarefToOrder(indexedOrder.val());
             return { ...total, ...mapped };
         }, {} as Record<string, IndexedOrder<FullOrder>>);
-        const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
+        const pagination = computePagination(elementPerPage, totalResults, orderFilter.limit);
         return Promise.resolve({
             orders: mapped,
             pagination: pagination,
@@ -153,46 +153,43 @@ export class AceBaseClient implements Database {
         return Promise.resolve(this.filters);
     }
 
-    async getOrdersERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>> {
+    async getOrdersERC20By(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrderERC20>> {
         const query = this.refERC20.query();
 
-        if (requestFilter.signerTokens != undefined) {
-            query.filter('order/signerToken', 'in', requestFilter.signerTokens);
+        if (orderFilter.signerTokens != undefined) {
+            query.filter('order/signerToken', 'in', orderFilter.signerTokens);
         }
-        if (requestFilter.senderTokens != undefined) {
-            query.filter('order/senderToken', 'in', requestFilter.senderTokens);
+        if (orderFilter.senderTokens != undefined) {
+            query.filter('order/senderToken', 'in', orderFilter.senderTokens);
         }
-        if (requestFilter.minSenderAmount != undefined) {
-            query.filter('order/approximatedSenderAmount', '>=', requestFilter.minSenderAmount);
+        if (orderFilter.senderMinAmount != undefined) {
+            query.filter('order/approximatedSenderAmount', '>=', orderFilter.senderMinAmount);
         }
-        if (requestFilter.maxSenderAmount != undefined) {
-            query.filter('order/approximatedSenderAmount', '<=', requestFilter.maxSenderAmount);
+        if (orderFilter.senderMaxAmount != undefined) {
+            query.filter('order/approximatedSenderAmount', '<=', orderFilter.senderMaxAmount);
         }
-        if (requestFilter.minSignerAmount != undefined) {
-            query.filter('order/approximatedSignerAmount', '>=', requestFilter.minSignerAmount);
+        if (orderFilter.signerMinAmount != undefined) {
+            query.filter('order/approximatedSignerAmount', '>=', orderFilter.signerMinAmount);
         }
-        if (requestFilter.maxSignerAmount != undefined) {
-            query.filter('order/approximatedSignerAmount', '<=', requestFilter.maxSignerAmount);
-        }
-        if (requestFilter.maxAddedDate != undefined) {
-            query.filter('addedOn', '>=', requestFilter.maxAddedDate);
+        if (orderFilter.signerMaxAmount != undefined) {
+            query.filter('order/approximatedSignerAmount', '<=', orderFilter.signerMaxAmount);
         }
 
-        const isAscSort = requestFilter.sortOrder == SortOrder.ASC;
-        if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
+        const isAscSort = orderFilter.sortOrder == SortOrder.ASC;
+        if (orderFilter.sortField == SortField.SIGNER_AMOUNT) {
             query.sort('order/approximatedSignerAmount', isAscSort)
-        } else if (requestFilter.sortField == SortField.SENDER_AMOUNT) {
+        } else if (orderFilter.sortField == SortField.SENDER_AMOUNT) {
             query.sort('order/approximatedSenderAmount', isAscSort)
         }
 
         const totalResults = await query.take(1000000).count()
-        const entriesSkipped = (requestFilter.page - 1) * elementPerPage;
-        const data = await query.skip(entriesSkipped).take(elementPerPage).get();
+        const entriesSkipped = orderFilter.offset;
+        const data = await query.skip(entriesSkipped).take(entriesSkipped + orderFilter.limit).get();
         const mapped = data.reduce((total, indexedOrder) => {
             const mapped = this.datarefToERC20(indexedOrder.val());
             return { ...total, ...mapped };
         }, {} as Record<string, IndexedOrder<FullOrderERC20>>);
-        const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
+        const pagination = computePagination(elementPerPage, totalResults, orderFilter.limit);
         return Promise.resolve({
             orders: mapped,
             pagination: pagination,

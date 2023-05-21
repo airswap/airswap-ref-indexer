@@ -4,14 +4,13 @@ import { isValidFullOrder, isValidFullOrderERC20 } from '@airswap/utils';
 import { Filters } from '../database/filter/Filters';
 import { Database } from '../database/Database.js';
 import { mapAnyToDbOrderERC20 } from '../mapper/mapAnyToDbOrderERC20.js';
-import { mapAnyToRequestFilterERC20 } from '../mapper/mapAnyToRequestFilterERC20.js';
+import { mapAnyToOrderFilter } from '../mapper/mapAnyToOrderFilter.js';
 import { isDateInRange, isNumeric } from '../validator/index.js';
 import { AlreadyExistsError } from '../model/error/AlreadyExists.js';
 import { ClientError } from '../model/error/ClientError.js';
 import { Web3SwapERC20Client } from '../client/Web3SwapERC20Client.js';
 import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
-import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
 import { Web3SwapClient } from '../client/Web3SwapClient';
 
 const validationDurationInWeek = 1;
@@ -82,7 +81,7 @@ export class OrderService {
             orders = await this.database.getOrdersERC20();
         }
         else {
-            orders = await this.database.getOrdersERC20By(mapAnyToRequestFilterERC20(query));
+            orders = await this.database.getOrdersERC20By(mapAnyToOrderFilter(query));
         }
 
         if (query.filters) {
@@ -133,7 +132,7 @@ export class OrderService {
             orders = await this.database.getOrders();
         }
         else {
-            orders = await this.database.getOrdersBy(mapAnyToRequestFilter(query));
+            orders = await this.database.getOrdersBy(mapAnyToOrderFilter(query));
         }
         return Promise.resolve(orders)
     }
