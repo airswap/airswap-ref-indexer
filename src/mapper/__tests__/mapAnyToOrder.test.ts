@@ -1,9 +1,9 @@
-import { mapAnyToDbOrder } from "../mapAnyToDbOrder";
+import { mapAnyToDbOrderERC20 } from "../mapAnyToDbOrderERC20";
 import { AddressZero } from '@ethersproject/constants';
 
 describe("mapAnyToDbOrder", () => {
     test("should map all string values", () => {
-        expect(mapAnyToDbOrder({
+        expect(mapAnyToDbOrderERC20({
             expiry: "1653900784706",
             nonce: "nonce",
             r: "r",

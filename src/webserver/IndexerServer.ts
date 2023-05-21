@@ -52,16 +52,27 @@ export class IndexerServer {
                 response.status(200);
                 switch (method) {
                     case METHODS.getOrdersERC20:
-                        result = await this.orderService.getOrdersERC20(parameters);
+                        let erc20Orders = await this.orderService.getOrdersERC20(parameters);
+                        result = new JsonRpcResponse(id, erc20Orders);
+                        break;
+                    case METHODS.getOrders:
+                        let orders = await this.orderService.getOrders(parameters);
+                        result = new JsonRpcResponse(id, orders);
                         break;
                     case METHODS.addOrderERC20:
                         await this.orderService.addOrderERC20(parameters);
                         this.peers.broadcast(request.method, request.url, request.body);
-                        result = new SuccessResponse("Added");
+                        result = new JsonRpcResponse(id, new SuccessResponse("Added"));
+                        response.status(201);
+                        break;
+                    case METHODS.addOrder:
+                        await this.orderService.addOrder(parameters);
+                        this.peers.broadcast(request.method, request.url, request.body);
+                        result = new JsonRpcResponse(id, new SuccessResponse("Added"));
                         response.status(201);
                         break;
                 }
-                response.json(new JsonRpcResponse(id, result));
+                response.json(result);
             } catch (error) {
                 console.log("error", error)
                 const err = error as IndexedOrderError;

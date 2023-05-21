@@ -1,6 +1,6 @@
 import { Database } from '../database/Database.js';
 import { Peers } from '../peer/Peers.js';
-import { HealthCheckResponse } from '../client/getHealthCheck.js';
+import { HealthCheckResponse } from '../model/response/HealthCheckResponse.js';
 import { Registry } from '@airswap/libraries';
 
 export class RootService {
@@ -16,12 +16,13 @@ export class RootService {
     }
 
     public async get(): Promise<HealthCheckResponse> {
-        const orders = await this.database.getOrdersERC20();
+        const ordersERC20 = await this.database.getOrdersERC20();
+        const orders = await this.database.getOrders();
         return {
             peers: this.peers.getPeers(),
             network: this.network,
             registry: Registry.addresses[this.network],
-            databaseOrders: orders.ordersForQuery
+            databaseOrders: ordersERC20.ordersForQuery +  orders.ordersForQuery 
         }
     }
 

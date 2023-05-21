@@ -1,26 +1,35 @@
-import { OrderResponse, RequestFilter } from '@airswap/types';
-import { IndexedOrder as IndexedOrderERC20 } from '../model/IndexedOrder.js';
+import { FullOrder, OrderResponse, RequestFilterERC20, IndexedOrder } from '@airswap/types';
 import { Filters } from './filter/Filters.js';
-import { FullOrderERC20 } from '@airswap/types';
+import { FullOrderERC20, RequestFilter } from '@airswap/types';
+import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
 
 export interface Database {
-    addOrder(IndexedOrderERC20: IndexedOrderERC20): Promise<void>;
+    addOrderERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): Promise<void>;
+    addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void>;
 
-    addAll(ordersERC20: Record<string, IndexedOrderERC20>): Promise<void>;
+    addAllOrderERC20(indexedOrdersERC20: Record<string, IndexedOrder<DbOrderERC20>>): Promise<void>;
+    addAllOrder(indexedOrders:  Record<string, IndexedOrder<DbOrder>>): Promise<void>;
 
     deleteOrderERC20(nonce: string, signerWallet: string): Promise<void>;
+    deleteOrder(nonce: string, signerWallet: string): Promise<void>;
 
     deleteExpiredOrderERC20(timestampInSeconds: number): Promise<void>;
+    deleteExpiredOrder(timestampInSeconds: number): Promise<void>;
 
     getOrderERC20(hash: string): Promise<OrderResponse<FullOrderERC20>>;
+    getOrder(hash: string): Promise<OrderResponse<FullOrder>>;
 
     getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>>;
+    getOrders(): Promise<OrderResponse<FullOrder>>;
 
-    getOrderERC20By(requestFilter: RequestFilter): Promise<OrderResponse<FullOrderERC20>>;
+    getOrdersERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>>;
+    getOrdersBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>>;
 
     orderERC20Exists(hash: string): Promise<boolean>;
+    orderExists(hash: string): Promise<boolean>;
 
-    generateHash(indexedOrderERC20: IndexedOrderERC20): string;
+    generateHashERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): string;
+    generateHash(indexedOrder: IndexedOrder<DbOrder>): string;
 
     getFiltersERC20(): Promise<Filters>;
 
