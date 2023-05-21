@@ -23,6 +23,9 @@ describe("Validator", () => {
         });
 
         test("should return true", () => {
+            expect(isNumeric("0")).toBe(true);
+            //@ts-ignore
+            expect(isNumeric(0)).toBe(true);
             expect(isNumeric("1")).toBe(true);
             //@ts-ignore
             expect(isNumeric(2)).toBe(true);
@@ -51,5 +54,4 @@ describe("Validator", () => {
             expect(isDateInRange("604", 1)).toBe(true);
         });
     });
-
 });
