@@ -1,7 +1,7 @@
 import { Express, Request, Response } from "express";
 import { SuccessResponse } from '../model/response/SuccessResponse.js';
 import { ClientError } from './../model/error/ClientError.js';
-import { IndexedOrderError, JsonRpcResponse } from  '@airswap/libraries';
+import { IndexedOrderError, JsonRpcResponse } from '@airswap/libraries';
 import { NotFound } from '../model/error/NotFound.js';
 import { RootService } from '../service/RootService.js';
 import { Peers } from './../peer/Peers.js';
@@ -70,6 +70,11 @@ export class IndexerServer {
                         this.peers.broadcast(request.method, request.url, request.body);
                         result = new JsonRpcResponse(id, new SuccessResponse("Added"));
                         response.status(201);
+                        break;
+                    case METHODS.getTokens:
+                        const tokens = await this.orderService.getTokens();
+                        //@ts-ignore
+                        result = new JsonRpcResponse(id, tokens);
                         break;
                 }
                 response.json(result);

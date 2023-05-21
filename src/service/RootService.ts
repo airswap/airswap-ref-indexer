@@ -22,7 +22,8 @@ export class RootService {
             peers: this.peers.getPeers(),
             network: this.network,
             registry: Registry.addresses[this.network],
-            databaseOrders: ordersERC20.ordersForQuery +  orders.ordersForQuery 
+            databaseOrdersERC20: ordersERC20.ordersForQuery,
+            databaseOrders: orders.ordersForQuery 
         }
     }
 

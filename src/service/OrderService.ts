@@ -20,6 +20,7 @@ export const METHODS = {
     addOrderERC20: "addOrderERC20",
     getOrders: "getOrders",
     addOrder: "addOrder",
+    getTokens: "getTokens",
 } as Record<string, string>;
 
 export class OrderService {
@@ -77,16 +78,11 @@ export class OrderService {
         if (query.hash) {
             orders = await this.database.getOrderERC20(query.hash);
         }
-        else if (Object.keys(query).filter(key => key !== "filters").length === 0) {
+        else if (Object.keys(query).length === 0) {
             orders = await this.database.getOrdersERC20();
         }
         else {
             orders = await this.database.getOrdersERC20By(mapAnyToOrderFilter(query));
-        }
-
-        if (query.filters) {
-            const filters = await this.database.getFiltersERC20();
-            orders.filters = toFilterResponse(filters)
         }
         return Promise.resolve(orders);
     }
@@ -128,13 +124,18 @@ export class OrderService {
         if (query.hash) {
             orders = await this.database.getOrder(query.hash);
         }
-        else if (Object.keys(query).filter(key => key !== "filters").length === 0) {
+        else if (Object.keys(query).length === 0) {
             orders = await this.database.getOrders();
         }
         else {
             orders = await this.database.getOrdersBy(mapAnyToOrderFilter(query));
         }
         return Promise.resolve(orders)
+    }
+
+    public async getTokens(): Promise<FiltersResponse> {
+        const filters = await this.database.getFiltersERC20();
+        return toFilterResponse(filters)
     }
 }
 

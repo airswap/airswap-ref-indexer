@@ -49,7 +49,7 @@ describe("Order controller", () => {
 
     describe("GET *", () => {
         test("should give basic info", done => {
-            const result: HealthCheckResponse = { registry: "registry", peers: [], databaseOrders: 100, network: 5 };
+            const result: HealthCheckResponse = { registry: "registry", peers: [], databaseOrders: 100, databaseOrdersERC20: 100, network: 5 };
             const expected = {
                 "jsonrpc": "2.0",
                 "id": "-1",

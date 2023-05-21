@@ -3,4 +3,5 @@ export type HealthCheckResponse = {
   network: number,
   peers: string[],
   databaseOrders: number
+  databaseOrdersERC20: number
 }
