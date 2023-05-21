@@ -54,5 +54,4 @@ describe("Validator", () => {
             expect(isDateInRange("604", 1)).toBe(true);
         });
     });
-
 });
