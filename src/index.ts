@@ -34,7 +34,7 @@ console.log("HOST is", host);
 // Injection
 const broadcastClient = new BroadcastClient();
 
-const database = await getDatabase(process.env.DELETE_DB_ON_START == "1", process.env.DATABASE_TYPE as string);
+const database = await getDatabase(process.env.DELETE_DB_ON_START == "1", process.env.DATABASE_TYPE as string, process.env.MAX_RESULT_FOR_QUERY as unknown as number);
 if (!database) {
   console.error("Unknown database, check env file !")
   process.exit(5);
