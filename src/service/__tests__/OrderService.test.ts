@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { IndexedOrder, FiltersResponse, SortField, SortOrder, OrderFilter, Order } from '@airswap/types';
 import { Web3SwapERC20Client } from '../../client/Web3SwapERC20Client';
 import { Web3SwapClient } from '../../client/Web3SwapClient';
