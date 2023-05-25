@@ -22,8 +22,8 @@ export class RootService {
             peers: this.peers.getPeers(),
             network: this.network,
             registry: Registry.addresses[this.network],
-            databaseOrdersERC20: Object.keys(ordersERC20).length,
-            databaseOrders: Object.keys(orders).length
+            databaseOrdersERC20: Object.keys(ordersERC20.orders).length,
+            databaseOrders: Object.keys(orders.orders).length
         }
     }
 

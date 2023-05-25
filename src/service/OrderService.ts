@@ -12,6 +12,7 @@ import { Web3SwapERC20Client } from '../client/Web3SwapERC20Client.js';
 import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
 import { Web3SwapClient } from '../client/Web3SwapClient';
+import { mapToFilterResponse } from '../mapper/mapFilterToFilterResponse.js';
 
 const validationDurationInWeek = 1;
 
@@ -135,27 +136,8 @@ export class OrderService {
 
     public async getTokens(): Promise<FiltersResponse> {
         const filters = await this.database.getFiltersERC20();
-        return toFilterResponse(filters)
+        return mapToFilterResponse(filters)
     }
-}
-
-function toFilterResponse(filters: Filters): FiltersResponse {
-    const senderToken: Record<string, AmountLimitFilterResponse> = {};
-    const signerToken: Record<string, AmountLimitFilterResponse> = {};
-    Object.keys(filters.senderToken).forEach(key => {
-        senderToken[key] = {
-            min: filters.senderToken[key].min.toString(),
-            max: filters.senderToken[key].max.toString()
-        } as AmountLimitFilterResponse;
-    });
-    Object.keys(filters.signerToken).forEach(key => {
-        signerToken[key] = {
-            min: filters.signerToken[key].min.toString(),
-            max: filters.signerToken[key].max.toString()
-        } as AmountLimitFilterResponse;
-    });
-
-    return { senderToken, signerToken };
 }
 
 function areERC20NumberFieldsValid(order: FullOrderERC20) {
