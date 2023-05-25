@@ -1,23 +1,22 @@
 import { FullOrder, FullOrderERC20, IndexedOrder, OrderResponse, OrderFilter, SortField, SortOrder } from '@airswap/types';
 import crypto from "crypto";
-import { computePagination } from '../mapper/pagination/index.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
 import { DbOrderERC20, DbOrder, DbOrderParty, DbOrderFilter } from '../model/DbOrderTypes.js';
 import { mapAnyToFullOrderERC20 } from '../mapper/mapAnyToFullOrderERC20.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 
-const elementPerPage = 20;
-
 export class InMemoryDatabase implements Database {
   erc20Database: Record<string, IndexedOrder<DbOrderERC20>>;
   orderDatabase: Record<string, IndexedOrder<DbOrder>>;
   filters: Filters;
+  maxResultByQuery: number;
 
-  constructor() {
+  constructor(maxResultByQuery: number) {
     this.erc20Database = {};
     this.orderDatabase = {};
     this.filters = new Filters();
+    this.maxResultByQuery = maxResultByQuery
   }
 
   connect(databaseName: string, deleteOnStart: boolean): Promise<void> {
@@ -70,8 +69,7 @@ export class InMemoryDatabase implements Database {
 
     return Promise.resolve({
       orders,
-      pagination: computePagination(elementPerPage, totalResultsCount, orderFilter.limit),
-      ordersForQuery: totalResultsCount
+      pagination: { offset: orderFilter.offset, limit: orderFilter.limit, resultsForQuery: totalResultsCount },
     });
   }
 
@@ -117,15 +115,14 @@ export class InMemoryDatabase implements Database {
       result[hash] = this.mapToERC20IndexedOrderResponse(this.erc20Database[hash]);
       return Promise.resolve({
         orders: result,
-        pagination: computePagination(elementPerPage, 1),
-        ordersForQuery: 1
+        pagination: { offset: 0, limit: 1, resultsForQuery: 1 },
       });
     }
     return Promise.resolve({
       orders: result,
-      pagination: computePagination(elementPerPage, 0),
-      ordersForQuery: 0
+      pagination: { offset: 0, limit: 1, resultsForQuery: 0 },
     });
+
   }
 
   async getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>> {
@@ -136,8 +133,7 @@ export class InMemoryDatabase implements Database {
     })
     return Promise.resolve({
       orders: results,
-      pagination: computePagination(size, size),
-      ordersForQuery: size
+      pagination: { offset: 0, limit: -1, resultsForQuery: size },
     });
   }
 
@@ -212,14 +208,12 @@ export class InMemoryDatabase implements Database {
       result[hash] = this.mapToIndexedOrderResponse(this.orderDatabase[hash]);
       return Promise.resolve({
         orders: result,
-        pagination: computePagination(elementPerPage, 1),
-        ordersForQuery: 1
+        pagination: { offset: 0, limit: 1, resultsForQuery: 1 },
       });
     }
     return Promise.resolve({
       orders: result,
-      pagination: computePagination(elementPerPage, 0),
-      ordersForQuery: 0
+      pagination: { offset: 0, limit: 1, resultsForQuery: 0 },
     });
   }
 
@@ -231,8 +225,7 @@ export class InMemoryDatabase implements Database {
     })
     return Promise.resolve({
       orders: results,
-      pagination: computePagination(size, size),
-      ordersForQuery: size
+      pagination: { offset: 0, limit: -1, resultsForQuery: size },
     });
   }
 
@@ -240,8 +233,8 @@ export class InMemoryDatabase implements Database {
     const totalResults = Object.values(this.orderDatabase).filter((indexedOrder: IndexedOrder<DbOrder>) => {
       const order = indexedOrder.order;
       let isFound = true;
-      if (orderFilter.signerWallet != undefined) { isFound = isFound && orderFilter.signerWallet == orderFilter.signerWallet; }
-      if (orderFilter.senderWallet != undefined) { isFound = isFound && orderFilter.senderWallet == orderFilter.senderWallet; }
+      if (orderFilter.signerWallet != undefined) { isFound = isFound && order.signer.wallet == orderFilter.signerWallet; }
+      if (orderFilter.senderWallet != undefined) { isFound = isFound && order.sender.wallet == orderFilter.senderWallet; }
       if (orderFilter.senderMinAmount != undefined) { isFound = isFound && order.sender.approximatedAmount >= orderFilter.senderMinAmount; }
       if (orderFilter.senderMaxAmount != undefined) { isFound = isFound && order.sender.approximatedAmount <= orderFilter.senderMaxAmount; }
       if (orderFilter.signerMinAmount != undefined) { isFound = isFound && order.signer.approximatedAmount >= orderFilter.signerMinAmount; }
@@ -282,8 +275,7 @@ export class InMemoryDatabase implements Database {
 
     return Promise.resolve({
       orders,
-      pagination: computePagination(elementPerPage, totalResultsCount, orderFilter.limit),
-      ordersForQuery: totalResultsCount
+      pagination: { offset: orderFilter.offset, limit: orderFilter.limit, resultsForQuery: totalResultsCount },
     });
   }
 

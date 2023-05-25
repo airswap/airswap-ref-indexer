@@ -2,7 +2,6 @@ import { FullOrder, IndexedOrder, OrderResponse, OrderFilter, SortField, SortOrd
 import { AceBase, AceBaseLocalSettings, DataReference } from 'acebase';
 import crypto from "crypto";
 import fs from "fs";
-import { computePagination } from '../mapper/pagination/index.js';
 import { mapAnyToFullOrderERC20 } from '../mapper/mapAnyToFullOrderERC20.js';
 import { Database } from './Database.js';
 import { Filters } from './filter/Filters.js';
@@ -85,16 +84,22 @@ export class AceBaseClient implements Database {
         if (!serializedOrder) {
             return Promise.resolve({
                 orders: {},
-                pagination: computePagination(elementPerPage, 0),
-                ordersForQuery: 0
+                pagination: {
+                    limit: 1,
+                    offset: 0,
+                    resultsForQuery: 0,
+                },
             });
         }
         const result: Record<string, IndexedOrder<FullOrder>> = {};
         result[hash] = this.datarefToOrder(serializedOrder)[hash];
         return Promise.resolve({
             orders: result,
-            pagination: computePagination(elementPerPage, 1),
-            ordersForQuery: 1
+            pagination: {
+                limit: 1,
+                offset: 0,
+                resultsForQuery: 1,
+            },
         });
     }
     async getOrders(): Promise<OrderResponse<FullOrder>> {
@@ -107,8 +112,11 @@ export class AceBaseClient implements Database {
         });
         return Promise.resolve({
             orders: mapped,
-            pagination: computePagination(totalResults, totalResults),
-            ordersForQuery: totalResults
+            pagination: {
+                limit: -1,
+                offset: 0,
+                resultsForQuery: totalResults,
+            },
         });
     }
     async getOrdersBy(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrder>> {
@@ -137,11 +145,13 @@ export class AceBaseClient implements Database {
             const mapped = this.datarefToOrder(indexedOrder.val());
             return { ...total, ...mapped };
         }, {} as Record<string, IndexedOrder<FullOrder>>);
-        const pagination = computePagination(elementPerPage, totalResults, orderFilter.limit);
         return Promise.resolve({
             orders: mapped,
-            pagination: pagination,
-            ordersForQuery: totalResults
+            pagination: {
+                limit: orderFilter.limit,
+                offset: orderFilter.offset,
+                resultsForQuery: totalResults,
+            },
         });
     }
     async orderExists(hash: string): Promise<boolean> {
@@ -189,11 +199,13 @@ export class AceBaseClient implements Database {
             const mapped = this.datarefToERC20(indexedOrder.val());
             return { ...total, ...mapped };
         }, {} as Record<string, IndexedOrder<FullOrderERC20>>);
-        const pagination = computePagination(elementPerPage, totalResults, orderFilter.limit);
         return Promise.resolve({
             orders: mapped,
-            pagination: pagination,
-            ordersForQuery: totalResults
+            pagination: {
+                limit: orderFilter.limit,
+                offset: orderFilter.offset,
+                resultsForQuery: totalResults,
+            },
         });
     }
 
@@ -239,16 +251,22 @@ export class AceBaseClient implements Database {
         if (!serializedOrder) {
             return Promise.resolve({
                 orders: {},
-                pagination: computePagination(elementPerPage, 0),
-                ordersForQuery: 0
+                pagination: {
+                    limit: 1,
+                    offset: 0,
+                    resultsForQuery: 0,
+                },
             });
         }
         const result: Record<string, IndexedOrder<FullOrderERC20>> = {};
         result[hash] = this.datarefToERC20(serializedOrder)[hash];
         return Promise.resolve({
             orders: result,
-            pagination: computePagination(elementPerPage, 1),
-            ordersForQuery: 1
+            pagination: {
+                limit: 1,
+                offset: 0,
+                resultsForQuery: 1,
+            },
         });
     }
 
@@ -262,8 +280,11 @@ export class AceBaseClient implements Database {
         });
         return Promise.resolve({
             orders: mapped,
-            pagination: computePagination(totalResults, totalResults),
-            ordersForQuery: totalResults
+            pagination: {
+                limit: -1,
+                offset: 0,
+                resultsForQuery: totalResults,
+            },
         });
     }
 

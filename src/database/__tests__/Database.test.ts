@@ -14,7 +14,7 @@ describe("Database implementations", () => {
     const expiryDate = new Date().getTime() + 10;
 
     beforeAll(async () => {
-        inMemoryDatabase = new InMemoryDatabase();
+        inMemoryDatabase = new InMemoryDatabase(100);
         acebaseClient = new AceBaseClient();
         await acebaseClient.connect("dbtest", true);
         await inMemoryDatabase.connect("dbtest", true);
@@ -267,60 +267,60 @@ describe("Database implementations", () => {
         expect(ordersFromToken).toEqual({
             orders: { "id1": expectedERC20Order1, "id3": expectedERC20Order3 },
             pagination: {
-                first: "1",
-                last: "1"
+                limit: 10,
+                offset: 0,
+                resultsForQuery: 2
             },
-            ordersForQuery: 2
         });
 
-        const anotherToken = await db.getOrdersERC20By({  offset: 0, limit: 10, senderTokens: ["another"] });
+        const anotherToken = await db.getOrdersERC20By({ offset: 0, limit: 10, senderTokens: ["another"] });
         expect(anotherToken).toEqual({
             orders: { "id2": expectedERC20Order2 },
             pagination: {
-                first: "1",
-                last: "1"
+                limit: 10,
+                offset: 0,
+                resultsForQuery: 1
             },
-            ordersForQuery: 1
         });
 
         const minSignerAmountFromToken = await db.getOrdersERC20By({ offset: 0, limit: 10, signerMinAmount: BigInt(15) });
         expect(minSignerAmountFromToken).toEqual({
             orders: { "id2": expectedERC20Order2 },
             pagination: {
-                first: "1",
-                last: "1"
+                limit: 10,
+                offset: 0,
+                resultsForQuery: 1
             },
-            ordersForQuery: 1
         });
 
         const maxSignerAmountFromToken = await db.getOrdersERC20By({ offset: 0, limit: 10, signerMaxAmount: BigInt(5) });
         expect(maxSignerAmountFromToken).toEqual({
             orders: { "id1": expectedERC20Order1, "id3": expectedERC20Order3 },
             pagination: {
-                first: "1",
-                last: "1"
+                limit: 10,
+                offset: 0,
+                resultsForQuery: 2
             },
-            ordersForQuery: 2
         });
 
-        const minSenderAmount = await db.getOrdersERC20By({  offset: 0, limit: 10, senderMinAmount: BigInt(20) });
+        const minSenderAmount = await db.getOrdersERC20By({ offset: 0, limit: 10, senderMinAmount: BigInt(20) });
         expect(minSenderAmount).toEqual({
             orders: { "id3": expectedERC20Order3 },
             pagination: {
-                first: "1",
-                last: "1"
+                limit: 10,
+                offset: 0,
+                resultsForQuery: 1
             },
-            ordersForQuery: 1
         });
 
-        const maxSenderAmount = await db.getOrdersERC20By({  offset: 0, limit: 10, senderMaxAmount: BigInt(15) });
+        const maxSenderAmount = await db.getOrdersERC20By({ offset: 0, limit: 10, senderMaxAmount: BigInt(15) });
         expect(maxSenderAmount).toEqual({
             orders: { "id1": expectedERC20Order1, "id2": expectedERC20Order2 },
             pagination: {
-                first: "1",
-                last: "1"
+                limit: 10,
+                offset: 0,
+                resultsForQuery: 2
             },
-            ordersForQuery: 2
         });
 
         const senderAmountAsc = await db.getOrdersERC20By({ offset: 0, limit: 10, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.ASC });
@@ -350,10 +350,10 @@ describe("Database implementations", () => {
         expect(specificOne).toEqual({
             orders: { "id1": expectedERC20Order1, },
             pagination: {
-                first: "1",
-                last: "1"
+                limit: 10,
+                offset: 0,
+                resultsForQuery: 1
             },
-            ordersForQuery: 1
         });
 
         return Promise.resolve();
@@ -409,20 +409,20 @@ describe("Database implementations", () => {
         expect(ordersFromSignerAddress).toEqual({
             orders: { "id1": expectedIndexedOrder1, "id3": expectedIndexedOrder3 },
             pagination: {
-                first: "1",
-                last: "1"
-            },
-            ordersForQuery: 2
+                limit: 10,
+                offset: 0,
+                resultsForQuery: 2,
+            }
         });
 
         const ordersFromOtherSenderAddress = await db.getOrdersBy({ offset: 0, limit: 10, senderWallet: "anotherWalletAddress" });
         expect(ordersFromOtherSenderAddress).toEqual({
             orders: { "id2": expectedIndexedOrder2 },
             pagination: {
-                first: "1",
-                last: "1"
-            },
-            ordersForQuery: 1
+                limit: 10,
+                offset: 0,
+                resultsForQuery: 1,
+            }
         });
 
         const senderAmountAsc = await db.getOrdersBy({ offset: 0, limit: 10, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.ASC });
@@ -453,10 +453,10 @@ describe("Database implementations", () => {
         expect(specificOne).toEqual({
             orders: { "id1": expectedIndexedOrder1, },
             pagination: {
-                first: "1",
-                last: "1"
-            },
-            ordersForQuery: 1
+                limit: 10,
+                offset: 0,
+                resultsForQuery: 1,
+            }
         });
 
         return Promise.resolve();
@@ -472,10 +472,10 @@ describe("Database implementations", () => {
         expect(orders).toEqual({
             orders: { hash: expectedIndexedOrder, },
             pagination: {
-                first: "1",
-                last: "1"
-            },
-            ordersForQuery: 1
+                limit: -1,
+                offset: 0,
+                resultsForQuery: 1,
+            }
         });
         return Promise.resolve();
     }
@@ -490,10 +490,10 @@ describe("Database implementations", () => {
         expect(orders).toEqual({
             orders: { hash: expectedIndexedOrder, },
             pagination: {
-                first: "1",
-                last: "1"
-            },
-            ordersForQuery: 1
+                limit: -1,
+                offset: 0,
+                resultsForQuery: 1,
+            }
         });
         return Promise.resolve();
     }
@@ -512,10 +512,10 @@ describe("Database implementations", () => {
         expect(orders).toEqual({
             orders: { hash: expectedIndexedOrder, "another_hash": expectedAnotherOrder },
             pagination: {
-                first: "1",
-                last: "1"
+                limit: -1,
+                offset: 0,
+                resultsForQuery: 2,
             },
-            ordersForQuery: 2
         });
         return Promise.resolve();
     }
@@ -534,10 +534,10 @@ describe("Database implementations", () => {
         expect(orders).toEqual({
             orders: { hash: expectedIndexedOrder, "another_hash": expectedAnotherOrder },
             pagination: {
-                first: "1",
-                last: "1"
+                offset: 0,
+                limit: -1,
+                resultsForQuery: 2
             },
-            ordersForQuery: 2
         });
         return Promise.resolve();
     }
@@ -571,10 +571,10 @@ describe("Database implementations", () => {
         expect(orders).toEqual({
             orders: {},
             pagination: {
-                first: "1",
-                last: "1"
+                offset: 0,
+                limit: -1,
+                resultsForQuery: 0
             },
-            ordersForQuery: 0
         });
         return Promise.resolve();
     }
@@ -589,10 +589,10 @@ describe("Database implementations", () => {
         expect(orders).toEqual({
             orders: {},
             pagination: {
-                first: "1",
-                last: "1"
+                limit: -1,
+                offset: 0,
+                resultsForQuery: 0,
             },
-            ordersForQuery: 0
         });
         return Promise.resolve();
     }
@@ -612,10 +612,10 @@ describe("Database implementations", () => {
         expect(orders).toEqual({
             orders: { "hash3": expected },
             pagination: {
-                first: "1",
-                last: "1"
+                limit: -1,
+                offset: 0,
+                resultsForQuery: 1,
             },
-            ordersForQuery: 1
         });
         return Promise.resolve();
     }
@@ -635,10 +635,10 @@ describe("Database implementations", () => {
         expect(orders).toEqual({
             orders: { "hash3": expected },
             pagination: {
-                first: "1",
-                last: "1"
+                limit: -1,
+                offset: 0,
+                resultsForQuery: 1,
             },
-            ordersForQuery: 1
         });
         return Promise.resolve();
     }
@@ -693,10 +693,10 @@ describe("Database implementations", () => {
         expect(orderExists).toEqual({
             orders: { hash: expectedIndexedOrder },
             pagination: {
-                first: "1",
-                last: "1"
+                limit: 1,
+                offset: 0,
+                resultsForQuery: 1,
             },
-            ordersForQuery: 1
         });
         return Promise.resolve();
     }
@@ -711,10 +711,10 @@ describe("Database implementations", () => {
         expect(orderExists).toEqual({
             orders: { hash: expectedIndexedOrder },
             pagination: {
-                first: "1",
-                last: "1"
+                limit: 1,
+                offset: 0,
+                resultsForQuery: 1,
             },
-            ordersForQuery: 1
         });
         return Promise.resolve();
     }
@@ -728,10 +728,10 @@ describe("Database implementations", () => {
         expect(orderExists).toEqual({
             orders: {},
             pagination: {
-                first: "1",
-                last: "1"
+                limit: 1,
+                offset: 0,
+                resultsForQuery: 0,
             },
-            ordersForQuery: 0
         });
         return Promise.resolve();
     }
@@ -745,10 +745,10 @@ describe("Database implementations", () => {
         expect(orderExists).toEqual({
             orders: {},
             pagination: {
-                first: "1",
-                last: "1"
+                limit: 1,
+                offset: 0,
+                resultsForQuery: 0,
             },
-            ordersForQuery: 0
         });
         return Promise.resolve();
     }
