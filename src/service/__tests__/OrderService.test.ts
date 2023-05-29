@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { IndexedOrder, FiltersResponse, SortField, SortOrder, OrderFilter, Order } from '@airswap/types';
+import { SortField, SortOrder, OrderFilter, Order } from '@airswap/types';
 import { Web3SwapERC20Client } from '../../client/Web3SwapERC20Client';
 import { Web3SwapClient } from '../../client/Web3SwapClient';
 import { Database } from '../../database/Database';
@@ -388,4 +388,12 @@ describe("Order service", () => {
         });
     });
 
+    describe("Get Tokens", () => {
+        it("erc20", async () => {
+            const expected = { senderToken: { dai: { max: "5", min: "5" } }, signerToken: { ETH: { max: "10", min: "10" } } };
+            const filters = await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient).getTokens()
+            expect(fakeDb.getFiltersERC20).toHaveBeenCalled()
+            expect(filters).toEqual(expected)
+        })
+    })
 });

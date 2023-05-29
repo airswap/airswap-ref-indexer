@@ -12,7 +12,6 @@ import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 
 const ENTRY_REF_ERC20 = "erc20Orders";
 const ENTRY_REF_ORDERS = "orders";
-const elementPerPage = 20;
 
 export class AceBaseClient implements Database {
 
@@ -37,6 +36,8 @@ export class AceBaseClient implements Database {
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/approximatedSenderAmount");
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/signerToken");
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/senderToken");
+                this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/senderWallet");
+                this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/signerWallet");
 
                 this.refOrders = this.db.ref(ENTRY_REF_ORDERS);
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, 'hash');
@@ -46,6 +47,8 @@ export class AceBaseClient implements Database {
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/wallet");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/approximatedAmount");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/approximatedAmount");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/token");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/token");
                 resolve();
             });
         });
@@ -129,6 +132,24 @@ export class AceBaseClient implements Database {
         if (orderFilter.signerWallet != undefined) {
             query.filter('order/signer/wallet', '==', orderFilter.signerWallet);
         }
+        if (orderFilter.signerTokens != undefined) {
+            query.filter('order/signer/token', 'in', orderFilter.signerTokens);
+        }
+        if (orderFilter.senderTokens != undefined) {
+            query.filter('order/sender/token', 'in', orderFilter.senderTokens);
+        }
+        if (orderFilter.senderMinAmount != undefined) {
+            query.filter('order/sender/approximatedAmount', '>=', orderFilter.senderMinAmount);
+        }
+        if (orderFilter.senderMaxAmount != undefined) {
+            query.filter('order/sender/approximatedAmount', '<=', orderFilter.senderMaxAmount);
+        }
+        if (orderFilter.signerMinAmount != undefined) {
+            query.filter('order/signer/approximatedAmount', '>=', orderFilter.signerMinAmount);
+        }
+        if (orderFilter.signerMaxAmount != undefined) {
+            query.filter('order/signer/approximatedAmount', '<=', orderFilter.signerMaxAmount);
+        }
 
         const isAscSort = orderFilter.sortOrder == SortOrder.ASC;
         if (orderFilter.sortField == SortField.SIGNER_AMOUNT) {
@@ -185,12 +206,20 @@ export class AceBaseClient implements Database {
         if (orderFilter.signerMaxAmount != undefined) {
             query.filter('order/approximatedSignerAmount', '<=', orderFilter.signerMaxAmount);
         }
+        if (orderFilter.senderWallet != undefined) {
+            query.filter('order/senderWallet', '==', orderFilter.senderWallet);
+        }
+        if (orderFilter.signerWallet != undefined) {
+            query.filter('order/signerWallet', '==', orderFilter.signerWallet);
+        }
 
         const isAscSort = orderFilter.sortOrder == SortOrder.ASC;
         if (orderFilter.sortField == SortField.SIGNER_AMOUNT) {
             query.sort('order/approximatedSignerAmount', isAscSort)
         } else if (orderFilter.sortField == SortField.SENDER_AMOUNT) {
             query.sort('order/approximatedSenderAmount', isAscSort)
+        } else if (orderFilter.sortField == SortField.EXPIRY) {
+            query.sort('order/expiry', isAscSort)
         }
 
         const totalResults = await query.take(1000000).count()
