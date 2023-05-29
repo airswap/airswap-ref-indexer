@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { FullOrder, FullOrderERC20, IndexedOrder, OrderResponse, OrderFilter, SortField, SortOrder } from '@airswap/types';
 import crypto from "crypto";
 import { Database } from './Database.js';
