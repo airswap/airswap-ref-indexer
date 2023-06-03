@@ -1,4 +1,4 @@
-export function isNumeric(value: string) {
+export function isNumeric(value: string | undefined) {
     return value !== undefined && value !== null && `${value}`.trim() !== "" && !isNaN(+value) && +value >= 0
 }
 

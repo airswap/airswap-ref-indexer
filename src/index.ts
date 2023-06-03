@@ -34,7 +34,7 @@ console.log("HOST is", host);
 // Injection
 const broadcastClient = new BroadcastClient();
 
-const database = await getDatabase(process.env.DELETE_DB_ON_START == "1", process.env.DATABASE_TYPE as string, process.env.MAX_RESULT_FOR_QUERY as unknown as number);
+const database = await getDatabase(process.env.DELETE_DB_ON_START == "1", process.env.DATABASE_TYPE as string);
 if (!database) {
   console.error("Unknown database, check env file !")
   process.exit(5);
@@ -57,7 +57,12 @@ if (swapClients?.swapClientOrder === null) {
   process.exit(4);
 }
 
-const orderService = new OrderService(database, swapClients!.swapClientOrderERC20, swapClients!.swapClientOrder);
+if (!isNumeric(process.env.MAX_RESULT_FOR_QUERY)) {
+  console.log("MAX_RESULT_FOR_QUERY not set");
+  process.exit(6);
+}
+
+const orderService = new OrderService(database, swapClients!.swapClientOrderERC20, swapClients!.swapClientOrder, +process.env.MAX_RESULT_FOR_QUERY!);
 const peers = new Peers(database, host, broadcastClient);
 
 const registryClient = getRegistry(process.env, peers);

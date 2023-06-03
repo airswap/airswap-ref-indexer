@@ -4,7 +4,6 @@ import crypto from "crypto";
 import fs from "fs";
 import { mapAnyToFullOrderERC20 } from '../mapper/mapAnyToFullOrderERC20.js';
 import { Database } from './Database.js';
-import { Filters } from './filter/Filters.js';
 import { FullOrderERC20 } from '@airswap/types';
 import { DbOrderERC20, DbOrder, DbOrderParty, DbOrderFilter } from '../model/DbOrderTypes.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
@@ -15,7 +14,7 @@ const ENTRY_REF_ORDERS = "orders";
 export class AceBaseClient implements Database {
 
     private db!: AceBase;
-    private filters!: Filters;
+    private tokens: string[];
     private refERC20!: DataReference;
     private refOrders!: DataReference;
 
@@ -54,11 +53,13 @@ export class AceBaseClient implements Database {
     }
 
     public constructor() {
-        this.filters = new Filters();
+        this.tokens = [];
     }
 
     async addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {
         await this.refOrders.push(indexedOrder);
+        this.addToken(indexedOrder.order.signer.token)
+        this.addToken(indexedOrder.order.sender.token)
         return Promise.resolve();
     }
     async addAllOrder(indexedOrders: Record<string, IndexedOrder<DbOrder>>): Promise<void> {
@@ -180,8 +181,14 @@ export class AceBaseClient implements Database {
             .filter('hash', '==', hash).exists();
     }
 
-    async getFiltersERC20(): Promise<Filters> {
-        return Promise.resolve(this.filters);
+    getTokens(): Promise<string[]> {
+        return Promise.resolve(this.tokens);
+    }
+
+    private addToken(token: string) {
+        if (!this.tokens.includes(token)) {
+            this.tokens.push(token);
+        }
     }
 
     async getOrdersERC20By(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrderERC20>> {
@@ -245,8 +252,8 @@ export class AceBaseClient implements Database {
     async addOrderERC20(indexedOrder: IndexedOrder<DbOrderERC20>): Promise<void> {
         await this.refERC20.push(indexedOrder);
         const order = indexedOrder.order as DbOrderERC20
-        this.filters.addSignerToken(order.signerToken, order.approximatedSignerAmount);
-        this.filters.addSenderToken(order.senderToken, order.approximatedSenderAmount);
+        this.addToken(indexedOrder.order.signerToken)
+        this.addToken(indexedOrder.order.senderToken)
         return Promise.resolve();
     }
 
@@ -318,7 +325,7 @@ export class AceBaseClient implements Database {
     }
 
     async erase() {
-        this.filters = new Filters();
+        this.tokens = [];
         await this.db.ref(ENTRY_REF_ERC20).remove();
         return await this.db.ref(ENTRY_REF_ORDERS).remove();
     }
@@ -351,17 +358,17 @@ export class AceBaseClient implements Database {
     generateHashERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): string {
         const lightenOrder: Partial<DbOrderERC20> = { ...indexedOrderERC20.order };
         if (lightenOrder.approximatedSenderAmount) {
-          delete lightenOrder.approximatedSenderAmount
+            delete lightenOrder.approximatedSenderAmount
         }
         if (lightenOrder.approximatedSignerAmount) {
-          delete lightenOrder.approximatedSignerAmount
+            delete lightenOrder.approximatedSignerAmount
         }
         const stringObject = JSON.stringify(lightenOrder);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
         return hashed.digest("hex");
-      }
-    
-      generateHash(indexedOrder: IndexedOrder<DbOrder>): string {
+    }
+
+    generateHash(indexedOrder: IndexedOrder<DbOrder>): string {
         const signer: Partial<DbOrderParty> = { ...indexedOrder.order.signer };
         const sender: Partial<DbOrderParty> = { ...indexedOrder.order.sender };
         delete signer.approximatedAmount
@@ -370,5 +377,5 @@ export class AceBaseClient implements Database {
         const stringObject = JSON.stringify(lightenOrder);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
         return hashed.digest("hex");
-      }
+    }
 }

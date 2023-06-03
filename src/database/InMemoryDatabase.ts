@@ -1,22 +1,19 @@
 import { FullOrder, FullOrderERC20, IndexedOrder, OrderResponse, OrderFilter, SortField, SortOrder } from '@airswap/types';
 import crypto from "crypto";
 import { Database } from './Database.js';
-import { Filters } from './filter/Filters.js';
 import { DbOrderERC20, DbOrder, DbOrderParty, DbOrderFilter } from '../model/DbOrderTypes.js';
 import { mapAnyToFullOrderERC20 } from '../mapper/mapAnyToFullOrderERC20.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 
 export class InMemoryDatabase implements Database {
-  erc20Database: Record<string, IndexedOrder<DbOrderERC20>>;
-  orderDatabase: Record<string, IndexedOrder<DbOrder>>;
-  filters: Filters;
-  maxResultByQuery: number;
+  private erc20Database: Record<string, IndexedOrder<DbOrderERC20>>;
+  private orderDatabase: Record<string, IndexedOrder<DbOrder>>;
+  private tokens: string[];
 
-  constructor(maxResultByQuery: number) {
+  constructor() {
     this.erc20Database = {};
     this.orderDatabase = {};
-    this.filters = new Filters();
-    this.maxResultByQuery = maxResultByQuery
+    this.tokens = [];
   }
 
   connect(databaseName: string, deleteOnStart: boolean): Promise<void> {
@@ -76,8 +73,8 @@ export class InMemoryDatabase implements Database {
   addOrderERC20(indexedOrder: IndexedOrder<DbOrderERC20>) {
     this.erc20Database[indexedOrder.hash!] = indexedOrder;
     const order = indexedOrder.order as DbOrderERC20;
-    this.filters.addSignerToken(order.signerToken, order.approximatedSignerAmount);
-    this.filters.addSenderToken(order.senderToken, order.approximatedSenderAmount);
+    this.addToken(order.signerToken);
+    this.addToken(order.senderToken);
     return Promise.resolve();
   }
 
@@ -137,8 +134,14 @@ export class InMemoryDatabase implements Database {
     });
   }
 
-  getFiltersERC20(): Promise<Filters> {
-    return Promise.resolve(this.filters);
+  getTokens(): Promise<string[]> {
+    return Promise.resolve(this.tokens);
+  }
+
+  private addToken(token: string) {
+    if (!this.tokens.includes(token)) {
+      this.tokens.push(token);
+    }
   }
 
   orderERC20Exists(hash: string): Promise<boolean> {
@@ -172,6 +175,8 @@ export class InMemoryDatabase implements Database {
   ////////////////////////////// Non ERC20
   addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {
     this.orderDatabase[indexedOrder.hash!] = indexedOrder;
+    this.addToken(indexedOrder.order.signer.token)
+    this.addToken(indexedOrder.order.sender.token)
     return Promise.resolve()
   }
 
@@ -192,6 +197,7 @@ export class InMemoryDatabase implements Database {
     }
     return Promise.resolve();
   }
+
   deleteExpiredOrder(timestampInSeconds: number): Promise<void> {
     const hashToDelete: string[] = Object.keys(this.orderDatabase).filter((key: string) => {
       return this.orderDatabase[key].order.expiry < timestampInSeconds;
@@ -287,7 +293,7 @@ export class InMemoryDatabase implements Database {
   erase() {
     this.erc20Database = {};
     this.orderDatabase = {};
-    this.filters = new Filters();
+    this.tokens = [];
     return Promise.resolve();
   }
 

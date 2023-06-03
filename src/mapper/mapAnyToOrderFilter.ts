@@ -3,7 +3,15 @@ import { toNumber, toArray, toBigInt } from "../converter/index.js";
 import { isNumeric } from '../validator/index.js';
 import { toSortField, toSortOrder } from '@airswap/libraries';
 
-export function mapAnyToOrderFilter(data: any): DbOrderFilter {
+export function mapAnyToOrderFilter(data: any, maxResultByQuery: number): DbOrderFilter {
+    let limit = maxResultByQuery;
+    if (isNumeric(data.limit)) {
+        const requestedLimit = toNumber(data.limit)!
+        if (requestedLimit < limit) {
+            limit = requestedLimit;
+        }
+    }
+
     return {
         signerWallet: data.signerWallet,
         signerMinAmount: toBigInt(data.signerMinAmount),
@@ -16,6 +24,6 @@ export function mapAnyToOrderFilter(data: any): DbOrderFilter {
         sortField: toSortField(data.sortField),
         sortOrder: toSortOrder(data.sortOrder),
         offset: isNumeric(data.offset) ? toNumber(data.offset)! : 0,
-        limit: isNumeric(data.limit) ? toNumber(data.limit)! : 20,
+        limit
     }
 }

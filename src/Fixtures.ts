@@ -1,4 +1,4 @@
-import { IndexedOrder, OrderResponse, FiltersResponse, FullOrder } from '@airswap/types';
+import { IndexedOrder, OrderResponse, FullOrder } from '@airswap/types';
 import { FullOrderERC20 } from '@airswap/types';
 import { AddressZero } from '@ethersproject/constants';
 import { DbOrderERC20, DbOrder } from './model/DbOrderTypes.js';

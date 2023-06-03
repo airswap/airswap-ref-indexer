@@ -9,7 +9,6 @@ import { OrderService } from './../../service/OrderService';
 import { RootService } from './../../service/RootService';
 import { IndexerServer } from './../IndexerServer';
 import { HealthCheckResponse } from "../../model/response/HealthCheckResponse";
-import { FiltersResponse } from "@airswap/types";
 
 jest
     .useFakeTimers()
@@ -203,7 +202,7 @@ describe("Order controller", () => {
 
             test("getTokens", done => {
                 const payload = { id: "-1", method: "getTokens", params: [{}] };
-                const filterResponse: FiltersResponse = {
+                const filterResponse: any = {
                     senderToken: {
                         "0x0000000000000000000000000000000000000000" : {
                             min: "10",

@@ -1,5 +1,4 @@
 import { FullOrder, OrderResponse, FullOrderERC20, IndexedOrder } from '@airswap/types';
-import { Filters } from './filter/Filters.js';
 import { DbOrderERC20, DbOrder, DbOrderFilter } from '../model/DbOrderTypes.js';
 
 export interface Database {
@@ -30,7 +29,7 @@ export interface Database {
     generateHashERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): string;
     generateHash(indexedOrder: IndexedOrder<DbOrder>): string;
 
-    getFiltersERC20(): Promise<Filters>;
+    getTokens(): Promise<string[]>;
 
     connect(databaseName: string, deleteOnStart: boolean): Promise<void>;
 

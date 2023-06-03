@@ -1,7 +1,6 @@
-import { IndexedOrder, AmountLimitFilterResponse, FiltersResponse, FullOrder, OrderResponse } from '@airswap/types';
+import { IndexedOrder, FullOrder, OrderResponse } from '@airswap/types';
 import { FullOrderERC20 } from '@airswap/types';
 import { isValidFullOrder, isValidFullOrderERC20 } from '@airswap/utils';
-import { Filters } from '../database/filter/Filters';
 import { Database } from '../database/Database.js';
 import { mapAnyToDbOrderERC20 } from '../mapper/mapAnyToDbOrderERC20.js';
 import { mapAnyToOrderFilter } from '../mapper/mapAnyToOrderFilter.js';
@@ -12,7 +11,6 @@ import { Web3SwapERC20Client } from '../client/Web3SwapERC20Client.js';
 import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
 import { Web3SwapClient } from '../client/Web3SwapClient';
-import { mapToFilterResponse } from '../mapper/mapFilterToFilterResponse.js';
 
 const validationDurationInWeek = 1;
 
@@ -28,11 +26,13 @@ export class OrderService {
     private database: Database;
     private web3SwapERC20Client: Web3SwapERC20Client;
     private web3SwapClient: Web3SwapClient;
+    private maxResultByQuery: number;
 
-    constructor(database: Database, web3ERC20SwapClient: Web3SwapERC20Client, web3SwapClient: Web3SwapClient) {
+    constructor(database: Database, web3ERC20SwapClient: Web3SwapERC20Client, web3SwapClient: Web3SwapClient, maxResultByQuery: number) {
         this.database = database;
         this.web3SwapERC20Client = web3ERC20SwapClient;
         this.web3SwapClient = web3SwapClient;
+        this.maxResultByQuery = maxResultByQuery;
 
         const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter((name) => name !== "constructor").sort();
         if (!(methods.length === Object.keys(METHODS).length && methods.every((value: string) => value === METHODS[value]))) {
@@ -83,7 +83,7 @@ export class OrderService {
             orders = await this.database.getOrdersERC20();
         }
         else {
-            orders = await this.database.getOrdersERC20By(mapAnyToOrderFilter(query));
+            orders = await this.database.getOrdersERC20By(mapAnyToOrderFilter(query, this.maxResultByQuery));
         }
         return Promise.resolve(orders);
     }
@@ -129,14 +129,14 @@ export class OrderService {
             orders = await this.database.getOrders();
         }
         else {
-            orders = await this.database.getOrdersBy(mapAnyToOrderFilter(query));
+            orders = await this.database.getOrdersBy(mapAnyToOrderFilter(query, this.maxResultByQuery));
         }
         return Promise.resolve(orders)
     }
 
-    public async getTokens(): Promise<FiltersResponse> {
-        const filters = await this.database.getFiltersERC20();
-        return mapToFilterResponse(filters)
+    public async getTokens(): Promise<any> {
+        const filters = await this.database.getTokens();
+        return filters;
     }
 }
 

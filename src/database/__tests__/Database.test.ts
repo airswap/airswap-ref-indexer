@@ -14,7 +14,7 @@ describe("Database implementations", () => {
     const expiryDate = new Date().getTime() + 10;
 
     beforeAll(async () => {
-        inMemoryDatabase = new InMemoryDatabase(100);
+        inMemoryDatabase = new InMemoryDatabase();
         acebaseClient = new AceBaseClient();
         await acebaseClient.connect("dbtest", true);
         await inMemoryDatabase.connect("dbtest", true);
@@ -592,12 +592,9 @@ describe("Database implementations", () => {
         (anotherOrder.order as DbOrderERC20).approximatedSignerAmount = BigInt(50);
 
         await db.addAllOrderERC20({ "hash": indexedOrder, "another_hash": anotherOrder });
-        const filters = await db.getFiltersERC20();
+        const filters = await db.getTokens();
 
-        expect(filters).toEqual({
-            senderToken: { "0x0000000000000000000000000000000000000000": { max: BigInt(15), min: BigInt(10) } },
-            signerToken: { "0x0000000000000000000000000000000000000000": { max: BigInt(50), min: BigInt(5) } }
-        });
+        expect(filters).toEqual(["0x0000000000000000000000000000000000000000"]);
         return Promise.resolve();
     }
 
