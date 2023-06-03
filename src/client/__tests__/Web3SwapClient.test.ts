@@ -108,7 +108,7 @@ describe("Web3SwapClient", () => {
 
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrder).toHaveBeenCalledTimes(1);
-        expect(fakeDatabase.deleteOrder).toHaveBeenCalledWith("245", "a_wallet");
+        expect(fakeDatabase.deleteOrder).toHaveBeenCalledWith(245, "a_wallet");
     });
 
     it("Should remove order on event Cancel", async () => {
@@ -133,7 +133,7 @@ describe("Web3SwapClient", () => {
 
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrder).toHaveBeenCalledTimes(1);
-        expect(fakeDatabase.deleteOrder).toHaveBeenCalledWith("245", "a_wallet");
+        expect(fakeDatabase.deleteOrder).toHaveBeenCalledWith(245, "a_wallet");
     });
 
     describe("Do nothing", () => {

@@ -29,7 +29,7 @@ export function forgeIndexedOrderResponse(expectedAddedDate: number, expiryDate:
 
 export function forgeDbOrderERC20(expiryDate: number): DbOrderERC20 {
     return {
-        nonce: "nonce",
+        nonce: 123,
         expiry: expiryDate / 1000,
         signerWallet: AddressZero,
         signerToken: AddressZero,
@@ -50,7 +50,7 @@ export function forgeDbOrderERC20(expiryDate: number): DbOrderERC20 {
 
 export function forgeDbOrder(expiryDate: number): DbOrder {
     return {
-        nonce: "nonce",
+        nonce: 123,
         expiry: expiryDate / 1000,
         protocolFee: "100",
         signer: {
@@ -83,7 +83,7 @@ export function forgeDbOrder(expiryDate: number): DbOrder {
 
 export function forgeFullOrderERC20(expiryDate: number): FullOrderERC20 {
     return {
-        nonce: "nonce",
+        nonce: "123",
         expiry: `${expiryDate / 1000}`,
         signerWallet: AddressZero,
         signerToken: AddressZero,
@@ -102,7 +102,7 @@ export function forgeFullOrderERC20(expiryDate: number): FullOrderERC20 {
 
 export function forgeFullOrder(expiryDate: number): FullOrder {
     return {
-        nonce: "nonce",
+        nonce: "123",
         expiry: String(expiryDate / 1000),
         protocolFee: "100",
         signer: {

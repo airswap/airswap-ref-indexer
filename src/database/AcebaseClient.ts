@@ -30,6 +30,7 @@ export class AceBaseClient implements Database {
                 this.refERC20 = this.db.ref(ENTRY_REF_ERC20);
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, 'hash');
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, 'addedOn');
+                this.db.indexes.create(`${ENTRY_REF_ERC20}`, 'order/nonce');
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/approximatedSignerAmount");
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/approximatedSenderAmount");
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/signerToken");
@@ -40,6 +41,7 @@ export class AceBaseClient implements Database {
                 this.refOrders = this.db.ref(ENTRY_REF_ORDERS);
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, 'hash');
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, 'addedOn');
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, 'order/nonce');
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/expiry");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/wallet");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/wallet");
@@ -68,9 +70,10 @@ export class AceBaseClient implements Database {
         }));
         return Promise.resolve();
     }
-    async deleteOrder(nonce: string, signerWallet: string): Promise<void> {
+    async deleteOrder(nonce: number, signerWallet: string): Promise<void> {
         await this.refOrders.query()
             .filter('order/nonce', '==', nonce)
+            .filter('order/signer/wallet', '==', signerWallet)
             .remove();
         return Promise.resolve();
     }
@@ -158,6 +161,8 @@ export class AceBaseClient implements Database {
             query.sort('order/sender/approximatedAmount', isAscSort)
         } else if (orderFilter.sortField == SortField.EXPIRY) {
             query.sort('order/expiry', isAscSort)
+        } else if (orderFilter.sortField == SortField.NONCE) {
+            query.sort('order/nonce', isAscSort)
         }
 
         const totalResults = await query.take(1000000).count()
@@ -226,6 +231,8 @@ export class AceBaseClient implements Database {
             query.sort('order/approximatedSenderAmount', isAscSort)
         } else if (orderFilter.sortField == SortField.EXPIRY) {
             query.sort('order/expiry', isAscSort)
+        } else if (orderFilter.sortField == SortField.NONCE) {
+            query.sort('order/nonce', isAscSort)
         }
 
         const totalResults = await query.take(1000000).count()
@@ -264,7 +271,7 @@ export class AceBaseClient implements Database {
         return Promise.resolve();
     }
 
-    async deleteOrderERC20(nonce: string, signerWallet: string): Promise<void> {
+    async deleteOrderERC20(nonce: number, signerWallet: string): Promise<void> {
         await this.refERC20.query()
             .filter('order/nonce', '==', nonce)
             .filter('order/signerWallet', '==', signerWallet)

@@ -3,7 +3,7 @@ import { DbOrder, DbOrderParty } from 'model/DbOrderTypes.js';
 
 export function mapAnyToDbOrder(data: any): DbOrder {
     return {
-        nonce: String(data.nonce),
+        nonce: Number(data.nonce),
         expiry: Number(data.expiry),
         protocolFee: String(data.protocolFee),
         signer: mapToOrderParty(data.signer),

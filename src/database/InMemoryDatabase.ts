@@ -47,6 +47,12 @@ export class InMemoryDatabase implements Database {
           }
           return Number(b.order.approximatedSenderAmount - a.order.approximatedSenderAmount)
         }
+        else if (orderFilter.sortField == SortField.NONCE) {
+          if (orderFilter.sortOrder == SortOrder.ASC) {
+            return Number(a.order.nonce - b.order.nonce)
+          }
+          return Number(b.order.nonce - a.order.nonce)
+        }
         if (orderFilter.sortOrder == SortOrder.ASC) {
           return Number(a.order.expiry - b.order.expiry)
         }
@@ -85,7 +91,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  deleteOrderERC20(nonce: string, signerWallet: string): Promise<void> {
+  deleteOrderERC20(nonce: number, signerWallet: string): Promise<void> {
     const orderToDelete = Object.values(this.erc20Database).find((indexedOrder) => {
       const order = indexedOrder.order as DbOrderERC20
       return order.nonce === nonce && order.signerWallet === signerWallet
@@ -187,10 +193,10 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  deleteOrder(nonce: string, signerWallet: string): Promise<void> {
+  deleteOrder(nonce: number, signerWallet: string): Promise<void> {
     const orderToDelete = Object.values(this.orderDatabase).find((indexedOrder) => {
       const order = indexedOrder.order as DbOrder
-      return order.nonce === nonce
+      return order.nonce === nonce && order.signer.wallet === signerWallet
     });
     if (orderToDelete && orderToDelete.hash) {
       delete this.orderDatabase[orderToDelete.hash];
@@ -261,6 +267,12 @@ export class InMemoryDatabase implements Database {
             return Number(a.order.sender.approximatedAmount - b.order.sender.approximatedAmount)
           }
           return Number(b.order.sender.approximatedAmount - a.order.sender.approximatedAmount)
+        }
+        else if (orderFilter.sortField == SortField.NONCE) {
+          if (orderFilter.sortOrder == SortOrder.ASC) {
+            return Number(a.order.nonce - b.order.nonce)
+          }
+          return Number(b.order.nonce - a.order.nonce)
         }
         if (orderFilter.sortOrder == SortOrder.ASC) {
           return Number(a.order.expiry - b.order.expiry)

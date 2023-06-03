@@ -5,7 +5,7 @@ describe("mapAnyToDbOrder", () => {
     test("should map all string values", () => {
         expect(mapAnyToDbOrderERC20({
             expiry: "1653900784706",
-            nonce: "nonce",
+            nonce: "123",
             r: "r",
             s: "s",
             senderAmount: "10",
@@ -20,7 +20,7 @@ describe("mapAnyToDbOrder", () => {
             swapContract: AddressZero
         })).toEqual({
             expiry: 1653900784706,
-            nonce: "nonce",
+            nonce: 123,
             senderAmount: "10",
             senderToken: "ETH",
             signerAmount: "5",

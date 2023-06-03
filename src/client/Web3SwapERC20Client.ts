@@ -46,7 +46,7 @@ export class Web3SwapERC20Client {
             const decodedNonce = parseInt(nonce._hex, 16);
             if (isNaN(decodedNonce)) return;
 
-            this.database.deleteOrderERC20(`${decodedNonce}`, signerWallet);
+            this.database.deleteOrderERC20(decodedNonce, signerWallet);
         }
     }
 }

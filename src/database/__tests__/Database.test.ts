@@ -152,7 +152,7 @@ describe("Database implementations", () => {
 
     async function getOrdersERC20By(db: Database) {
         const dbOrder1: DbOrderERC20 = {
-            nonce: "nonce",
+            nonce: 123,
             expiry: 1653138423535,
             signerWallet: "signerWallet1",
             signerToken: "signerToken",
@@ -170,7 +170,7 @@ describe("Database implementations", () => {
             senderWallet: "senderWallet1",
         };
         const order1: FullOrderERC20 = {
-            nonce: "nonce",
+            nonce: "123",
             expiry: "1653138423535",
             signerWallet: "signerWallet1",
             signerToken: "signerToken",
@@ -186,7 +186,7 @@ describe("Database implementations", () => {
             swapContract: AddressZero
         };
         const dbOrder2: DbOrderERC20 = {
-            nonce: "nonce",
+            nonce: 124,
             expiry: 1653138423536,
             signerWallet: "signerWallet2",
             signerToken: "blip",
@@ -204,7 +204,7 @@ describe("Database implementations", () => {
             senderWallet: "senderWallet2",
         };
         const order2: FullOrderERC20 = {
-            nonce: "nonce",
+            nonce: "124",
             expiry: "1653138423536",
             signerWallet: "signerWallet2",
             signerToken: "blip",
@@ -220,7 +220,7 @@ describe("Database implementations", () => {
             swapContract: AddressZero
         };
         const dbOrder3: DbOrderERC20 = {
-            nonce: "nonce",
+            nonce: 1,
             expiry: 1653138423537,
             signerWallet: "signerWallet3",
             signerToken: "signerToken",
@@ -238,7 +238,7 @@ describe("Database implementations", () => {
             senderWallet: "senderWallet3",
         };
         const order3: FullOrderERC20 = {
-            nonce: "nonce",
+            nonce: "1",
             expiry: "1653138423537",
             signerWallet: "signerWallet3",
             signerToken: "signerToken",
@@ -344,6 +344,12 @@ describe("Database implementations", () => {
         const expiryDesc = await db.getOrdersERC20By({ offset: 0, limit: 10, sortField: SortField.EXPIRY, sortOrder: SortOrder.DESC });
         expect(Object.keys(expiryDesc.orders)).toEqual(["id3", "id2", "id1"]);
 
+        const orderByNonceDESC = await db.getOrdersERC20By({ offset: 0, limit: 10, sortField: SortField.NONCE, sortOrder: SortOrder.DESC });
+        expect(Object.keys(orderByNonceDESC.orders)).toEqual(["id2", "id1", "id3"]);
+        
+        const orderByNonceASC = await db.getOrdersERC20By({ offset: 0, limit: 10, sortField: SortField.NONCE, sortOrder: SortOrder.ASC });
+        expect(Object.keys(orderByNonceASC.orders)).toEqual(["id3", "id1", "id2"]);
+
         const specificSignerWallet = await db.getOrdersERC20By({ offset: 0, limit: 10, signerWallet: order1.signerWallet });
         expect(Object.keys(specificSignerWallet.orders)).toEqual(["id1"]);
 
@@ -373,6 +379,7 @@ describe("Database implementations", () => {
 
     async function getOrdersBy(db: Database) {
         const dbOrder1: DbOrder = forgeDbOrder(5);
+        dbOrder1.nonce = 123
         dbOrder1.sender.wallet = "aWalletAddress"
         dbOrder1.sender.amount = "1"
         dbOrder1.sender.approximatedAmount = BigInt(1)
@@ -382,6 +389,7 @@ describe("Database implementations", () => {
         dbOrder1.signer.approximatedAmount = BigInt(1)
         dbOrder1.signer.token = "signerToken1"
         const order1: FullOrder = forgeFullOrder(5);
+        order1.nonce = "123"
         order1.signer.wallet = "aWalletAddress"
         order1.signer.amount = "1"
         order1.signer.token = "signerToken1"
@@ -390,6 +398,7 @@ describe("Database implementations", () => {
         order1.sender.token = "senderToken1"
 
         const dbOrder2: DbOrder = forgeDbOrder(1);
+        dbOrder2.nonce = 124
         dbOrder2.sender.wallet = "anotherWalletAddress"
         dbOrder2.sender.amount = "2"
         dbOrder2.sender.approximatedAmount = BigInt(2)
@@ -398,6 +407,7 @@ describe("Database implementations", () => {
         dbOrder2.signer.approximatedAmount = BigInt(3)
         dbOrder2.signer.token = "signerToken2"
         const order2: FullOrder = forgeFullOrder(1);
+        order2.nonce = "124"
         order2.sender.wallet = "anotherWalletAddress"
         order2.sender.amount = "2"
         order2.sender.token = "senderToken2"
@@ -405,6 +415,7 @@ describe("Database implementations", () => {
         order2.signer.token = "signerToken2"
 
         const dbOrder3: DbOrder = forgeDbOrder(3);
+        dbOrder3.nonce = 1
         dbOrder3.sender.amount = "3"
         dbOrder3.sender.approximatedAmount = BigInt(3)
         dbOrder3.sender.token = "senderToken3"
@@ -413,6 +424,7 @@ describe("Database implementations", () => {
         dbOrder3.signer.approximatedAmount = BigInt(2)
         dbOrder3.signer.token = "signerToken3"
         const order3: FullOrder = forgeFullOrder(3);
+        order3.nonce = "1"
         order3.sender.amount = "3"
         order3.sender.token = "senderToken3"
         order3.signer.wallet = "aWalletAddress"
@@ -466,6 +478,12 @@ describe("Database implementations", () => {
 
         const orderByExpiryDESC = await db.getOrdersBy({ offset: 0, limit: 10, sortField: SortField.EXPIRY, sortOrder: SortOrder.DESC });
         expect(Object.keys(orderByExpiryDESC.orders)).toEqual(["id1", "id3", "id2"]);
+        
+        const orderByNonceDESC = await db.getOrdersBy({ offset: 0, limit: 10, sortField: SortField.NONCE, sortOrder: SortOrder.DESC });
+        expect(Object.keys(orderByNonceDESC.orders)).toEqual(["id2", "id1", "id3"]);
+
+        const orderByNonceASC = await db.getOrdersBy({ offset: 0, limit: 10, sortField: SortField.NONCE, sortOrder: SortOrder.ASC });
+        expect(Object.keys(orderByNonceASC.orders)).toEqual(["id3", "id1", "id2"]);
 
         const minSenderAmountDesc = await db.getOrdersBy({ offset: 0, limit: 10, sortField: SortField.SENDER_AMOUNT, sortOrder: SortOrder.DESC, senderMinAmount: BigInt(2) });
         expect(Object.keys(minSenderAmountDesc.orders)).toEqual(["id3", "id2"]);
@@ -602,7 +620,7 @@ describe("Database implementations", () => {
         const indexedOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
         await db.addOrderERC20(indexedOrder);
 
-        await db.deleteOrderERC20("nonce", AddressZero);
+        await db.deleteOrderERC20(123, AddressZero);
         const orders = await db.getOrdersERC20();
 
         expect(orders).toEqual({
@@ -620,7 +638,7 @@ describe("Database implementations", () => {
         const indexedOrder: IndexedOrder<DbOrder> = forgeIndexedOrder(addedOn, expiryDate);
         await db.addOrder(indexedOrder);
 
-        await db.deleteOrder("nonce", AddressZero);
+        await db.deleteOrder(123, AddressZero);
         const orders = await db.getOrders();
 
         expect(orders).toEqual({
@@ -795,7 +813,7 @@ describe("Database implementations", () => {
 
         const hash = db.generateHashERC20(indexedOrder);
 
-        expect(hash).toBe("5cfd1a4837f91f4b690c739ecf08b26d3cfa5f69e0891a108df50b1fd0a0d892");
+        expect(hash).toBe("5488777f61ade4df7cdb64996137382be7d70172fd7d6562281200ae2a2d1ba7");
         return Promise.resolve();
     }
 
@@ -804,7 +822,7 @@ describe("Database implementations", () => {
 
         const hash = db.generateHash(indexedOrder);
 
-        expect(hash).toBe("98c17b5644869ccf94b202c22f2ebf2d9cfa60f6938f2f1566ffd9c6bae5ff97");
+        expect(hash).toBe("dff9f300bb369f7de5a472eeb19aba5fdfa7815fede741b68ad55244359e54e2");
         return Promise.resolve();
     }
 });

@@ -108,7 +108,7 @@ describe("Web3SwapERC20Client", () => {
 
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledTimes(1);
-        expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledWith("245", "a_wallet");
+        expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledWith(245, "a_wallet");
     });
 
     it("Should remove order on event Cancel", async () => {
@@ -133,7 +133,7 @@ describe("Web3SwapERC20Client", () => {
 
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledTimes(1);
-        expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledWith("245", "a_wallet");
+        expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledWith(245, "a_wallet");
     });
 
     describe("Do nothing", () => {

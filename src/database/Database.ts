@@ -8,8 +8,8 @@ export interface Database {
     addAllOrderERC20(indexedOrdersERC20: Record<string, IndexedOrder<DbOrderERC20>>): Promise<void>;
     addAllOrder(indexedOrders:  Record<string, IndexedOrder<DbOrder>>): Promise<void>;
 
-    deleteOrderERC20(nonce: string, signerWallet: string): Promise<void>;
-    deleteOrder(nonce: string, signerWallet: string): Promise<void>;
+    deleteOrderERC20(nonce: number, signerWallet: string): Promise<void>;
+    deleteOrder(nonce: number, signerWallet: string): Promise<void>;
 
     deleteExpiredOrderERC20(timestampInSeconds: number): Promise<void>;
     deleteExpiredOrder(timestampInSeconds: number): Promise<void>;
