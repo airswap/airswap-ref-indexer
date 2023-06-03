@@ -12,7 +12,17 @@ export function mapAnyToOrderFilter(data: any, maxResultByQuery: number): DbOrde
         }
     }
 
+    let offset = 0;
+    if (isNumeric(data.offset)) {
+        const requestedOffset = toNumber(data.offset)!
+        if (requestedOffset > 0) {
+            offset = requestedOffset;
+        }
+    }
+
     return {
+        orderNonce: toNumber(data.orderNonce),
+        tokenIds: data.tokenIds,
         signerWallet: data.signerWallet,
         signerMinAmount: toBigInt(data.signerMinAmount),
         signerMaxAmount: toBigInt(data.signerMaxAmount),
@@ -23,7 +33,7 @@ export function mapAnyToOrderFilter(data: any, maxResultByQuery: number): DbOrde
         senderTokens: toArray(data.senderTokens),
         sortField: toSortField(data.sortField),
         sortOrder: toSortOrder(data.sortOrder),
-        offset: isNumeric(data.offset) ? toNumber(data.offset)! : 0,
+        offset,
         limit
     }
 }

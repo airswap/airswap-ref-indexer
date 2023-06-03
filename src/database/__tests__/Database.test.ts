@@ -346,7 +346,7 @@ describe("Database implementations", () => {
 
         const orderByNonceDESC = await db.getOrdersERC20By({ offset: 0, limit: 10, sortField: SortField.NONCE, sortOrder: SortOrder.DESC });
         expect(Object.keys(orderByNonceDESC.orders)).toEqual(["id2", "id1", "id3"]);
-        
+
         const orderByNonceASC = await db.getOrdersERC20By({ offset: 0, limit: 10, sortField: SortField.NONCE, sortOrder: SortOrder.ASC });
         expect(Object.keys(orderByNonceASC.orders)).toEqual(["id3", "id1", "id2"]);
 
@@ -355,6 +355,9 @@ describe("Database implementations", () => {
 
         const specifiSenderWallet = await db.getOrdersERC20By({ offset: 0, limit: 10, senderWallet: order3.senderWallet });
         expect(Object.keys(specifiSenderWallet.orders)).toEqual(["id3"]);
+
+        const byNonce = await db.getOrdersERC20By({ offset: 0, limit: 10, orderNonce: 123 });
+        expect(Object.keys(byNonce.orders)).toEqual(["id1"]);
 
         const specificOne = await db.getOrdersERC20By({
             offset: 0, limit: 10,
@@ -406,6 +409,7 @@ describe("Database implementations", () => {
         dbOrder2.signer.amount = "3"
         dbOrder2.signer.approximatedAmount = BigInt(3)
         dbOrder2.signer.token = "signerToken2"
+        dbOrder2.signer.id = "aTokenId"
         const order2: FullOrder = forgeFullOrder(1);
         order2.nonce = "124"
         order2.sender.wallet = "anotherWalletAddress"
@@ -413,6 +417,7 @@ describe("Database implementations", () => {
         order2.sender.token = "senderToken2"
         order2.signer.amount = "3"
         order2.signer.token = "signerToken2"
+        order2.signer.id = "aTokenId"
 
         const dbOrder3: DbOrder = forgeDbOrder(3);
         dbOrder3.nonce = 1
@@ -478,7 +483,7 @@ describe("Database implementations", () => {
 
         const orderByExpiryDESC = await db.getOrdersBy({ offset: 0, limit: 10, sortField: SortField.EXPIRY, sortOrder: SortOrder.DESC });
         expect(Object.keys(orderByExpiryDESC.orders)).toEqual(["id1", "id3", "id2"]);
-        
+
         const orderByNonceDESC = await db.getOrdersBy({ offset: 0, limit: 10, sortField: SortField.NONCE, sortOrder: SortOrder.DESC });
         expect(Object.keys(orderByNonceDESC.orders)).toEqual(["id2", "id1", "id3"]);
 
@@ -502,6 +507,12 @@ describe("Database implementations", () => {
 
         const senderTokens = await db.getOrdersBy({ offset: 0, limit: 10, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC, senderTokens: ["senderToken1", "senderToken2"] });
         expect(Object.keys(senderTokens.orders)).toEqual(["id2", "id1"]);
+
+        const byTokenId = await db.getOrdersBy({ offset: 0, limit: 10, tokenIds: ["aTokenId"] });
+        expect(Object.keys(byTokenId.orders)).toEqual(["id2"]);
+
+        const byNonce = await db.getOrdersBy({ offset: 0, limit: 10, orderNonce: 123 });
+        expect(Object.keys(byNonce.orders)).toEqual(["id1"]);
 
         const specificOne = await db.getOrdersBy({
             offset: 0, limit: 10,

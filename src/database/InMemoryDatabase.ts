@@ -32,6 +32,7 @@ export class InMemoryDatabase implements Database {
       if (orderFilter.senderMaxAmount != undefined) { isFound = isFound && order.approximatedSenderAmount <= orderFilter.senderMaxAmount; }
       if (orderFilter.signerMinAmount != undefined) { isFound = isFound && order.approximatedSignerAmount >= orderFilter.signerMinAmount; }
       if (orderFilter.signerMaxAmount != undefined) { isFound = isFound && order.approximatedSignerAmount <= orderFilter.signerMaxAmount; }
+      if (orderFilter.orderNonce != undefined) { isFound = isFound && order.nonce == orderFilter.orderNonce; }
       return isFound;
     })
       .sort((a, b) => {
@@ -253,6 +254,8 @@ export class InMemoryDatabase implements Database {
       if (orderFilter.signerMaxAmount != undefined) { isFound = isFound && order.signer.approximatedAmount <= orderFilter.signerMaxAmount; }
       if (orderFilter.signerTokens != undefined) { isFound = isFound && orderFilter.signerTokens.indexOf(order.signer.token) !== -1; }
       if (orderFilter.senderTokens != undefined) { isFound = isFound && orderFilter.senderTokens.indexOf(order.sender.token) !== -1; }
+      if (orderFilter.orderNonce != undefined) { isFound = isFound && order.nonce == orderFilter.orderNonce; }
+      if (orderFilter.tokenIds != undefined) { isFound = isFound && orderFilter.tokenIds.indexOf(order.signer.id) !== -1; }
       return isFound;
     })
       .sort((a, b) => {

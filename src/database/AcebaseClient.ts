@@ -49,6 +49,7 @@ export class AceBaseClient implements Database {
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/approximatedAmount");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/token");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/token");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/id");
                 resolve();
             });
         });
@@ -129,6 +130,9 @@ export class AceBaseClient implements Database {
     async getOrdersBy(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrder>> {
         const query = this.refOrders.query();
 
+        if (orderFilter.orderNonce != undefined) {
+            query.filter('order/nonce', '==', orderFilter.orderNonce);
+        }
         if (orderFilter.senderWallet != undefined) {
             query.filter('order/sender/wallet', '==', orderFilter.senderWallet);
         }
@@ -152,6 +156,9 @@ export class AceBaseClient implements Database {
         }
         if (orderFilter.signerMaxAmount != undefined) {
             query.filter('order/signer/approximatedAmount', '<=', orderFilter.signerMaxAmount);
+        }
+        if (orderFilter.tokenIds != undefined) {
+            query.filter('order/signer/id', 'in', orderFilter.tokenIds);
         }
 
         const isAscSort = orderFilter.sortOrder == SortOrder.ASC;
@@ -199,6 +206,9 @@ export class AceBaseClient implements Database {
     async getOrdersERC20By(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrderERC20>> {
         const query = this.refERC20.query();
 
+        if (orderFilter.orderNonce != undefined) {
+            query.filter('order/nonce', '==', orderFilter.orderNonce);
+        }
         if (orderFilter.signerTokens != undefined) {
             query.filter('order/signerToken', 'in', orderFilter.signerTokens);
         }
