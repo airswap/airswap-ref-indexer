@@ -22,7 +22,8 @@ export function mapAnyToOrderFilter(data: any, maxResultByQuery: number): DbOrde
 
     return {
         orderNonce: toNumber(data.orderNonce),
-        tokenIds: data.tokenIds,
+        senderIds: data.senderIds,
+        signerIds: data.signerIds,
         signerWallet: data.signerWallet,
         signerMinAmount: toBigInt(data.signerMinAmount),
         signerMaxAmount: toBigInt(data.signerMaxAmount),

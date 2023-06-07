@@ -406,18 +406,18 @@ describe("Database implementations", () => {
         dbOrder2.sender.amount = "2"
         dbOrder2.sender.approximatedAmount = BigInt(2)
         dbOrder2.sender.token = "senderToken2"
+        dbOrder2.sender.id = "aTokenId"
         dbOrder2.signer.amount = "3"
         dbOrder2.signer.approximatedAmount = BigInt(3)
         dbOrder2.signer.token = "signerToken2"
-        dbOrder2.signer.id = "aTokenId"
         const order2: FullOrder = forgeFullOrder(1);
         order2.nonce = "124"
         order2.sender.wallet = "anotherWalletAddress"
         order2.sender.amount = "2"
         order2.sender.token = "senderToken2"
+        order2.sender.id = "aTokenId"
         order2.signer.amount = "3"
         order2.signer.token = "signerToken2"
-        order2.signer.id = "aTokenId"
 
         const dbOrder3: DbOrder = forgeDbOrder(3);
         dbOrder3.nonce = 1
@@ -428,6 +428,7 @@ describe("Database implementations", () => {
         dbOrder3.signer.amount = "2"
         dbOrder3.signer.approximatedAmount = BigInt(2)
         dbOrder3.signer.token = "signerToken3"
+        dbOrder3.signer.id = "aTokenId"
         const order3: FullOrder = forgeFullOrder(3);
         order3.nonce = "1"
         order3.sender.amount = "3"
@@ -435,6 +436,7 @@ describe("Database implementations", () => {
         order3.signer.wallet = "aWalletAddress"
         order3.signer.amount = "2"
         order3.signer.token = "signerToken3"
+        order3.signer.id = "aTokenId"
 
         const indexedOrder1: IndexedOrder<DbOrder> = { order: dbOrder1, addedOn: 1653138423537, hash: "id1" }
         const expectedIndexedOrder1: IndexedOrder<FullOrder> = { order: order1, addedOn: 1653138423537, hash: "id1" };
@@ -508,8 +510,11 @@ describe("Database implementations", () => {
         const senderTokens = await db.getOrdersBy({ offset: 0, limit: 10, sortField: SortField.SIGNER_AMOUNT, sortOrder: SortOrder.DESC, senderTokens: ["senderToken1", "senderToken2"] });
         expect(Object.keys(senderTokens.orders)).toEqual(["id2", "id1"]);
 
-        const byTokenId = await db.getOrdersBy({ offset: 0, limit: 10, tokenIds: ["aTokenId"] });
-        expect(Object.keys(byTokenId.orders)).toEqual(["id2"]);
+        const bySenderId = await db.getOrdersBy({ offset: 0, limit: 10, senderIds: ["aTokenId"] });
+        expect(Object.keys(bySenderId.orders)).toEqual(["id2"]);
+
+        const bySignerId = await db.getOrdersBy({ offset: 0, limit: 10, signerIds: ["aTokenId"] });
+        expect(Object.keys(bySignerId.orders)).toEqual(["id3"]);
 
         const byNonce = await db.getOrdersBy({ offset: 0, limit: 10, orderNonce: 123 });
         expect(Object.keys(byNonce.orders)).toEqual(["id1"]);

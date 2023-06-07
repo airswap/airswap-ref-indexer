@@ -50,6 +50,7 @@ export class AceBaseClient implements Database {
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/token");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/token");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/id");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/id");
                 resolve();
             });
         });
@@ -157,8 +158,11 @@ export class AceBaseClient implements Database {
         if (orderFilter.signerMaxAmount != undefined) {
             query.filter('order/signer/approximatedAmount', '<=', orderFilter.signerMaxAmount);
         }
-        if (orderFilter.tokenIds != undefined) {
-            query.filter('order/signer/id', 'in', orderFilter.tokenIds);
+        if (orderFilter.signerIds != undefined) {
+            query.filter('order/signer/id', 'in', orderFilter.signerIds);
+        }
+        if (orderFilter.senderIds != undefined) {
+            query.filter('order/sender/id', 'in', orderFilter.senderIds);
         }
 
         const isAscSort = orderFilter.sortOrder == SortOrder.ASC;

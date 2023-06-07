@@ -255,7 +255,8 @@ export class InMemoryDatabase implements Database {
       if (orderFilter.signerTokens != undefined) { isFound = isFound && orderFilter.signerTokens.indexOf(order.signer.token) !== -1; }
       if (orderFilter.senderTokens != undefined) { isFound = isFound && orderFilter.senderTokens.indexOf(order.sender.token) !== -1; }
       if (orderFilter.orderNonce != undefined) { isFound = isFound && order.nonce == orderFilter.orderNonce; }
-      if (orderFilter.tokenIds != undefined) { isFound = isFound && orderFilter.tokenIds.indexOf(order.signer.id) !== -1; }
+      if (orderFilter.signerIds != undefined) { isFound = isFound && orderFilter.signerIds.indexOf(order.signer.id) !== -1; }
+      if (orderFilter.senderIds != undefined) { isFound = isFound && orderFilter.senderIds.indexOf(order.sender.id) !== -1; }
       return isFound;
     })
       .sort((a, b) => {
