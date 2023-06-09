@@ -73,7 +73,7 @@ export class InMemoryDatabase implements Database {
 
     return Promise.resolve({
       orders,
-      pagination: { offset: orderFilter.offset, limit: orderFilter.limit, resultsForQuery: totalResultsCount },
+      pagination: { offset: orderFilter.offset, limit: orderFilter.limit, total: totalResultsCount },
     });
   }
 
@@ -119,12 +119,12 @@ export class InMemoryDatabase implements Database {
       result[hash] = this.mapToERC20IndexedOrderResponse(this.erc20Database[hash]);
       return Promise.resolve({
         orders: result,
-        pagination: { offset: 0, limit: 1, resultsForQuery: 1 },
+        pagination: { offset: 0, limit: 1, total: 1 },
       });
     }
     return Promise.resolve({
       orders: result,
-      pagination: { offset: 0, limit: 1, resultsForQuery: 0 },
+      pagination: { offset: 0, limit: 1, total: 0 },
     });
 
   }
@@ -137,7 +137,7 @@ export class InMemoryDatabase implements Database {
     })
     return Promise.resolve({
       orders: results,
-      pagination: { offset: 0, limit: -1, resultsForQuery: size },
+      pagination: { offset: 0, limit: -1, total: size },
     });
   }
 
@@ -221,12 +221,12 @@ export class InMemoryDatabase implements Database {
       result[hash] = this.mapToIndexedOrderResponse(this.orderDatabase[hash]);
       return Promise.resolve({
         orders: result,
-        pagination: { offset: 0, limit: 1, resultsForQuery: 1 },
+        pagination: { offset: 0, limit: 1, total: 1 },
       });
     }
     return Promise.resolve({
       orders: result,
-      pagination: { offset: 0, limit: 1, resultsForQuery: 0 },
+      pagination: { offset: 0, limit: 1, total: 0 },
     });
   }
 
@@ -238,7 +238,7 @@ export class InMemoryDatabase implements Database {
     })
     return Promise.resolve({
       orders: results,
-      pagination: { offset: 0, limit: -1, resultsForQuery: size },
+      pagination: { offset: 0, limit: -1, total: size },
     });
   }
 
@@ -297,7 +297,7 @@ export class InMemoryDatabase implements Database {
 
     return Promise.resolve({
       orders,
-      pagination: { offset: orderFilter.offset, limit: orderFilter.limit, resultsForQuery: totalResultsCount },
+      pagination: { offset: orderFilter.offset, limit: orderFilter.limit, total: totalResultsCount },
     });
   }
 

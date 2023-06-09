@@ -96,7 +96,7 @@ export class AceBaseClient implements Database {
                 pagination: {
                     limit: 1,
                     offset: 0,
-                    resultsForQuery: 0,
+                    total: 0,
                 },
             });
         }
@@ -107,7 +107,7 @@ export class AceBaseClient implements Database {
             pagination: {
                 limit: 1,
                 offset: 0,
-                resultsForQuery: 1,
+                total: 1,
             },
         });
     }
@@ -124,7 +124,7 @@ export class AceBaseClient implements Database {
             pagination: {
                 limit: -1,
                 offset: 0,
-                resultsForQuery: totalResults,
+                total: totalResults,
             },
         });
     }
@@ -188,7 +188,7 @@ export class AceBaseClient implements Database {
             pagination: {
                 limit: orderFilter.limit,
                 offset: orderFilter.offset,
-                resultsForQuery: totalResults,
+                total: totalResults,
             },
         });
     }
@@ -261,7 +261,7 @@ export class AceBaseClient implements Database {
             pagination: {
                 limit: orderFilter.limit,
                 offset: orderFilter.offset,
-                resultsForQuery: totalResults,
+                total: totalResults,
             },
         });
     }
@@ -311,7 +311,7 @@ export class AceBaseClient implements Database {
                 pagination: {
                     limit: 1,
                     offset: 0,
-                    resultsForQuery: 0,
+                    total: 0,
                 },
             });
         }
@@ -322,7 +322,7 @@ export class AceBaseClient implements Database {
             pagination: {
                 limit: 1,
                 offset: 0,
-                resultsForQuery: 1,
+                total: 1,
             },
         });
     }
@@ -340,7 +340,7 @@ export class AceBaseClient implements Database {
             pagination: {
                 limit: -1,
                 offset: 0,
-                resultsForQuery: totalResults,
+                total: totalResults,
             },
         });
     }

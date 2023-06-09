@@ -18,7 +18,7 @@ describe("Root service", () => {
                     pagination: {
                         limit: 10,
                         offset: 0,
-                        resultsForQuery: 1
+                        total: 1
                     }
                 }
             )),
@@ -28,7 +28,7 @@ describe("Root service", () => {
                     pagination: {
                         limit: 10,
                         offset: 0,
-                        resultsForQuery: 1
+                        total: 1
                     }
                 }
             )),

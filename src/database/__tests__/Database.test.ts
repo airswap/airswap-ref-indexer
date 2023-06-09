@@ -269,7 +269,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 10,
                 offset: 0,
-                resultsForQuery: 2
+                total: 2
             },
         });
 
@@ -279,7 +279,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 10,
                 offset: 0,
-                resultsForQuery: 1
+                total: 1
             },
         });
 
@@ -289,7 +289,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 10,
                 offset: 0,
-                resultsForQuery: 1
+                total: 1
             },
         });
 
@@ -299,7 +299,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 10,
                 offset: 0,
-                resultsForQuery: 2
+                total: 2
             },
         });
 
@@ -309,7 +309,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 10,
                 offset: 0,
-                resultsForQuery: 1
+                total: 1
             },
         });
 
@@ -319,7 +319,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 10,
                 offset: 0,
-                resultsForQuery: 2
+                total: 2
             },
         });
 
@@ -373,7 +373,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 10,
                 offset: 0,
-                resultsForQuery: 1
+                total: 1
             },
         });
 
@@ -454,7 +454,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 10,
                 offset: 0,
-                resultsForQuery: 2,
+                total: 2,
             }
         });
 
@@ -464,7 +464,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 10,
                 offset: 0,
-                resultsForQuery: 1,
+                total: 1,
             }
         });
 
@@ -529,7 +529,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 10,
                 offset: 0,
-                resultsForQuery: 1,
+                total: 1,
             }
         });
 
@@ -548,7 +548,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: -1,
                 offset: 0,
-                resultsForQuery: 1,
+                total: 1,
             }
         });
         return Promise.resolve();
@@ -566,7 +566,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: -1,
                 offset: 0,
-                resultsForQuery: 1,
+                total: 1,
             }
         });
         return Promise.resolve();
@@ -588,7 +588,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: -1,
                 offset: 0,
-                resultsForQuery: 2,
+                total: 2,
             },
         });
         return Promise.resolve();
@@ -610,7 +610,7 @@ describe("Database implementations", () => {
             pagination: {
                 offset: 0,
                 limit: -1,
-                resultsForQuery: 2
+                total: 2
             },
         });
         return Promise.resolve();
@@ -644,7 +644,7 @@ describe("Database implementations", () => {
             pagination: {
                 offset: 0,
                 limit: -1,
-                resultsForQuery: 0
+                total: 0
             },
         });
         return Promise.resolve();
@@ -662,7 +662,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: -1,
                 offset: 0,
-                resultsForQuery: 0,
+                total: 0,
             },
         });
         return Promise.resolve();
@@ -685,7 +685,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: -1,
                 offset: 0,
-                resultsForQuery: 1,
+                total: 1,
             },
         });
         return Promise.resolve();
@@ -708,7 +708,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: -1,
                 offset: 0,
-                resultsForQuery: 1,
+                total: 1,
             },
         });
         return Promise.resolve();
@@ -766,7 +766,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 1,
                 offset: 0,
-                resultsForQuery: 1,
+                total: 1,
             },
         });
         return Promise.resolve();
@@ -784,7 +784,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 1,
                 offset: 0,
-                resultsForQuery: 1,
+                total: 1,
             },
         });
         return Promise.resolve();
@@ -801,7 +801,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 1,
                 offset: 0,
-                resultsForQuery: 0,
+                total: 0,
             },
         });
         return Promise.resolve();
@@ -818,7 +818,7 @@ describe("Database implementations", () => {
             pagination: {
                 limit: 1,
                 offset: 0,
-                resultsForQuery: 0,
+                total: 0,
             },
         });
         return Promise.resolve();

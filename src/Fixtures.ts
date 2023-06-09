@@ -141,7 +141,7 @@ export function forgeOrderERC20Response(): OrderResponse<FullOrderERC20> {
         pagination: {
             limit: 10,
             offset: 0,
-            resultsForQuery:1
+            total:1
         }
     }
 }
@@ -158,7 +158,7 @@ export function forgeOrderResponse(): OrderResponse<FullOrder> {
         pagination: {
             limit: 10,
             offset: 0,
-            resultsForQuery:1
+            total:1
         }
     }
 }
