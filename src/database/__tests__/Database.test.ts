@@ -839,7 +839,7 @@ describe("Database implementations", () => {
 
         const hash = db.generateHash(indexedOrder);
 
-        expect(hash).toBe("dff9f300bb369f7de5a472eeb19aba5fdfa7815fede741b68ad55244359e54e2");
+        expect(hash).toBe("86903491dd10421ee4bc866341c9852e18b296d429ed1fdc9fc9c30701d6d8cd");
         return Promise.resolve();
     }
 });

@@ -221,7 +221,7 @@ describe("Order service", () => {
 
         test("Add order invalid date", async () => {
             const orderDateNotInRange = forgeFullOrderERC20(1653900784696);
-            orderDateNotInRange.expiry = `${new Date().getTime()}${1000 * 3600 * 24 * 100}`;
+            orderDateNotInRange.expiry = '0';
 
             await expect(async () => {
                 await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, maxResultByQuery).addOrderERC20(orderDateNotInRange)
@@ -323,7 +323,7 @@ describe("Order service", () => {
 
         test("Add order invalid date", async () => {
             const orderDateNotInRange = forgeFullOrder(1653900784696);
-            orderDateNotInRange.expiry = `${new Date().getTime()}${1000 * 3600 * 24 * 100}`;
+            orderDateNotInRange.expiry = '0';
 
             await expect(async () => {
                 await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, maxResultByQuery).addOrder(orderDateNotInRange)

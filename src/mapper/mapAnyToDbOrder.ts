@@ -12,18 +12,18 @@ export function mapAnyToDbOrder(data: any): DbOrder {
         s: String(data.s),
         v: String(data.v),
         chainId: Number(data.chainId),
-        swapContract: String(data.swapContract),
-        affiliateWallet: String(data.affiliateWallet),
+        swapContract: String(data.swapContract).toLocaleLowerCase(),
+        affiliateWallet: String(data.affiliateWallet).toLocaleLowerCase(),
         affiliateAmount: String(data.affiliateAmount)
     }
 }
 
 function mapToOrderParty(field: any): DbOrderParty {
     return {
-        wallet: String(field.wallet),
-        token: String(field.token),
-        kind: String(field.kind),
-        id: String(field.id),
+        wallet: String(field.wallet).toLocaleLowerCase(),
+        token: String(field.token).toLocaleLowerCase(),
+        kind: String(field.kind).toLocaleLowerCase(),
+        id: String(field.id).toLocaleLowerCase(),
         amount: String(field.amount),
         approximatedAmount: toBigInt(field.amount)!
     }

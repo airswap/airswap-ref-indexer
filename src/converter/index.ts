@@ -6,7 +6,7 @@ function isString(value: string) {
 
 export function toArray(value: string[]): string[] | undefined {
     if (value !== undefined && value !== null && Array.isArray(value)) {
-        return value.filter(isString);
+        return value.filter(isString).map(value => value.toLocaleLowerCase());
     }
     return undefined;
 }

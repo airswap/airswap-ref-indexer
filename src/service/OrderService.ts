@@ -12,7 +12,6 @@ import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
 import { Web3SwapClient } from '../client/Web3SwapClient';
 
-const validationDurationInWeek = 1;
 
 export const METHODS = {
     getOrdersERC20: "getOrdersERC20",
@@ -51,7 +50,7 @@ export class OrderService {
         if (!areERC20NumberFieldsValid(body)) {
             throw new ClientError("Number fields are incorrect");
         }
-        if (!isDateInRange(body.expiry, validationDurationInWeek)) {
+        if (!isDateInRange(body.expiry)) {
             throw new ClientError("Invalid expiry date");
         }
 
@@ -98,7 +97,7 @@ export class OrderService {
         if (!areOrderNumberFieldsValid(body)) {
             throw new ClientError("Number fields are incorrect");
         }
-        if (!isDateInRange(body.expiry, validationDurationInWeek)) {
+        if (!isDateInRange(body.expiry)) {
             throw new ClientError("Invalid expiry date");
         }
         const dbOrder = mapAnyToDbOrder(body);

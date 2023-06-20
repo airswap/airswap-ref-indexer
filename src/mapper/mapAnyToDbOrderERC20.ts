@@ -9,12 +9,12 @@ import { toBigInt, toNumber } from '../converter/index.js';
 export function mapAnyToDbOrderERC20(data: any): DbOrderERC20 {
     return {
         nonce: Number(data.nonce),
-        signerWallet: String(data.signerWallet),
-        signerToken: String(data.signerToken),
+        signerWallet: String(data.signerWallet).toLocaleLowerCase(),
+        signerToken: String(data.signerToken).toLocaleLowerCase(),
         signerAmount: String(data.signerAmount),
         protocolFee: String(data.protocolFee),
-        senderWallet: String(data.senderWallet),
-        senderToken: String(data.senderToken),
+        senderWallet: String(data.senderWallet).toLocaleLowerCase(),
+        senderToken: String(data.senderToken).toLocaleLowerCase(),
         senderAmount: String(data.senderAmount),
         expiry: toNumber(data.expiry)!,
         approximatedSignerAmount: toBigInt(data.signerAmount)!,
@@ -23,6 +23,6 @@ export function mapAnyToDbOrderERC20(data: any): DbOrderERC20 {
         s: String(data.s),
         v: String(data.v),
         chainId: Number(data.chainId),
-        swapContract: String(data.swapContract)
+        swapContract: String(data.swapContract).toLocaleLowerCase()
     }
 }

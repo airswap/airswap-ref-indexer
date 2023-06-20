@@ -57,16 +57,16 @@ export function forgeDbOrder(expiryDate: number): DbOrder {
         signer: {
             wallet: AddressZero,
             token: AddressZero,
-            kind: "aKind",
-            id: "aId",
+            kind: "akind",
+            id: "aid",
             amount: "100",
             approximatedAmount: BigInt("100")
         },
         sender: {
             wallet: AddressZero,
             token: AddressZero,
-            kind: "aKind",
-            id: "aId",
+            kind: "akind",
+            id: "aid",
             amount: "100",
             approximatedAmount: BigInt("100")
         },
@@ -109,15 +109,15 @@ export function forgeFullOrder(expiryDate: number): FullOrder {
         signer: {
             wallet: AddressZero,
             token: AddressZero,
-            kind: "aKind",
-            id: "aId",
+            kind: "akind",
+            id: "aid",
             amount: "100"
         },
         sender: {
             wallet: AddressZero,
             token: AddressZero,
-            kind: "aKind",
-            id: "aId",
+            kind: "akind",
+            id: "aid",
             amount: "100"
         },
         r: "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",

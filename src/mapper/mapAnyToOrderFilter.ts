@@ -23,13 +23,13 @@ export function mapAnyToOrderFilter(data: any, maxResultByQuery: number): DbOrde
 
     return {
         orderNonce: toNumber(data.orderNonce),
-        senderIds: data.senderIds,
-        signerIds: data.signerIds,
-        signerWallet: data.signerWallet,
+        senderIds: toArray(data.senderIds),
+        signerIds: toArray(data.signerIds),
+        signerWallet: data.signerWallet?.toLocaleLowerCase(),
         signerMinAmount: toBigInt(data.signerMinAmount),
         signerMaxAmount: toBigInt(data.signerMaxAmount),
         signerTokens: toArray(data.signerTokens),
-        senderWallet: data.senderWallet,
+        senderWallet: data.senderWallet?.toLocaleLowerCase(),
         senderMinAmount: toBigInt(data.senderMinAmount),
         senderMaxAmount: toBigInt(data.senderMaxAmount),
         senderTokens: toArray(data.senderTokens),
