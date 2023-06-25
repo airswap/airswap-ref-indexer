@@ -1,4 +1,3 @@
- // @ts-nocheck
 import { FullOrder, FullOrderERC20, IndexedOrder, OrderResponse, OrderFilter, SortField, SortOrder } from '@airswap/types';
 import crypto from "crypto";
 import { Database } from './Database.js';
@@ -33,7 +32,7 @@ export class InMemoryDatabase implements Database {
       if (orderFilter.senderMaxAmount != undefined) { isFound = isFound && order.approximatedSenderAmount <= orderFilter.senderMaxAmount; }
       if (orderFilter.signerMinAmount != undefined) { isFound = isFound && order.approximatedSignerAmount >= orderFilter.signerMinAmount; }
       if (orderFilter.signerMaxAmount != undefined) { isFound = isFound && order.approximatedSignerAmount <= orderFilter.signerMaxAmount; }
-      if (orderFilter.orderNonce != undefined) { isFound = isFound && order.nonce == orderFilter.orderNonce; }
+      if (orderFilter.nonce != undefined) { isFound = isFound && order.nonce == orderFilter.nonce; }
       return isFound;
     })
       .sort((a, b) => {
@@ -255,7 +254,7 @@ export class InMemoryDatabase implements Database {
       if (orderFilter.signerMaxAmount != undefined) { isFound = isFound && order.signer.approximatedAmount <= orderFilter.signerMaxAmount; }
       if (orderFilter.signerTokens != undefined) { isFound = isFound && orderFilter.signerTokens.indexOf(order.signer.token) !== -1; }
       if (orderFilter.senderTokens != undefined) { isFound = isFound && orderFilter.senderTokens.indexOf(order.sender.token) !== -1; }
-      if (orderFilter.orderNonce != undefined) { isFound = isFound && order.nonce == orderFilter.orderNonce; }
+      if (orderFilter.nonce != undefined) { isFound = isFound && order.nonce == orderFilter.nonce; }
       if (orderFilter.signerIds != undefined) { isFound = isFound && orderFilter.signerIds.indexOf(order.signer.id) !== -1; }
       if (orderFilter.senderIds != undefined) { isFound = isFound && orderFilter.senderIds.indexOf(order.sender.id) !== -1; }
       return isFound;

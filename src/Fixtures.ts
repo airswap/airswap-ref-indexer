@@ -1,4 +1,3 @@
- // @ts-nocheck
 import { IndexedOrder, OrderResponse, FullOrder } from '@airswap/types';
 import { FullOrderERC20 } from '@airswap/types';
 import { AddressZero } from '@ethersproject/constants';

@@ -1,4 +1,3 @@
- // @ts-nocheck
 import { AddressZero } from '@ethersproject/constants';
 import { FullOrder, FullOrderERC20 } from '@airswap/types';
 import { forgeDbOrderERC20, forgeDbOrder, forgeFullOrder, forgeIndexedOrderERC20, forgeIndexedOrder, forgeIndexedOrderResponseERC20, forgeIndexedOrderResponse } from '../../Fixtures';
@@ -357,7 +356,7 @@ describe("Database implementations", () => {
         const specifiSenderWallet = await db.getOrdersERC20By({ offset: 0, limit: 10, senderWallet: order3.senderWallet });
         expect(Object.keys(specifiSenderWallet.orders)).toEqual(["id3"]);
 
-        const byNonce = await db.getOrdersERC20By({ offset: 0, limit: 10, orderNonce: 123 });
+        const byNonce = await db.getOrdersERC20By({ offset: 0, limit: 10, nonce: 123 });
         expect(Object.keys(byNonce.orders)).toEqual(["id1"]);
 
         const specificOne = await db.getOrdersERC20By({
@@ -517,7 +516,7 @@ describe("Database implementations", () => {
         const bySignerId = await db.getOrdersBy({ offset: 0, limit: 10, signerIds: ["aTokenId"] });
         expect(Object.keys(bySignerId.orders)).toEqual(["id3"]);
 
-        const byNonce = await db.getOrdersBy({ offset: 0, limit: 10, orderNonce: 123 });
+        const byNonce = await db.getOrdersBy({ offset: 0, limit: 10, nonce: 123 });
         expect(Object.keys(byNonce.orders)).toEqual(["id1"]);
 
         const specificOne = await db.getOrdersBy({

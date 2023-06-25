@@ -1,4 +1,3 @@
- // @ts-nocheck
 import { Database } from '../../database/Database';
 import { forgeIndexedOrderResponseERC20, forgeIndexedOrderResponse } from '../../Fixtures';
 import { Peers } from '../../peer/Peers';

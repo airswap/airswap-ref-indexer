@@ -20,7 +20,7 @@ export type DbOrder = Modify<FullOrder, {
 }>
 
 export type DbOrderFilter = Modify<OrderFilter, {
-    orderNonce?: number;
+    nonce?: number;
     signerMinAmount?: bigint;
     signerMaxAmount?: bigint;
     senderMinAmount?: bigint;

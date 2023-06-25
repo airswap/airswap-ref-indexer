@@ -1,4 +1,3 @@
- // @ts-nocheck
 import { FullOrder, IndexedOrder, OrderResponse, OrderFilter, SortField, SortOrder } from '@airswap/types';
 import { AceBase, AceBaseLocalSettings, DataReference } from 'acebase';
 import crypto from "crypto";
@@ -132,8 +131,8 @@ export class AceBaseClient implements Database {
     async getOrdersBy(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrder>> {
         const query = this.refOrders.query();
 
-        if (orderFilter.orderNonce != undefined) {
-            query.filter('order/nonce', '==', orderFilter.orderNonce);
+        if (orderFilter.nonce != undefined) {
+            query.filter('order/nonce', '==', orderFilter.nonce);
         }
         if (orderFilter.senderWallet != undefined) {
             query.filter('order/sender/wallet', '==', orderFilter.senderWallet);
@@ -211,8 +210,8 @@ export class AceBaseClient implements Database {
     async getOrdersERC20By(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrderERC20>> {
         const query = this.refERC20.query();
 
-        if (orderFilter.orderNonce != undefined) {
-            query.filter('order/nonce', '==', orderFilter.orderNonce);
+        if (orderFilter.nonce != undefined) {
+            query.filter('order/nonce', '==', orderFilter.nonce);
         }
         if (orderFilter.signerTokens != undefined) {
             query.filter('order/signerToken', 'in', orderFilter.signerTokens);

@@ -17,8 +17,8 @@
   "license": "MIT",
   "dependencies": {
     "@airswap/libraries": "4.0.10",
-    "@airswap/types": "4.0.4",
-    "@airswap/utils": "4.0.5",
+    "@airswap/types": "4.0.5",
+    "@airswap/utils": "4.0.6",
     "@airswap/constants": "4.0.3",
     "@babel/preset-env": "7.20.2",
     "@babel/preset-typescript": "7.18.6",

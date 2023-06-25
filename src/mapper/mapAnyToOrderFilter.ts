@@ -1,4 +1,3 @@
- // @ts-nocheck
 import { DbOrderFilter } from "model/DbOrderTypes.js";
 import { toNumber, toArray, toBigInt } from "../converter/index.js";
 import { isNumeric } from '../validator/index.js';
@@ -22,7 +21,7 @@ export function mapAnyToOrderFilter(data: any, maxResultByQuery: number): DbOrde
     }
 
     return {
-        orderNonce: toNumber(data.orderNonce),
+        nonce: toNumber(data.nonce),
         senderIds: toArray(data.senderIds),
         signerIds: toArray(data.signerIds),
         signerWallet: data.signerWallet?.toLocaleLowerCase(),
