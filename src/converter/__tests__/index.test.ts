@@ -44,7 +44,7 @@ describe("converter", () => {
             expect(toArray([])).toEqual([]);
             expect(toArray(["a"])).toEqual(["a"]);
             //@ts-ignore
-            expect(toArray(["a", 1, "", " "])).toEqual(["a"]);
+            expect(toArray(["a", 1, "", " "])).toEqual(["a", "1"]);
         });
 
     });
