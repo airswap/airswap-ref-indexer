@@ -24,16 +24,16 @@ export class InMemoryDatabase implements Database {
     const totalResults = Object.values(this.erc20Database).filter((indexedOrder: IndexedOrder<DbOrderERC20>) => {
       const order = indexedOrder.order;
       let isFound = true;
-      if (orderFilter.signerTokens != undefined) { isFound = isFound && orderFilter.signerTokens.indexOf(order.signerToken) !== -1; }
-      if (orderFilter.senderTokens != undefined) { isFound = isFound && orderFilter.senderTokens.indexOf(order.senderToken) !== -1; }
-      if (orderFilter.signerWallet != undefined) { isFound = isFound && orderFilter.signerWallet === order.signerWallet; }
-      if (orderFilter.senderWallet != undefined) { isFound = isFound && orderFilter.senderWallet === order.senderWallet; }
-      if (orderFilter.senderMinAmount != undefined) { isFound = isFound && order.approximatedSenderAmount >= orderFilter.senderMinAmount; }
-      if (orderFilter.senderMaxAmount != undefined) { isFound = isFound && order.approximatedSenderAmount <= orderFilter.senderMaxAmount; }
-      if (orderFilter.signerMinAmount != undefined) { isFound = isFound && order.approximatedSignerAmount >= orderFilter.signerMinAmount; }
-      if (orderFilter.signerMaxAmount != undefined) { isFound = isFound && order.approximatedSignerAmount <= orderFilter.signerMaxAmount; }
-      if (orderFilter.nonce != undefined) { isFound = isFound && order.nonce == orderFilter.nonce; }
-      return isFound;
+      if (orderFilter.signerTokens != undefined) { if (orderFilter.signerTokens.indexOf(order.signerToken) === -1) return false; }
+      if (orderFilter.senderTokens != undefined) { if (orderFilter.senderTokens.indexOf(order.senderToken) === -1) return false; }
+      if (orderFilter.signerWallet != undefined) { if (orderFilter.signerWallet !== order.signerWallet) return false; }
+      if (orderFilter.senderWallet != undefined) { if (orderFilter.senderWallet !== order.senderWallet) return false; }
+      if (orderFilter.senderMinAmount != undefined) { if (order.approximatedSenderAmount < orderFilter.senderMinAmount) return false; }
+      if (orderFilter.senderMaxAmount != undefined) { if (order.approximatedSenderAmount > orderFilter.senderMaxAmount) return false; }
+      if (orderFilter.signerMinAmount != undefined) { if (order.approximatedSignerAmount < orderFilter.signerMinAmount) return false; }
+      if (orderFilter.signerMaxAmount != undefined) { if (order.approximatedSignerAmount > orderFilter.signerMaxAmount) return false; }
+      if (orderFilter.nonce != undefined) { if (order.nonce !== orderFilter.nonce) return false; }
+      return true;
     })
       .sort((a, b) => {
         if (orderFilter.sortField == SortField.SIGNER_AMOUNT) {
