@@ -64,9 +64,12 @@ export class OrderService {
         }
 
         indexedOrder.hash = hash;
+        const isNetworkAdded = this.web3SwapERC20Client.connectToChain(indexedOrder.order.chainId)
+        if(!isNetworkAdded){
+            throw new ClientError("Chain ID unsupported");
+        }
         await this.database.addOrderERC20(indexedOrder);
         console.log("Added", indexedOrder.order)
-        this.web3SwapERC20Client.connectToChain(indexedOrder.order.chainId)
         return Promise.resolve();
     }
 
@@ -110,9 +113,12 @@ export class OrderService {
         }
 
         indexedOrder.hash = hash;
+        const isNetworkAdded = this.web3SwapClient.connectToChain(indexedOrder.order.chainId)
+        if(!isNetworkAdded){
+            throw new ClientError("Chain ID unsupported");
+        }
         await this.database.addOrder(indexedOrder);
         console.log("Added", indexedOrder.order)
-        this.web3SwapClient.connectToChain(indexedOrder.order.chainId)
         return Promise.resolve();
     }
 
