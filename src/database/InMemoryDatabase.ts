@@ -1,59 +1,66 @@
-import { FullOrder, FullOrderERC20, IndexedOrder, OrderResponse, RequestFilterERC20, SortField, SortOrder, RequestFilter } from '@airswap/types';
+import { FullOrder, FullOrderERC20, IndexedOrder, OrderResponse, OrderFilter, SortField, SortOrder } from '@airswap/types';
 import crypto from "crypto";
-import { computePagination } from '../mapper/pagination/index.js';
 import { Database } from './Database.js';
-import { Filters } from './filter/Filters.js';
-import { DbOrderERC20, DbOrder, DbOrderParty } from '../model/DbOrderTypes.js';
+import { DbOrderERC20, DbOrder, DbOrderParty, DbOrderFilter } from '../model/DbOrderTypes.js';
 import { mapAnyToFullOrderERC20 } from '../mapper/mapAnyToFullOrderERC20.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 
-const elementPerPage = 20;
-
 export class InMemoryDatabase implements Database {
-  erc20Database: Record<string, IndexedOrder<DbOrderERC20>>;
-  orderDatabase: Record<string, IndexedOrder<DbOrder>>;
-  filters: Filters;
+  private erc20Database: Record<string, IndexedOrder<DbOrderERC20>>;
+  private orderDatabase: Record<string, IndexedOrder<DbOrder>>;
+  private tokens: string[];
 
   constructor() {
     this.erc20Database = {};
     this.orderDatabase = {};
-    this.filters = new Filters();
+    this.tokens = [];
   }
 
   connect(databaseName: string, deleteOnStart: boolean): Promise<void> {
     return Promise.resolve();
   }
 
-  getOrdersERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>> {
+  getOrdersERC20By(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrderERC20>> {
     const totalResults = Object.values(this.erc20Database).filter((indexedOrder: IndexedOrder<DbOrderERC20>) => {
       const order = indexedOrder.order;
-      let isFound = true;
-      if (requestFilter.signerTokens != undefined) { isFound = isFound && requestFilter.signerTokens.indexOf(order.signerToken) !== -1; }
-      if (requestFilter.senderTokens != undefined) { isFound = isFound && requestFilter.senderTokens.indexOf(order.senderToken) !== -1; }
-      if (requestFilter.minSenderAmount != undefined) { isFound = isFound && order.approximatedSenderAmount >= requestFilter.minSenderAmount; }
-      if (requestFilter.maxSenderAmount != undefined) { isFound = isFound && order.approximatedSenderAmount <= requestFilter.maxSenderAmount; }
-      if (requestFilter.minSignerAmount != undefined) { isFound = isFound && order.approximatedSignerAmount >= requestFilter.minSignerAmount; }
-      if (requestFilter.maxSignerAmount != undefined) { isFound = isFound && order.approximatedSignerAmount <= requestFilter.maxSignerAmount; }
-      if (requestFilter.maxAddedDate != undefined) {
-        isFound = isFound && +indexedOrder.addedOn >= requestFilter.maxAddedDate;
-      }
-      return isFound;
+      if (orderFilter.signerTokens != undefined) { if (orderFilter.signerTokens.indexOf(order.signerToken) === -1) return false; }
+      if (orderFilter.senderTokens != undefined) { if (orderFilter.senderTokens.indexOf(order.senderToken) === -1) return false; }
+      if (orderFilter.signerWallet != undefined) { if (orderFilter.signerWallet !== order.signerWallet) return false; }
+      if (orderFilter.senderWallet != undefined) { if (orderFilter.senderWallet !== order.senderWallet) return false; }
+      if (orderFilter.senderMinAmount != undefined) { if (order.approximatedSenderAmount < orderFilter.senderMinAmount) return false; }
+      if (orderFilter.senderMaxAmount != undefined) { if (order.approximatedSenderAmount > orderFilter.senderMaxAmount) return false; }
+      if (orderFilter.signerMinAmount != undefined) { if (order.approximatedSignerAmount < orderFilter.signerMinAmount) return false; }
+      if (orderFilter.signerMaxAmount != undefined) { if (order.approximatedSignerAmount > orderFilter.signerMaxAmount) return false; }
+      if (orderFilter.nonce != undefined) { if (order.nonce !== orderFilter.nonce) return false; }
+      return true;
     })
       .sort((a, b) => {
-        if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
-          if (requestFilter.sortOrder == SortOrder.ASC) {
+        if (orderFilter.sortField == SortField.SIGNER_AMOUNT) {
+          if (orderFilter.sortOrder == SortOrder.ASC) {
             return Number(a.order.approximatedSignerAmount - b.order.approximatedSignerAmount)
           }
           return Number(b.order.approximatedSignerAmount - a.order.approximatedSignerAmount)
         }
-        if (requestFilter.sortOrder == SortOrder.ASC) {
-          return Number(a.order.approximatedSenderAmount - b.order.approximatedSenderAmount)
+        else if (orderFilter.sortField == SortField.SENDER_AMOUNT) {
+          if (orderFilter.sortOrder == SortOrder.ASC) {
+            return Number(a.order.approximatedSenderAmount - b.order.approximatedSenderAmount)
+          }
+          return Number(b.order.approximatedSenderAmount - a.order.approximatedSenderAmount)
         }
-        return Number(b.order.approximatedSenderAmount - a.order.approximatedSenderAmount)
+        else if (orderFilter.sortField == SortField.NONCE) {
+          if (orderFilter.sortOrder == SortOrder.ASC) {
+            return Number(a.order.nonce - b.order.nonce)
+          }
+          return Number(b.order.nonce - a.order.nonce)
+        }
+        if (orderFilter.sortOrder == SortOrder.ASC) {
+          return Number(a.order.expiry - b.order.expiry)
+        }
+        return Number(b.order.expiry - a.order.expiry)
       });
     const totalResultsCount = totalResults.length;
     const orders: Record<string, IndexedOrder<FullOrderERC20>> = totalResults
-      .slice((requestFilter.page - 1) * elementPerPage, requestFilter.page * elementPerPage)
+      .slice(orderFilter.offset, orderFilter.offset + orderFilter.limit)
       .reduce((total, indexedOrder) => {
         const orderId = indexedOrder['hash'];
         if (orderId) {
@@ -65,16 +72,15 @@ export class InMemoryDatabase implements Database {
 
     return Promise.resolve({
       orders,
-      pagination: computePagination(elementPerPage, totalResultsCount, requestFilter.page),
-      ordersForQuery: totalResultsCount
+      pagination: { offset: orderFilter.offset, limit: orderFilter.limit, total: totalResultsCount },
     });
   }
 
   addOrderERC20(indexedOrder: IndexedOrder<DbOrderERC20>) {
     this.erc20Database[indexedOrder.hash!] = indexedOrder;
     const order = indexedOrder.order as DbOrderERC20;
-    this.filters.addSignerToken(order.signerToken, order.approximatedSignerAmount);
-    this.filters.addSenderToken(order.senderToken, order.approximatedSenderAmount);
+    this.addToken(order.signerToken);
+    this.addToken(order.senderToken);
     return Promise.resolve();
   }
 
@@ -85,7 +91,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  deleteOrderERC20(nonce: string, signerWallet: string): Promise<void> {
+  deleteOrderERC20(nonce: number, signerWallet: string): Promise<void> {
     const orderToDelete = Object.values(this.erc20Database).find((indexedOrder) => {
       const order = indexedOrder.order as DbOrderERC20
       return order.nonce === nonce && order.signerWallet === signerWallet
@@ -112,15 +118,14 @@ export class InMemoryDatabase implements Database {
       result[hash] = this.mapToERC20IndexedOrderResponse(this.erc20Database[hash]);
       return Promise.resolve({
         orders: result,
-        pagination: computePagination(elementPerPage, 1),
-        ordersForQuery: 1
+        pagination: { offset: 0, limit: 1, total: 1 },
       });
     }
     return Promise.resolve({
       orders: result,
-      pagination: computePagination(elementPerPage, 0),
-      ordersForQuery: 0
+      pagination: { offset: 0, limit: 1, total: 0 },
     });
+
   }
 
   async getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>> {
@@ -131,13 +136,18 @@ export class InMemoryDatabase implements Database {
     })
     return Promise.resolve({
       orders: results,
-      pagination: computePagination(size, size),
-      ordersForQuery: size
+      pagination: { offset: 0, limit: -1, total: size },
     });
   }
 
-  getFiltersERC20(): Promise<Filters> {
-    return Promise.resolve(this.filters);
+  getTokens(): Promise<string[]> {
+    return Promise.resolve(this.tokens);
+  }
+
+  private addToken(token: string) {
+    if (!this.tokens.includes(token)) {
+      this.tokens.push(token);
+    }
   }
 
   orderERC20Exists(hash: string): Promise<boolean> {
@@ -171,6 +181,8 @@ export class InMemoryDatabase implements Database {
   ////////////////////////////// Non ERC20
   addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {
     this.orderDatabase[indexedOrder.hash!] = indexedOrder;
+    this.addToken(indexedOrder.order.signer.token)
+    this.addToken(indexedOrder.order.sender.token)
     return Promise.resolve()
   }
 
@@ -181,16 +193,17 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  deleteOrder(nonce: string, signerWallet: string): Promise<void> {
+  deleteOrder(nonce: number, signerWallet: string): Promise<void> {
     const orderToDelete = Object.values(this.orderDatabase).find((indexedOrder) => {
       const order = indexedOrder.order as DbOrder
-      return order.nonce === nonce
+      return order.nonce === nonce && order.signer.wallet === signerWallet
     });
     if (orderToDelete && orderToDelete.hash) {
       delete this.orderDatabase[orderToDelete.hash];
     }
     return Promise.resolve();
   }
+
   deleteExpiredOrder(timestampInSeconds: number): Promise<void> {
     const hashToDelete: string[] = Object.keys(this.orderDatabase).filter((key: string) => {
       return this.orderDatabase[key].order.expiry < timestampInSeconds;
@@ -207,14 +220,12 @@ export class InMemoryDatabase implements Database {
       result[hash] = this.mapToIndexedOrderResponse(this.orderDatabase[hash]);
       return Promise.resolve({
         orders: result,
-        pagination: computePagination(elementPerPage, 1),
-        ordersForQuery: 1
+        pagination: { offset: 0, limit: 1, total: 1 },
       });
     }
     return Promise.resolve({
       orders: result,
-      pagination: computePagination(elementPerPage, 0),
-      ordersForQuery: 0
+      pagination: { offset: 0, limit: 1, total: 0 },
     });
   }
 
@@ -226,40 +237,53 @@ export class InMemoryDatabase implements Database {
     })
     return Promise.resolve({
       orders: results,
-      pagination: computePagination(size, size),
-      ordersForQuery: size
+      pagination: { offset: 0, limit: -1, total: size },
     });
   }
 
-  getOrdersBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
+  getOrdersBy(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrder>> {
     const totalResults = Object.values(this.orderDatabase).filter((indexedOrder: IndexedOrder<DbOrder>) => {
       const order = indexedOrder.order;
-      let isFound = true;
-      if (requestFilter.signerAddress != undefined) { isFound = isFound && requestFilter.signerAddress.indexOf(order.signer.wallet) !== -1; }
-      if (requestFilter.senderAddress != undefined) { isFound = isFound && requestFilter.senderAddress.indexOf(order.sender.wallet) !== -1; }
-      return isFound;
+      if (orderFilter.signerWallet != undefined) { if (order.signer.wallet !== orderFilter.signerWallet) return false; }
+      if (orderFilter.senderWallet != undefined) { if (order.sender.wallet !== orderFilter.senderWallet) return false; }
+      if (orderFilter.senderMinAmount != undefined) { if (order.sender.approximatedAmount < orderFilter.senderMinAmount) return false; }
+      if (orderFilter.senderMaxAmount != undefined) { if (order.sender.approximatedAmount > orderFilter.senderMaxAmount) return false; }
+      if (orderFilter.signerMinAmount != undefined) { if (order.signer.approximatedAmount < orderFilter.signerMinAmount) return false; }
+      if (orderFilter.signerMaxAmount != undefined) { if (order.signer.approximatedAmount > orderFilter.signerMaxAmount) return false; }
+      if (orderFilter.signerTokens != undefined) { if (orderFilter.signerTokens.indexOf(order.signer.token) === -1) return false; }
+      if (orderFilter.senderTokens != undefined) { if (orderFilter.senderTokens.indexOf(order.sender.token) === -1) return false; }
+      if (orderFilter.nonce != undefined) { if (order.nonce !== orderFilter.nonce) return false; }
+      if (orderFilter.signerIds != undefined) { if (orderFilter.signerIds.indexOf(order.signer.id) === -1) return false; }
+      if (orderFilter.senderIds != undefined) { if (orderFilter.senderIds.indexOf(order.sender.id) === -1) return false; }
+      return true;
     })
       .sort((a, b) => {
-        if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
-          if (requestFilter.sortOrder == SortOrder.ASC) {
+        if (orderFilter.sortField == SortField.SIGNER_AMOUNT) {
+          if (orderFilter.sortOrder == SortOrder.ASC) {
             return Number(a.order.signer.approximatedAmount - b.order.signer.approximatedAmount)
           }
           return Number(b.order.signer.approximatedAmount - a.order.signer.approximatedAmount)
         }
-        else if (requestFilter.sortField == SortField.SENDER_AMOUNT) {
-          if (requestFilter.sortOrder == SortOrder.ASC) {
+        else if (orderFilter.sortField == SortField.SENDER_AMOUNT) {
+          if (orderFilter.sortOrder == SortOrder.ASC) {
             return Number(a.order.sender.approximatedAmount - b.order.sender.approximatedAmount)
           }
           return Number(b.order.sender.approximatedAmount - a.order.sender.approximatedAmount)
         }
-        if (requestFilter.sortOrder == SortOrder.ASC) {
+        else if (orderFilter.sortField == SortField.NONCE) {
+          if (orderFilter.sortOrder == SortOrder.ASC) {
+            return Number(a.order.nonce - b.order.nonce)
+          }
+          return Number(b.order.nonce - a.order.nonce)
+        }
+        if (orderFilter.sortOrder == SortOrder.ASC) {
           return Number(a.order.expiry - b.order.expiry)
         }
         return Number(b.order.expiry - a.order.expiry)
       });
     const totalResultsCount = totalResults.length;
     const orders: Record<string, IndexedOrder<FullOrder>> = totalResults
-      .slice((requestFilter.page - 1) * elementPerPage, requestFilter.page * elementPerPage)
+      .slice(orderFilter.offset, orderFilter.offset + orderFilter.limit)
       .reduce((total, indexedOrder) => {
         const orderId = indexedOrder['hash'];
         if (orderId) {
@@ -271,8 +295,7 @@ export class InMemoryDatabase implements Database {
 
     return Promise.resolve({
       orders,
-      pagination: computePagination(elementPerPage, totalResultsCount, requestFilter.page),
-      ordersForQuery: totalResultsCount
+      pagination: { offset: orderFilter.offset, limit: orderFilter.limit, total: totalResultsCount },
     });
   }
 
@@ -284,7 +307,7 @@ export class InMemoryDatabase implements Database {
   erase() {
     this.erc20Database = {};
     this.orderDatabase = {};
-    this.filters = new Filters();
+    this.tokens = [];
     return Promise.resolve();
   }
 

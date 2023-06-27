@@ -1,4 +1,4 @@
-import { IndexedOrder, OrderResponse, FiltersResponse, FullOrder } from '@airswap/types';
+import { IndexedOrder, OrderResponse, FullOrder } from '@airswap/types';
 import { FullOrderERC20 } from '@airswap/types';
 import { AddressZero } from '@ethersproject/constants';
 import { DbOrderERC20, DbOrder } from './model/DbOrderTypes.js';
@@ -29,7 +29,7 @@ export function forgeIndexedOrderResponse(expectedAddedDate: number, expiryDate:
 
 export function forgeDbOrderERC20(expiryDate: number): DbOrderERC20 {
     return {
-        nonce: "nonce",
+        nonce: 123,
         expiry: expiryDate / 1000,
         signerWallet: AddressZero,
         signerToken: AddressZero,
@@ -50,22 +50,22 @@ export function forgeDbOrderERC20(expiryDate: number): DbOrderERC20 {
 
 export function forgeDbOrder(expiryDate: number): DbOrder {
     return {
-        nonce: "nonce",
+        nonce: 123,
         expiry: expiryDate / 1000,
         protocolFee: "100",
         signer: {
             wallet: AddressZero,
             token: AddressZero,
-            kind: "aKind",
-            id: "aId",
+            kind: "akind",
+            id: "aid",
             amount: "100",
             approximatedAmount: BigInt("100")
         },
         sender: {
             wallet: AddressZero,
             token: AddressZero,
-            kind: "aKind",
-            id: "aId",
+            kind: "akind",
+            id: "aid",
             amount: "100",
             approximatedAmount: BigInt("100")
         },
@@ -83,7 +83,7 @@ export function forgeDbOrder(expiryDate: number): DbOrder {
 
 export function forgeFullOrderERC20(expiryDate: number): FullOrderERC20 {
     return {
-        nonce: "nonce",
+        nonce: "123",
         expiry: `${expiryDate / 1000}`,
         signerWallet: AddressZero,
         signerToken: AddressZero,
@@ -102,21 +102,21 @@ export function forgeFullOrderERC20(expiryDate: number): FullOrderERC20 {
 
 export function forgeFullOrder(expiryDate: number): FullOrder {
     return {
-        nonce: "nonce",
+        nonce: "123",
         expiry: String(expiryDate / 1000),
         protocolFee: "100",
         signer: {
             wallet: AddressZero,
             token: AddressZero,
-            kind: "aKind",
-            id: "aId",
+            kind: "akind",
+            id: "aid",
             amount: "100"
         },
         sender: {
             wallet: AddressZero,
             token: AddressZero,
-            kind: "aKind",
-            id: "aId",
+            kind: "akind",
+            id: "aid",
             amount: "100"
         },
         r: "0x3e1010e70f178443d0e3437464db2f910be150259cfcbe8916a6267247bea0f7",
@@ -129,7 +129,7 @@ export function forgeFullOrder(expiryDate: number): FullOrder {
     };
 }
 
-export function forgeOrderERC20Response(filters?: FiltersResponse): OrderResponse<FullOrderERC20> {
+export function forgeOrderERC20Response(): OrderResponse<FullOrderERC20> {
     return {
         orders: {
             aze: {
@@ -139,15 +139,14 @@ export function forgeOrderERC20Response(filters?: FiltersResponse): OrderRespons
             },
         },
         pagination: {
-            first: "1",
-            last: "1"
-        },
-        ordersForQuery: 1,
-        filters: filters
+            limit: 10,
+            offset: 0,
+            total:1
+        }
     }
 }
 
-export function forgeOrderResponse(filters?: FiltersResponse): OrderResponse<FullOrder> {
+export function forgeOrderResponse(): OrderResponse<FullOrder> {
     return {
         orders: {
             aze: {
@@ -157,11 +156,10 @@ export function forgeOrderResponse(filters?: FiltersResponse): OrderResponse<Ful
             },
         },
         pagination: {
-            first: "1",
-            last: "1"
-        },
-        ordersForQuery: 1,
-        filters: filters
+            limit: 10,
+            offset: 0,
+            total:1
+        }
     }
 }
 

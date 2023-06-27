@@ -57,7 +57,12 @@ if (swapClients?.swapClientOrder === null) {
   process.exit(4);
 }
 
-const orderService = new OrderService(database, swapClients!.swapClientOrderERC20, swapClients!.swapClientOrder);
+if (!isNumeric(process.env.MAX_RESULTS_FOR_QUERY)) {
+  console.log("MAX_RESULTS_FOR_QUERY not set");
+  process.exit(6);
+}
+
+const orderService = new OrderService(database, swapClients!.swapClientOrderERC20, swapClients!.swapClientOrder, +process.env.MAX_RESULTS_FOR_QUERY!);
 const peers = new Peers(database, host, broadcastClient);
 
 const registryClient = getRegistry(process.env, peers);

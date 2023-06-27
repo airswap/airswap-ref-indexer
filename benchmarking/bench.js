@@ -21,7 +21,7 @@ async function bench() {
         const expiryInSeconds = `${(new Date().getTime() + shift * 60000) / 1000
             }`;
         const body = {
-            nonce: "nonce",
+            nonce: `${new Date().getTime()}`,
             expiry: expiryInSeconds,
             protocolFee: "100",
             signer: {
@@ -48,7 +48,8 @@ async function bench() {
         };
 
         try {
-            if (index % 10 === 0) {
+            const by = 100
+            if (index % by === 0) {
                 await axios.post(host, {
                     jsonrpc: '2.0',
                     id: '1',
@@ -57,7 +58,7 @@ async function bench() {
                 })
                 const now = new Date().getTime();
                 const elapsed = now - lastDate;
-                console.log(index, elapsed, elapsed / 100, "ms/rq");
+                console.log(index, elapsed, elapsed / by, "ms/rq");
                 lastDate = now;
             } else {
                 await axios.post(host, {

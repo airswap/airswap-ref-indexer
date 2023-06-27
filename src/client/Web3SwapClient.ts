@@ -47,7 +47,7 @@ export class Web3SwapClient {
             const decodedNonce = parseInt(nonce._hex, 16);
             if (isNaN(decodedNonce)) return;
 
-            this.database.deleteOrder(`${decodedNonce}`, signerWallet);
+            this.database.deleteOrder(decodedNonce, signerWallet);
         }
     }
 }

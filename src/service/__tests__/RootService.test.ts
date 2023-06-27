@@ -16,20 +16,20 @@ describe("Root service", () => {
                 {
                     orders: { "aze": indexedOrderResponseERC20 },
                     pagination: {
-                        first: "1",
-                        last: "1"
-                    },
-                    ordersForQuery: 1
+                        limit: 10,
+                        offset: 0,
+                        total: 1
+                    }
                 }
             )),
             getOrders: jest.fn(() => Promise.resolve(
                 {
                     orders: { "aze": indexedOrderResponse },
                     pagination: {
-                        first: "1",
-                        last: "1"
-                    },
-                    ordersForQuery: 1
+                        limit: 10,
+                        offset: 0,
+                        total: 1
+                    }
                 }
             )),
         };
@@ -41,7 +41,8 @@ describe("Root service", () => {
     test("get", async () => {
         const expected =
         {
-            databaseOrders: 2,
+            databaseOrders: 1,
+            databaseOrdersERC20: 1,
             peers: [],
             network: 5,
             registry: '0x05545815a5579d80Bd4c380da3487EAC2c4Ce299',

@@ -34,24 +34,23 @@ describe("Validator", () => {
 
     describe("isDateInRange", () => {
         test("should return false", () => {
-            expect(isDateInRange("a", 0)).toBe(false);
-            expect(isDateInRange("1a", 0)).toBe(false);
-            expect(isDateInRange("a1", 0)).toBe(false);
-            expect(isDateInRange("", 0)).toBe(false);
-            expect(isDateInRange(" ", 0)).toBe(false);
+            expect(isDateInRange("a")).toBe(false);
+            expect(isDateInRange("1a")).toBe(false);
+            expect(isDateInRange("a1")).toBe(false);
+            expect(isDateInRange("")).toBe(false);
+            expect(isDateInRange(" ")).toBe(false);
             //@ts-ignore
-            expect(isDateInRange(null, 0)).toBe(false);
+            expect(isDateInRange(null)).toBe(false);
             //@ts-ignore
-            expect(isDateInRange(undefined, 0)).toBe(false);
+            expect(isDateInRange(undefined)).toBe(false);
             //@ts-ignore
-            expect(isDateInRange({}, 0)).toBe(false);
+            expect(isDateInRange({})).toBe(false);
             //@ts-ignore
-            expect(isDateInRange([], 0)).toBe(false);
-            expect(isDateInRange("604800005", 1)).toBe(false);
+            expect(isDateInRange([])).toBe(false);
         });
 
         test("should return true", () => {
-            expect(isDateInRange("604", 1)).toBe(true);
+            expect(isDateInRange("604")).toBe(true);
         });
     });
 });

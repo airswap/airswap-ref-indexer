@@ -1,7 +1,5 @@
-import { FullOrder, OrderResponse, RequestFilterERC20, IndexedOrder } from '@airswap/types';
-import { Filters } from './filter/Filters.js';
-import { FullOrderERC20, RequestFilter } from '@airswap/types';
-import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
+import { FullOrder, OrderResponse, FullOrderERC20, IndexedOrder } from '@airswap/types';
+import { DbOrderERC20, DbOrder, DbOrderFilter } from '../model/DbOrderTypes.js';
 
 export interface Database {
     addOrderERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): Promise<void>;
@@ -10,8 +8,8 @@ export interface Database {
     addAllOrderERC20(indexedOrdersERC20: Record<string, IndexedOrder<DbOrderERC20>>): Promise<void>;
     addAllOrder(indexedOrders:  Record<string, IndexedOrder<DbOrder>>): Promise<void>;
 
-    deleteOrderERC20(nonce: string, signerWallet: string): Promise<void>;
-    deleteOrder(nonce: string, signerWallet: string): Promise<void>;
+    deleteOrderERC20(nonce: number, signerWallet: string): Promise<void>;
+    deleteOrder(nonce: number, signerWallet: string): Promise<void>;
 
     deleteExpiredOrderERC20(timestampInSeconds: number): Promise<void>;
     deleteExpiredOrder(timestampInSeconds: number): Promise<void>;
@@ -22,8 +20,8 @@ export interface Database {
     getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>>;
     getOrders(): Promise<OrderResponse<FullOrder>>;
 
-    getOrdersERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>>;
-    getOrdersBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>>;
+    getOrdersERC20By(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrderERC20>>;
+    getOrdersBy(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrder>>;
 
     orderERC20Exists(hash: string): Promise<boolean>;
     orderExists(hash: string): Promise<boolean>;
@@ -31,7 +29,7 @@ export interface Database {
     generateHashERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): string;
     generateHash(indexedOrder: IndexedOrder<DbOrder>): string;
 
-    getFiltersERC20(): Promise<Filters>;
+    getTokens(): Promise<string[]>;
 
     connect(databaseName: string, deleteOnStart: boolean): Promise<void>;
 

@@ -1,23 +1,20 @@
-import { FullOrder, IndexedOrder, OrderResponse, RequestFilterERC20, RequestFilter, SortField, SortOrder } from '@airswap/types';
+import { FullOrder, IndexedOrder, OrderResponse, OrderFilter, SortField, SortOrder } from '@airswap/types';
 import { AceBase, AceBaseLocalSettings, DataReference } from 'acebase';
 import crypto from "crypto";
 import fs from "fs";
-import { computePagination } from '../mapper/pagination/index.js';
 import { mapAnyToFullOrderERC20 } from '../mapper/mapAnyToFullOrderERC20.js';
 import { Database } from './Database.js';
-import { Filters } from './filter/Filters.js';
 import { FullOrderERC20 } from '@airswap/types';
-import { DbOrderERC20, DbOrder, DbOrderParty } from '../model/DbOrderTypes.js';
+import { DbOrderERC20, DbOrder, DbOrderParty, DbOrderFilter } from '../model/DbOrderTypes.js';
 import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 
 const ENTRY_REF_ERC20 = "erc20Orders";
 const ENTRY_REF_ORDERS = "orders";
-const elementPerPage = 20;
 
 export class AceBaseClient implements Database {
 
     private db!: AceBase;
-    private filters!: Filters;
+    private tokens: string[];
     private refERC20!: DataReference;
     private refOrders!: DataReference;
 
@@ -33,30 +30,40 @@ export class AceBaseClient implements Database {
                 this.refERC20 = this.db.ref(ENTRY_REF_ERC20);
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, 'hash');
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, 'addedOn');
+                this.db.indexes.create(`${ENTRY_REF_ERC20}`, 'order/nonce');
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/approximatedSignerAmount");
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/approximatedSenderAmount");
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/signerToken");
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/senderToken");
+                this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/senderWallet");
+                this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/signerWallet");
 
                 this.refOrders = this.db.ref(ENTRY_REF_ORDERS);
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, 'hash');
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, 'addedOn');
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, 'order/nonce');
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/expiry");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/wallet");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/wallet");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/approximatedAmount");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/approximatedAmount");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/token");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/token");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/id");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/id");
                 resolve();
             });
         });
     }
 
     public constructor() {
-        this.filters = new Filters();
+        this.tokens = [];
     }
 
     async addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {
         await this.refOrders.push(indexedOrder);
+        this.addToken(indexedOrder.order.signer.token)
+        this.addToken(indexedOrder.order.sender.token)
         return Promise.resolve();
     }
     async addAllOrder(indexedOrders: Record<string, IndexedOrder<DbOrder>>): Promise<void> {
@@ -65,9 +72,10 @@ export class AceBaseClient implements Database {
         }));
         return Promise.resolve();
     }
-    async deleteOrder(nonce: string, signerWallet: string): Promise<void> {
+    async deleteOrder(nonce: number, signerWallet: string): Promise<void> {
         await this.refOrders.query()
             .filter('order/nonce', '==', nonce)
+            .filter('order/signer/wallet', '==', signerWallet)
             .remove();
         return Promise.resolve();
     }
@@ -85,16 +93,22 @@ export class AceBaseClient implements Database {
         if (!serializedOrder) {
             return Promise.resolve({
                 orders: {},
-                pagination: computePagination(elementPerPage, 0),
-                ordersForQuery: 0
+                pagination: {
+                    limit: 1,
+                    offset: 0,
+                    total: 0,
+                },
             });
         }
         const result: Record<string, IndexedOrder<FullOrder>> = {};
         result[hash] = this.datarefToOrder(serializedOrder)[hash];
         return Promise.resolve({
             orders: result,
-            pagination: computePagination(elementPerPage, 1),
-            ordersForQuery: 1
+            pagination: {
+                limit: 1,
+                offset: 0,
+                total: 1,
+            },
         });
     }
     async getOrders(): Promise<OrderResponse<FullOrder>> {
@@ -107,41 +121,75 @@ export class AceBaseClient implements Database {
         });
         return Promise.resolve({
             orders: mapped,
-            pagination: computePagination(totalResults, totalResults),
-            ordersForQuery: totalResults
+            pagination: {
+                limit: -1,
+                offset: 0,
+                total: totalResults,
+            },
         });
     }
-    async getOrdersBy(requestFilter: RequestFilter): Promise<OrderResponse<FullOrder>> {
+    async getOrdersBy(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrder>> {
         const query = this.refOrders.query();
 
-        if (requestFilter.senderAddress != undefined) {
-            query.filter('order/sender/wallet', '==', requestFilter.senderAddress);
+        if (orderFilter.nonce != undefined) {
+            query.filter('order/nonce', '==', orderFilter.nonce);
         }
-        if (requestFilter.signerAddress != undefined) {
-            query.filter('order/signer/wallet', '==', requestFilter.signerAddress);
+        if (orderFilter.senderWallet != undefined) {
+            query.filter('order/sender/wallet', '==', orderFilter.senderWallet);
+        }
+        if (orderFilter.signerWallet != undefined) {
+            query.filter('order/signer/wallet', '==', orderFilter.signerWallet);
+        }
+        if (orderFilter.signerTokens != undefined) {
+            query.filter('order/signer/token', 'in', orderFilter.signerTokens);
+        }
+        if (orderFilter.senderTokens != undefined) {
+            query.filter('order/sender/token', 'in', orderFilter.senderTokens);
+        }
+        if (orderFilter.senderMinAmount != undefined) {
+            query.filter('order/sender/approximatedAmount', '>=', orderFilter.senderMinAmount);
+        }
+        if (orderFilter.senderMaxAmount != undefined) {
+            query.filter('order/sender/approximatedAmount', '<=', orderFilter.senderMaxAmount);
+        }
+        if (orderFilter.signerMinAmount != undefined) {
+            query.filter('order/signer/approximatedAmount', '>=', orderFilter.signerMinAmount);
+        }
+        if (orderFilter.signerMaxAmount != undefined) {
+            query.filter('order/signer/approximatedAmount', '<=', orderFilter.signerMaxAmount);
+        }
+        if (orderFilter.signerIds != undefined) {
+            query.filter('order/signer/id', 'in', orderFilter.signerIds);
+        }
+        if (orderFilter.senderIds != undefined) {
+            query.filter('order/sender/id', 'in', orderFilter.senderIds);
         }
 
-        const isAscSort = requestFilter.sortOrder == SortOrder.ASC;
-        if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
+        const isAscSort = orderFilter.sortOrder == SortOrder.ASC;
+        if (orderFilter.sortField == SortField.SIGNER_AMOUNT) {
             query.sort('order/signer/approximatedAmount', isAscSort)
-        } else if (requestFilter.sortField == SortField.SENDER_AMOUNT) {
+        } else if (orderFilter.sortField == SortField.SENDER_AMOUNT) {
             query.sort('order/sender/approximatedAmount', isAscSort)
-        } else if (requestFilter.sortField == SortField.EXPIRY) {
+        } else if (orderFilter.sortField == SortField.EXPIRY) {
             query.sort('order/expiry', isAscSort)
+        } else if (orderFilter.sortField == SortField.NONCE) {
+            query.sort('order/nonce', isAscSort)
         }
 
         const totalResults = await query.take(1000000).count()
-        const entriesSkipped = (requestFilter.page - 1) * elementPerPage;
-        const data = await query.skip(entriesSkipped).take(elementPerPage).get();
+        const entriesSkipped = orderFilter.offset;
+        const data = await query.skip(entriesSkipped).take(entriesSkipped + orderFilter.limit).get();
         const mapped = data.reduce((total, indexedOrder) => {
             const mapped = this.datarefToOrder(indexedOrder.val());
             return { ...total, ...mapped };
         }, {} as Record<string, IndexedOrder<FullOrder>>);
-        const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
         return Promise.resolve({
             orders: mapped,
-            pagination: pagination,
-            ordersForQuery: totalResults
+            pagination: {
+                limit: orderFilter.limit,
+                offset: orderFilter.offset,
+                total: totalResults,
+            },
         });
     }
     async orderExists(hash: string): Promise<boolean> {
@@ -149,54 +197,72 @@ export class AceBaseClient implements Database {
             .filter('hash', '==', hash).exists();
     }
 
-    async getFiltersERC20(): Promise<Filters> {
-        return Promise.resolve(this.filters);
+    getTokens(): Promise<string[]> {
+        return Promise.resolve(this.tokens);
     }
 
-    async getOrdersERC20By(requestFilter: RequestFilterERC20): Promise<OrderResponse<FullOrderERC20>> {
+    private addToken(token: string) {
+        if (!this.tokens.includes(token)) {
+            this.tokens.push(token);
+        }
+    }
+
+    async getOrdersERC20By(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrderERC20>> {
         const query = this.refERC20.query();
 
-        if (requestFilter.signerTokens != undefined) {
-            query.filter('order/signerToken', 'in', requestFilter.signerTokens);
+        if (orderFilter.nonce != undefined) {
+            query.filter('order/nonce', '==', orderFilter.nonce);
         }
-        if (requestFilter.senderTokens != undefined) {
-            query.filter('order/senderToken', 'in', requestFilter.senderTokens);
+        if (orderFilter.signerTokens != undefined) {
+            query.filter('order/signerToken', 'in', orderFilter.signerTokens);
         }
-        if (requestFilter.minSenderAmount != undefined) {
-            query.filter('order/approximatedSenderAmount', '>=', requestFilter.minSenderAmount);
+        if (orderFilter.senderTokens != undefined) {
+            query.filter('order/senderToken', 'in', orderFilter.senderTokens);
         }
-        if (requestFilter.maxSenderAmount != undefined) {
-            query.filter('order/approximatedSenderAmount', '<=', requestFilter.maxSenderAmount);
+        if (orderFilter.senderMinAmount != undefined) {
+            query.filter('order/approximatedSenderAmount', '>=', orderFilter.senderMinAmount);
         }
-        if (requestFilter.minSignerAmount != undefined) {
-            query.filter('order/approximatedSignerAmount', '>=', requestFilter.minSignerAmount);
+        if (orderFilter.senderMaxAmount != undefined) {
+            query.filter('order/approximatedSenderAmount', '<=', orderFilter.senderMaxAmount);
         }
-        if (requestFilter.maxSignerAmount != undefined) {
-            query.filter('order/approximatedSignerAmount', '<=', requestFilter.maxSignerAmount);
+        if (orderFilter.signerMinAmount != undefined) {
+            query.filter('order/approximatedSignerAmount', '>=', orderFilter.signerMinAmount);
         }
-        if (requestFilter.maxAddedDate != undefined) {
-            query.filter('addedOn', '>=', requestFilter.maxAddedDate);
+        if (orderFilter.signerMaxAmount != undefined) {
+            query.filter('order/approximatedSignerAmount', '<=', orderFilter.signerMaxAmount);
+        }
+        if (orderFilter.senderWallet != undefined) {
+            query.filter('order/senderWallet', '==', orderFilter.senderWallet);
+        }
+        if (orderFilter.signerWallet != undefined) {
+            query.filter('order/signerWallet', '==', orderFilter.signerWallet);
         }
 
-        const isAscSort = requestFilter.sortOrder == SortOrder.ASC;
-        if (requestFilter.sortField == SortField.SIGNER_AMOUNT) {
+        const isAscSort = orderFilter.sortOrder == SortOrder.ASC;
+        if (orderFilter.sortField == SortField.SIGNER_AMOUNT) {
             query.sort('order/approximatedSignerAmount', isAscSort)
-        } else if (requestFilter.sortField == SortField.SENDER_AMOUNT) {
+        } else if (orderFilter.sortField == SortField.SENDER_AMOUNT) {
             query.sort('order/approximatedSenderAmount', isAscSort)
+        } else if (orderFilter.sortField == SortField.EXPIRY) {
+            query.sort('order/expiry', isAscSort)
+        } else if (orderFilter.sortField == SortField.NONCE) {
+            query.sort('order/nonce', isAscSort)
         }
 
         const totalResults = await query.take(1000000).count()
-        const entriesSkipped = (requestFilter.page - 1) * elementPerPage;
-        const data = await query.skip(entriesSkipped).take(elementPerPage).get();
+        const entriesSkipped = orderFilter.offset;
+        const data = await query.skip(entriesSkipped).take(entriesSkipped + orderFilter.limit).get();
         const mapped = data.reduce((total, indexedOrder) => {
             const mapped = this.datarefToERC20(indexedOrder.val());
             return { ...total, ...mapped };
         }, {} as Record<string, IndexedOrder<FullOrderERC20>>);
-        const pagination = computePagination(elementPerPage, totalResults, requestFilter.page);
         return Promise.resolve({
             orders: mapped,
-            pagination: pagination,
-            ordersForQuery: totalResults
+            pagination: {
+                limit: orderFilter.limit,
+                offset: orderFilter.offset,
+                total: totalResults,
+            },
         });
     }
 
@@ -207,8 +273,8 @@ export class AceBaseClient implements Database {
     async addOrderERC20(indexedOrder: IndexedOrder<DbOrderERC20>): Promise<void> {
         await this.refERC20.push(indexedOrder);
         const order = indexedOrder.order as DbOrderERC20
-        this.filters.addSignerToken(order.signerToken, order.approximatedSignerAmount);
-        this.filters.addSenderToken(order.senderToken, order.approximatedSenderAmount);
+        this.addToken(indexedOrder.order.signerToken)
+        this.addToken(indexedOrder.order.senderToken)
         return Promise.resolve();
     }
 
@@ -219,7 +285,7 @@ export class AceBaseClient implements Database {
         return Promise.resolve();
     }
 
-    async deleteOrderERC20(nonce: string, signerWallet: string): Promise<void> {
+    async deleteOrderERC20(nonce: number, signerWallet: string): Promise<void> {
         await this.refERC20.query()
             .filter('order/nonce', '==', nonce)
             .filter('order/signerWallet', '==', signerWallet)
@@ -242,16 +308,22 @@ export class AceBaseClient implements Database {
         if (!serializedOrder) {
             return Promise.resolve({
                 orders: {},
-                pagination: computePagination(elementPerPage, 0),
-                ordersForQuery: 0
+                pagination: {
+                    limit: 1,
+                    offset: 0,
+                    total: 0,
+                },
             });
         }
         const result: Record<string, IndexedOrder<FullOrderERC20>> = {};
         result[hash] = this.datarefToERC20(serializedOrder)[hash];
         return Promise.resolve({
             orders: result,
-            pagination: computePagination(elementPerPage, 1),
-            ordersForQuery: 1
+            pagination: {
+                limit: 1,
+                offset: 0,
+                total: 1,
+            },
         });
     }
 
@@ -265,13 +337,16 @@ export class AceBaseClient implements Database {
         });
         return Promise.resolve({
             orders: mapped,
-            pagination: computePagination(totalResults, totalResults),
-            ordersForQuery: totalResults
+            pagination: {
+                limit: -1,
+                offset: 0,
+                total: totalResults,
+            },
         });
     }
 
     async erase() {
-        this.filters = new Filters();
+        this.tokens = [];
         await this.db.ref(ENTRY_REF_ERC20).remove();
         return await this.db.ref(ENTRY_REF_ORDERS).remove();
     }
@@ -304,17 +379,17 @@ export class AceBaseClient implements Database {
     generateHashERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): string {
         const lightenOrder: Partial<DbOrderERC20> = { ...indexedOrderERC20.order };
         if (lightenOrder.approximatedSenderAmount) {
-          delete lightenOrder.approximatedSenderAmount
+            delete lightenOrder.approximatedSenderAmount
         }
         if (lightenOrder.approximatedSignerAmount) {
-          delete lightenOrder.approximatedSignerAmount
+            delete lightenOrder.approximatedSignerAmount
         }
         const stringObject = JSON.stringify(lightenOrder);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
         return hashed.digest("hex");
-      }
-    
-      generateHash(indexedOrder: IndexedOrder<DbOrder>): string {
+    }
+
+    generateHash(indexedOrder: IndexedOrder<DbOrder>): string {
         const signer: Partial<DbOrderParty> = { ...indexedOrder.order.signer };
         const sender: Partial<DbOrderParty> = { ...indexedOrder.order.sender };
         delete signer.approximatedAmount
@@ -323,5 +398,5 @@ export class AceBaseClient implements Database {
         const stringObject = JSON.stringify(lightenOrder);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
         return hashed.digest("hex");
-      }
+    }
 }

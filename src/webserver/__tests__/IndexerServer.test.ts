@@ -49,7 +49,7 @@ describe("Order controller", () => {
 
     describe("GET *", () => {
         test("should give basic info", done => {
-            const result: HealthCheckResponse = { registry: "registry", peers: [], databaseOrders: 100, network: 5 };
+            const result: HealthCheckResponse = { registry: "registry", peers: [], databaseOrders: 100, databaseOrdersERC20: 100, network: 5 };
             const expected = {
                 "jsonrpc": "2.0",
                 "id": "-1",
@@ -199,9 +199,51 @@ describe("Order controller", () => {
                         done();
                     });
             });
+
+            test("getTokens", done => {
+                const payload = { id: "-1", method: "getTokens", params: [{}] };
+                const filterResponse: any = {
+                    senderToken: {
+                        "0x0000000000000000000000000000000000000000" : {
+                            min: "10",
+                            max: "10",
+                        }
+                    },
+                    signerToken: {
+                        "0x0000000000000000000000000000000000000001" : {
+                            min: "10",
+                            max: "10",
+                        }
+                    }
+                }
+                fakeOrderService.getTokens = jest.fn().mockImplementation(() => {
+                    return filterResponse
+                })
+
+                new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
+
+                supertest(webserver)
+                    .post("/")
+                    .type("json")
+                    .send(payload)
+                    .then(response => {
+                        expect(response.body).toEqual(
+                            {
+                                jsonrpc: "2.0",
+                                id: "-1",
+                                result: {
+                                    ...filterResponse
+                                }
+                            });
+                        expect(response.statusCode).toBe(200);
+                        expect(fakeOrderService.getTokens).toHaveBeenCalled();
+                        expect(fakePeers.broadcast).not.toHaveBeenCalled();
+                        done();
+                    });
+            });
         });
 
-        describe('ERC 721', () => {
+        describe('Order', () => {
             test("Add order nominal & broadcast", done => {
                 const order = forgeFullOrder(1653900784696);
                 const payload = { id: "-1", method: "addOrder", params: [order] };
@@ -218,16 +260,16 @@ describe("Order controller", () => {
                         done();
                     });
             });
-    
+
             test("Add order error, no broadcast", done => {
                 const order = forgeFullOrder(1653900784696);
                 const payload = { id: "-1", method: "addOrder", params: [order] };
-    
+
                 fakeOrderService.addOrder = jest.fn().mockImplementation(() => {
                     throw new ClientError("an error");
                 })
                 new IndexerServer(webserver, fakeOrderService as OrderService, fakeRootService as RootService, fakePeers as Peers).run();
-    
+
                 supertest(webserver)
                     .post("/")
                     .type("json")

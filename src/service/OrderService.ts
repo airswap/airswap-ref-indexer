@@ -1,37 +1,37 @@
-import { IndexedOrder, AmountLimitFilterResponse, FiltersResponse, FullOrder, OrderResponse } from '@airswap/types';
+import { IndexedOrder, FullOrder, OrderResponse } from '@airswap/types';
 import { FullOrderERC20 } from '@airswap/types';
 import { isValidFullOrder, isValidFullOrderERC20 } from '@airswap/utils';
-import { Filters } from '../database/filter/Filters';
 import { Database } from '../database/Database.js';
 import { mapAnyToDbOrderERC20 } from '../mapper/mapAnyToDbOrderERC20.js';
-import { mapAnyToRequestFilterERC20 } from '../mapper/mapAnyToRequestFilterERC20.js';
+import { mapAnyToOrderFilter } from '../mapper/mapAnyToOrderFilter.js';
 import { isDateInRange, isNumeric } from '../validator/index.js';
 import { AlreadyExistsError } from '../model/error/AlreadyExists.js';
 import { ClientError } from '../model/error/ClientError.js';
 import { Web3SwapERC20Client } from '../client/Web3SwapERC20Client.js';
 import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
-import { mapAnyToRequestFilter } from '../mapper/mapAnyToRequestFilter.js';
 import { Web3SwapClient } from '../client/Web3SwapClient';
 
-const validationDurationInWeek = 1;
 
 export const METHODS = {
     getOrdersERC20: "getOrdersERC20",
     addOrderERC20: "addOrderERC20",
     getOrders: "getOrders",
     addOrder: "addOrder",
+    getTokens: "getTokens",
 } as Record<string, string>;
 
 export class OrderService {
     private database: Database;
     private web3SwapERC20Client: Web3SwapERC20Client;
     private web3SwapClient: Web3SwapClient;
+    private maxResultByQuery: number;
 
-    constructor(database: Database, web3ERC20SwapClient: Web3SwapERC20Client, web3SwapClient: Web3SwapClient) {
+    constructor(database: Database, web3ERC20SwapClient: Web3SwapERC20Client, web3SwapClient: Web3SwapClient, maxResultByQuery: number) {
         this.database = database;
         this.web3SwapERC20Client = web3ERC20SwapClient;
         this.web3SwapClient = web3SwapClient;
+        this.maxResultByQuery = maxResultByQuery;
 
         const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter((name) => name !== "constructor").sort();
         if (!(methods.length === Object.keys(METHODS).length && methods.every((value: string) => value === METHODS[value]))) {
@@ -50,7 +50,7 @@ export class OrderService {
         if (!areERC20NumberFieldsValid(body)) {
             throw new ClientError("Number fields are incorrect");
         }
-        if (!isDateInRange(body.expiry, validationDurationInWeek)) {
+        if (!isDateInRange(body.expiry)) {
             throw new ClientError("Invalid expiry date");
         }
 
@@ -78,16 +78,11 @@ export class OrderService {
         if (query.hash) {
             orders = await this.database.getOrderERC20(query.hash);
         }
-        else if (Object.keys(query).filter(key => key !== "filters").length === 0) {
+        else if (Object.keys(query).length === 0) {
             orders = await this.database.getOrdersERC20();
         }
         else {
-            orders = await this.database.getOrdersERC20By(mapAnyToRequestFilterERC20(query));
-        }
-
-        if (query.filters) {
-            const filters = await this.database.getFiltersERC20();
-            orders.filters = toFilterResponse(filters)
+            orders = await this.database.getOrdersERC20By(mapAnyToOrderFilter(query, this.maxResultByQuery));
         }
         return Promise.resolve(orders);
     }
@@ -102,7 +97,7 @@ export class OrderService {
         if (!areOrderNumberFieldsValid(body)) {
             throw new ClientError("Number fields are incorrect");
         }
-        if (!isDateInRange(body.expiry, validationDurationInWeek)) {
+        if (!isDateInRange(body.expiry)) {
             throw new ClientError("Invalid expiry date");
         }
         const dbOrder = mapAnyToDbOrder(body);
@@ -129,38 +124,24 @@ export class OrderService {
         if (query.hash) {
             orders = await this.database.getOrder(query.hash);
         }
-        else if (Object.keys(query).filter(key => key !== "filters").length === 0) {
+        else if (Object.keys(query).length === 0) {
             orders = await this.database.getOrders();
         }
         else {
-            orders = await this.database.getOrdersBy(mapAnyToRequestFilter(query));
+            orders = await this.database.getOrdersBy(mapAnyToOrderFilter(query, this.maxResultByQuery));
         }
         return Promise.resolve(orders)
     }
-}
 
-function toFilterResponse(filters: Filters): FiltersResponse {
-    const senderToken: Record<string, AmountLimitFilterResponse> = {};
-    const signerToken: Record<string, AmountLimitFilterResponse> = {};
-    Object.keys(filters.senderToken).forEach(key => {
-        senderToken[key] = {
-            min: filters.senderToken[key].min.toString(),
-            max: filters.senderToken[key].max.toString()
-        } as AmountLimitFilterResponse;
-    });
-    Object.keys(filters.signerToken).forEach(key => {
-        signerToken[key] = {
-            min: filters.signerToken[key].min.toString(),
-            max: filters.signerToken[key].max.toString()
-        } as AmountLimitFilterResponse;
-    });
-
-    return { senderToken, signerToken };
+    public async getTokens(): Promise<any> {
+        const filters = await this.database.getTokens();
+        return filters;
+    }
 }
 
 function areERC20NumberFieldsValid(order: FullOrderERC20) {
-    return isNumeric(order.senderAmount) && isNumeric(order.signerAmount) && isNumeric(order.expiry)
+    return isNumeric(order.senderAmount) && isNumeric(order.signerAmount) && isNumeric(order.expiry) && isNumeric(order.nonce)
 }
 function areOrderNumberFieldsValid(order: FullOrder) {
-    return isNumeric(order.sender.amount) && isNumeric(order.signer.amount) && isNumeric(order.expiry) && isNumeric(order.affiliateAmount)
+    return isNumeric(order.sender.amount) && isNumeric(order.signer.amount) && isNumeric(order.expiry) && isNumeric(order.affiliateAmount) && isNumeric(order.nonce)
 }
