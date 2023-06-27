@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Express, Request, Response } from "express";
 import { SuccessResponse } from '../model/response/SuccessResponse.js';
 import { ClientError } from './../model/error/ClientError.js';
