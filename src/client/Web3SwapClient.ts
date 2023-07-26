@@ -1,6 +1,7 @@
 import { Contract, ethers, providers } from 'ethers';
 import { Database } from '../database/Database.js';
 import { Swap } from '@airswap/libraries'
+import { getProviderUrl } from './getProviderUrl.js';
 
 export class Web3SwapClient {
     private contracts: Contract[] = [];
@@ -19,8 +20,8 @@ export class Web3SwapClient {
         let provider: providers.Provider
 
         try {
-            chainId = ethers.providers.getNetwork(network)?.chainId;
-            if (!chainId) {
+            chainId = Number(network);
+            if (!chainId || isNaN(chainId)) {
                 console.warn("Tried to add this network but it does not work :", network)
                 return false
             }
@@ -29,7 +30,7 @@ export class Web3SwapClient {
                 return true
             }
     
-            provider = ethers.providers.InfuraProvider.getWebSocketProvider(chainId, this.apiKey);
+            provider = new ethers.providers.JsonRpcProvider(getProviderUrl(chainId, this.apiKey))
             contract = Swap.getContract(provider, chainId);
         } catch (err) {
             return false

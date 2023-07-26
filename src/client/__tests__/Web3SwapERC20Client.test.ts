@@ -28,10 +28,7 @@ describe("Web3SwapERC20Client", () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
-                InfuraProvider: {
-                    getWebSocketProvider: jest.fn()
-                },
-                getNetwork: jest.fn(() => ({ chainId: 5, name: "a_custom" }))
+                JsonRpcProvider: jest.fn(),
             };
             //@ts-ignore
             SwapERC20.getContract = jest.fn(() => ({ on: jest.fn() }))
@@ -39,39 +36,29 @@ describe("Web3SwapERC20Client", () => {
             const client = new Web3SwapERC20Client(apiKey, fakeDatabase as Database);
             client.connectToChain(5);
 
-            expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
-            expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).toHaveBeenCalledWith(5, "apikey");
+            expect(mockedEther.providers.JsonRpcProvider).toHaveBeenCalledWith("https://https://goerli.infura.io/v3/apikey");
         });
 
         it("Network is not found", () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
-                InfuraProvider: {
-                    getWebSocketProvider: jest.fn()
-                },
-                //@ts-ignore
-                getNetwork: jest.fn(() => undefined)
+                JsonRpcProvider: jest.fn(),
             };
             //@ts-ignore
             SwapERC20.getContract = jest.fn(() => ({ on: jest.fn() }))
 
             const client = new Web3SwapERC20Client(apiKey, fakeDatabase as Database);
-            client.connectToChain(5);
+            client.connectToChain("aze");
 
-            expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
-            expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).not.toHaveBeenCalled();
+            expect(mockedEther.providers.JsonRpcProvider).not.toHaveBeenCalled();
         });
 
         it("Network can't be added twice", () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
-                InfuraProvider: {
-                    getWebSocketProvider: jest.fn()
-                },
-                //@ts-ignore
-                getNetwork: jest.fn(() => ({ chainId: 5 }))
+                JsonRpcProvider: jest.fn(),
             };
             //@ts-ignore
             SwapERC20.getContract = jest.fn(() => ({ on: jest.fn() }))
@@ -80,9 +67,8 @@ describe("Web3SwapERC20Client", () => {
             client.connectToChain(5);
             client.connectToChain(5);
 
-            expect(mockedEther.providers.getNetwork).toHaveBeenCalledWith(5);
-            expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).toHaveBeenCalledTimes(1)
-            expect(mockedEther.providers.InfuraProvider.getWebSocketProvider).toBeCalledWith(5, "apikey")
+            expect(mockedEther.providers.JsonRpcProvider).toHaveBeenCalledTimes(1)
+            expect(mockedEther.providers.JsonRpcProvider).toBeCalledWith("https://https://goerli.infura.io/v3/apikey")
         });
     });
 
@@ -95,13 +81,10 @@ describe("Web3SwapERC20Client", () => {
 
         //@ts-ignore
         SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
+        //@ts-ignore
         mockedEther.providers = {
             //@ts-ignore
-            InfuraProvider: {
-                getWebSocketProvider: jest.fn()
-            },
-            //@ts-ignore
-            getNetwork: jest.fn(() => ({ chainId: 5 }))
+            JsonRpcProvider: jest.fn(),
         };
 
         new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
@@ -120,11 +103,7 @@ describe("Web3SwapERC20Client", () => {
         //@ts-ignore
         mockedEther.providers = {
             //@ts-ignore
-            InfuraProvider: {
-                getWebSocketProvider: jest.fn()
-            },
-            //@ts-ignore
-            getNetwork: jest.fn(() => ({ chainId: 5 }))
+            JsonRpcProvider: jest.fn(),
         };
         //@ts-ignore
         SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
@@ -142,8 +121,9 @@ describe("Web3SwapERC20Client", () => {
                 callback();
             });
             //@ts-ignore
-            mockedEther.providers.InfuraProvider = {
-                getWebSocketProvider: jest.fn()
+            mockedEther.providers = {
+                //@ts-ignore
+                JsonRpcProvider: jest.fn(),
             };
             //@ts-ignore
             SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
@@ -158,8 +138,9 @@ describe("Web3SwapERC20Client", () => {
                 callback({});
             });
             //@ts-ignore
-            mockedEther.providers.InfuraProvider = {
-                getWebSocketProvider: jest.fn()
+            mockedEther.providers = {
+                //@ts-ignore
+                JsonRpcProvider: jest.fn(),
             };
             //@ts-ignore
             SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
@@ -174,8 +155,9 @@ describe("Web3SwapERC20Client", () => {
                 callback({ _hex: undefined, _isBigNumber: true }, "A_wallet");
             });
             //@ts-ignore
-            mockedEther.providers.InfuraProvider = {
-                getWebSocketProvider: jest.fn()
+            mockedEther.providers = {
+                //@ts-ignore
+                JsonRpcProvider: jest.fn(),
             };
             //@ts-ignore
             SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
