@@ -1,3 +1,5 @@
+import {apiUrls} from '@airswap/constants'
+
 const hostByChainId: Record<number, string> =
 {
     1: "https://mainnet.infura.io/v3",
@@ -22,9 +24,11 @@ const hostByChainId: Record<number, string> =
 }
 
 export function getProviderUrl(chainId: number, apiKey: string) {
-    const host = hostByChainId[chainId];
+    const host = apiUrls[chainId] || hostByChainId[chainId];
+    
     if (!host) {
         throw new Error("Unknown chain ID");
     }
-    return `https://${host}/${apiKey}`;
+    
+    return host.includes("infura.io/v3") ? `https://${host}/${apiKey}` : `https://${host}`;
 }
