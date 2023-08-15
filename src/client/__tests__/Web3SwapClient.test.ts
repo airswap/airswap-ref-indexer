@@ -89,7 +89,7 @@ describe("Web3SwapClient", () => {
     it("Should remove order on event Swap", async () => {
         const mockedOn = jest.fn((eventName, callback) => {
             if (eventName === "Swap") {
-                callback({ _hex: "0xf5", _isBigNumber: true }, "a_wallet");
+                callback({ _hex: "0xf5", _isBigNumber: true }, "a_wAllet");
             }
         });
 
@@ -114,7 +114,7 @@ describe("Web3SwapClient", () => {
     it("Should remove order on event Cancel", async () => {
         const mockedOn = jest.fn((eventName, callback) => {
             if (eventName === "Cancel") {
-                callback({ _hex: "0xf5", _isBigNumber: true }, "a_wallet");
+                callback({ _hex: "0xf5", _isBigNumber: true }, "a_waLl3t");
             }
         });
         //@ts-ignore
@@ -133,7 +133,7 @@ describe("Web3SwapClient", () => {
 
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrder).toHaveBeenCalledTimes(1);
-        expect(fakeDatabase.deleteOrder).toHaveBeenCalledWith(245, "a_wallet");
+        expect(fakeDatabase.deleteOrder).toHaveBeenCalledWith(245, "a_wall3t");
     });
 
     describe("Do nothing", () => {

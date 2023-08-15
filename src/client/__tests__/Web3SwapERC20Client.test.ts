@@ -89,7 +89,7 @@ describe("Web3SwapERC20Client", () => {
     it("Should remove order on event SwapERC20", async () => {
         const mockedOn = jest.fn((eventName, callback) => {
             if (eventName === "SwapERC20") {
-                callback({ _hex: "0xf5", _isBigNumber: true }, "a_wallet");
+                callback({ _hex: "0xf5", _isBigNumber: true }, "a_wAll3t");
             }
         });
 
@@ -108,13 +108,13 @@ describe("Web3SwapERC20Client", () => {
 
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledTimes(1);
-        expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledWith(245, "a_wallet");
+        expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledWith(245, "a_wall3t");
     });
 
     it("Should remove order on event Cancel", async () => {
         const mockedOn = jest.fn((eventName, callback) => {
             if (eventName === "Cancel") {
-                callback({ _hex: "0xf5", _isBigNumber: true }, "a_wallet");
+                callback({ _hex: "0xf5", _isBigNumber: true }, "a_waLLet");
             }
         });
         //@ts-ignore
@@ -171,7 +171,7 @@ describe("Web3SwapERC20Client", () => {
 
         it("nonce has no value", () => {
             const mockedOn = jest.fn((eventName, callback) => {
-                callback({ _hex: undefined, _isBigNumber: true }, "a_wallet");
+                callback({ _hex: undefined, _isBigNumber: true }, "A_wallet");
             });
             //@ts-ignore
             mockedEther.providers.InfuraProvider = {
