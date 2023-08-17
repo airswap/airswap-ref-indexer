@@ -26,8 +26,7 @@ export class Web3SwapClient {
 
         const provider = ethers.providers.InfuraProvider.getWebSocketProvider(chainId, this.apiKey);
         const contract = Swap.getContract(provider, chainId);
-        contract.on("Swap", (nonce, signerWallet, signerAmount, signerId, signerToken, senderWallet, senderAmount, senderId,
-            senderToken, affiliateWallet, affiliateAmount) => {
+        contract.on("Swap", (nonce, signerWallet) => {
             this.onEvent(nonce, signerWallet);
         });
         contract.on("Cancel", (nonce, signerWallet) => {
@@ -46,8 +45,7 @@ export class Web3SwapClient {
         if (nonce && signerWallet) {
             const decodedNonce = parseInt(nonce._hex, 16);
             if (isNaN(decodedNonce)) return;
-
-            this.database.deleteOrder(decodedNonce, signerWallet);
+            this.database.deleteOrder(decodedNonce, signerWallet.toLocaleLowerCase());
         }
     }
 }
