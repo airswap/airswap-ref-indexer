@@ -33,10 +33,10 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             Swap.getContract = jest.fn(() => ({ on: jest.fn() }))
 
-            const client = new Web3SwapClient(apiKey, fakeDatabase as Database);
+            const client = new Web3SwapClient(fakeDatabase as Database);
             client.connectToChain(5);
 
-            expect(mockedEther.providers.JsonRpcProvider).toHaveBeenCalledWith("https://https://goerli.infura.io/v3/apikey");
+            expect(mockedEther.providers.JsonRpcProvider).toHaveBeenCalledWith("https://https://goerli.infura.io/v3");
         });
 
         it("Network is not found", () => {
@@ -48,7 +48,7 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             Swap.getContract = jest.fn(() => ({ on: jest.fn() }))
 
-            const client = new Web3SwapClient(apiKey, fakeDatabase as Database);
+            const client = new Web3SwapClient(fakeDatabase as Database);
             client.connectToChain("aze");
 
             expect(mockedEther.providers.JsonRpcProvider).not.toHaveBeenCalled();
@@ -63,12 +63,12 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             Swap.getContract = jest.fn(() => ({ on: jest.fn() }))
 
-            const client = new Web3SwapClient(apiKey, fakeDatabase as Database);
+            const client = new Web3SwapClient(fakeDatabase as Database);
             client.connectToChain(5);
             client.connectToChain(5);
 
             expect(mockedEther.providers.JsonRpcProvider).toHaveBeenCalledTimes(1)
-            expect(mockedEther.providers.JsonRpcProvider).toBeCalledWith("https://https://goerli.infura.io/v3/apikey");
+            expect(mockedEther.providers.JsonRpcProvider).toBeCalledWith("https://https://goerli.infura.io/v3");
         });
     });
 
@@ -87,7 +87,7 @@ describe("Web3SwapClient", () => {
             JsonRpcProvider: jest.fn(),
         };
 
-        new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
+        new Web3SwapClient(fakeDatabase as Database).connectToChain(network);
 
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrder).toHaveBeenCalledTimes(1);
@@ -108,7 +108,7 @@ describe("Web3SwapClient", () => {
         //@ts-ignore
         Swap.getContract = jest.fn(() => ({ on: mockedOn }))
 
-        new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
+        new Web3SwapClient(fakeDatabase as Database).connectToChain(network);
 
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrder).toHaveBeenCalledTimes(1);
@@ -125,7 +125,7 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             Swap.getContract = jest.fn(() => ({ on: mockedOn }))
 
-            new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
+            new Web3SwapClient(fakeDatabase as Database).connectToChain(network);
 
             expect(fakeDatabase.deleteOrder).not.toHaveBeenCalled();
         });
@@ -142,7 +142,7 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             Swap.getContract = jest.fn(() => ({ on: mockedOn }))
 
-            new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
+            new Web3SwapClient(fakeDatabase as Database).connectToChain(network);
 
             expect(fakeDatabase.deleteOrder).not.toHaveBeenCalled();
         });
@@ -159,7 +159,7 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             Swap.getContract = jest.fn(() => ({ on: mockedOn }))
 
-            new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
+            new Web3SwapClient(fakeDatabase as Database).connectToChain(network);
 
             expect(fakeDatabase.deleteOrder).not.toHaveBeenCalled();
         });

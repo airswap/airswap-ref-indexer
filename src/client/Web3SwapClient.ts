@@ -6,12 +6,10 @@ import { getProviderUrl } from './getProviderUrl.js';
 export class Web3SwapClient {
     private contracts: Contract[] = [];
     private database: Database;
-    private apiKey: string;
     private registeredChains: string[] = [];
 
-    constructor(apiKey: string, database: Database) {
+    constructor(database: Database) {
         this.database = database;
-        this.apiKey = apiKey;
     }
 
     public connectToChain(network: number | string): boolean {
@@ -30,7 +28,7 @@ export class Web3SwapClient {
                 return true
             }
     
-            provider = new ethers.providers.JsonRpcProvider(getProviderUrl(chainId, this.apiKey))
+            provider = new ethers.providers.JsonRpcProvider(getProviderUrl(chainId))
             contract = Swap.getContract(provider, chainId);
         } catch (err) {
             return false

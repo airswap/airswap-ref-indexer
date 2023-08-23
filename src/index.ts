@@ -95,8 +95,8 @@ function getWeb3SwapClient(database: Database, network: number) {
   }
   const apiKey: string = process.env.API_KEY as string;
 
-  const swapClientOrderERC20 = new Web3SwapERC20Client(apiKey, database);
-  const swapClientOrder = new Web3SwapClient(apiKey, database);
+  const swapClientOrderERC20 = new Web3SwapERC20Client(database);
+  const swapClientOrder = new Web3SwapClient(database);
 
   swapClientOrder.connectToChain(network);
   swapClientOrderERC20.connectToChain(network);
