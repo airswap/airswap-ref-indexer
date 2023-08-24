@@ -33,10 +33,10 @@ describe("Web3SwapERC20Client", () => {
             //@ts-ignore
             SwapERC20.getContract = jest.fn(() => ({ on: jest.fn() }))
 
-            const client = new Web3SwapERC20Client(fakeDatabase as Database);
+            const client = new Web3SwapERC20Client(apiKey, fakeDatabase as Database);
             client.connectToChain(5);
 
-            expect(mockedEther.providers.JsonRpcProvider).toHaveBeenCalledWith("https://https://goerli.infura.io/v3");
+            expect(mockedEther.providers.JsonRpcProvider).toHaveBeenCalledWith("https://https://goerli.infura.io/v3/apikey");
         });
 
         it("Network is not found", () => {
@@ -48,7 +48,7 @@ describe("Web3SwapERC20Client", () => {
             //@ts-ignore
             SwapERC20.getContract = jest.fn(() => ({ on: jest.fn() }))
 
-            const client = new Web3SwapERC20Client(fakeDatabase as Database);
+            const client = new Web3SwapERC20Client(apiKey, fakeDatabase as Database);
             client.connectToChain("aze");
 
             expect(mockedEther.providers.JsonRpcProvider).not.toHaveBeenCalled();
@@ -63,12 +63,12 @@ describe("Web3SwapERC20Client", () => {
             //@ts-ignore
             SwapERC20.getContract = jest.fn(() => ({ on: jest.fn() }))
 
-            const client = new Web3SwapERC20Client(fakeDatabase as Database);
+            const client = new Web3SwapERC20Client(apiKey, fakeDatabase as Database);
             client.connectToChain(5);
             client.connectToChain(5);
 
             expect(mockedEther.providers.JsonRpcProvider).toHaveBeenCalledTimes(1)
-            expect(mockedEther.providers.JsonRpcProvider).toBeCalledWith("https://https://goerli.infura.io/v3")
+            expect(mockedEther.providers.JsonRpcProvider).toBeCalledWith("https://https://goerli.infura.io/v3/apikey")
         });
     });
 
@@ -87,7 +87,7 @@ describe("Web3SwapERC20Client", () => {
             JsonRpcProvider: jest.fn(),
         };
 
-        new Web3SwapERC20Client(fakeDatabase as Database).connectToChain(network);
+        new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
 
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledTimes(1);
@@ -108,7 +108,7 @@ describe("Web3SwapERC20Client", () => {
         //@ts-ignore
         SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
 
-        new Web3SwapERC20Client(fakeDatabase as Database).connectToChain(network);
+        new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
 
         expect(mockedOn).toHaveBeenCalledTimes(2);
         expect(fakeDatabase.deleteOrderERC20).toHaveBeenCalledTimes(1);
@@ -128,7 +128,7 @@ describe("Web3SwapERC20Client", () => {
             //@ts-ignore
             SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
 
-            new Web3SwapERC20Client(fakeDatabase as Database).connectToChain(network);
+            new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
 
             expect(fakeDatabase.deleteOrderERC20).not.toHaveBeenCalled();
         });
@@ -145,7 +145,7 @@ describe("Web3SwapERC20Client", () => {
             //@ts-ignore
             SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
 
-            new Web3SwapERC20Client(fakeDatabase as Database).connectToChain(network);
+            new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
 
             expect(fakeDatabase.deleteOrderERC20).not.toHaveBeenCalled();
         });
@@ -162,7 +162,7 @@ describe("Web3SwapERC20Client", () => {
             //@ts-ignore
             SwapERC20.getContract = jest.fn(() => ({ on: mockedOn }))
 
-            new Web3SwapERC20Client(fakeDatabase as Database).connectToChain(network);
+            new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
 
             expect(fakeDatabase.deleteOrderERC20).not.toHaveBeenCalled();
         });
