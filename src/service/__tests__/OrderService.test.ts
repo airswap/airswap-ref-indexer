@@ -163,7 +163,7 @@ describe("Order service", () => {
     });
 
     describe("Add Order ERC 20", () => {
-        test("Add order nominal & broadcast", async () => {
+        test("Add order nominal", async () => {
             const order = forgeFullOrderERC20(1653900784796);
             const expectedForgeHash = { order: forgeDbOrderERC20(1653900784796), addedOn: 1653900784706 }
             const expected = forgeIndexedOrderERC20(1653900784706, 1653900784796);
@@ -176,12 +176,38 @@ describe("Order service", () => {
             });
             //@ts-ignore
             fakeDb.orderERC20Exists.mockImplementation(() => false);
+            //@ts-ignore
+            fakeWeb3SwapERC20Client.connectToChain.mockImplementation(() => true)
 
             await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, maxResultByQuery).addOrderERC20(order);
 
             expect(fakeDb.generateHashERC20).toHaveBeenCalledTimes(1);
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrderERC20).toHaveBeenCalledWith(expected);
+            expect(fakeWeb3SwapERC20Client.connectToChain).toHaveBeenCalledWith(5);
+        });
+
+        test("not adding on unsupported chain", async () => {
+            const order = forgeFullOrderERC20(1653900784796);
+            const expectedForgeHash = { order: forgeDbOrderERC20(1653900784796), addedOn: 1653900784706 }
+
+            //@ts-ignore
+            fakeDb.generateHashERC20.mockImplementation((order) => {
+                expect(order).toEqual(expectedForgeHash); // https://github.com/facebook/jest/issues/7950
+                return "a";
+            });
+            //@ts-ignore
+            fakeDb.orderERC20Exists.mockImplementation(() => false);
+            //@ts-ignore
+            fakeWeb3SwapERC20Client.connectToChain.mockImplementation(() => false)
+
+            await expect(async () => {
+                await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, maxResultByQuery).addOrderERC20(order);
+            }).rejects.toThrow("Chain ID unsupported");
+
+            expect(fakeDb.generateHashERC20).toHaveBeenCalledTimes(1);
+            expect(fakeDb.orderERC20Exists).toHaveBeenCalledWith("a");
+            expect(fakeDb.addOrderERC20).not.toHaveBeenCalled();
             expect(fakeWeb3SwapERC20Client.connectToChain).toHaveBeenCalledWith(5);
         });
 
@@ -265,7 +291,7 @@ describe("Order service", () => {
     });
 
     describe("Add Order", () => {
-        test("Add order nominal & broadcast", async () => {
+        test("Add order nominal", async () => {
             const order = forgeFullOrder(1653900784796);
             const expectedForgeHash = { order: forgeDbOrder(1653900784796), addedOn: 1653900784706 }
             const expected = forgeIndexedOrder(1653900784706, 1653900784796);
@@ -278,12 +304,38 @@ describe("Order service", () => {
             });
             //@ts-ignore
             fakeDb.orderExists.mockImplementation(() => false);
+            //@ts-ignore
+            fakeWeb3SwapClient.connectToChain.mockImplementation(() => true)
 
             await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, maxResultByQuery).addOrder(order);
 
             expect(fakeDb.generateHash).toHaveBeenCalledTimes(1);
             expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
+            expect(fakeWeb3SwapClient.connectToChain).toHaveBeenCalledWith(5);
+        });
+
+        test("not adding on unsupported chain", async () => {
+            const order = forgeFullOrder(1653900784796);
+            const expectedForgeHash = { order: forgeDbOrder(1653900784796), addedOn: 1653900784706 }
+
+            //@ts-ignore
+            fakeDb.generateHash.mockImplementation((order) => {
+                expect(order).toEqual(expectedForgeHash); // https://github.com/facebook/jest/issues/7950
+                return "a";
+            });
+            //@ts-ignore
+            fakeDb.orderExists.mockImplementation(() => false);
+            //@ts-ignore
+            fakeWeb3SwapClient.connectToChain.mockImplementation(() => false)
+
+            await expect(async () => {
+                await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, maxResultByQuery).addOrder(order);
+            }).rejects.toThrow("Chain ID unsupported");
+
+            expect(fakeDb.generateHash).toHaveBeenCalledTimes(1);
+            expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
+            expect(fakeDb.addOrder).not.toHaveBeenCalled();
             expect(fakeWeb3SwapClient.connectToChain).toHaveBeenCalledWith(5);
         });
 

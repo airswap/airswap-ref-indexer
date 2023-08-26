@@ -1,6 +1,7 @@
-import { Contract, ethers } from 'ethers';
+import { Contract, ethers, providers } from 'ethers';
 import { Database } from '../database/Database.js';
 import { SwapERC20 } from '@airswap/libraries'
+import { getProviderUrl } from './getProviderUrl.js';
 
 export class Web3SwapERC20Client {
     private contracts: Contract[] = [];
@@ -13,19 +14,27 @@ export class Web3SwapERC20Client {
         this.apiKey = apiKey;
     }
 
-    public connectToChain(network: number|string) {
-        const chainId = ethers.providers.getNetwork(network)?.chainId;
-        if (!chainId) {
-            console.warn("Tried to add this network but it does not work :", network)
-            return;
-        }
-        if (this.keyExists(String(chainId))) {
-            console.log("Already connected");
-            return;
+    public connectToChain(network: number | string): boolean {
+        let chainId: number
+        let contract: Contract
+        let provider: providers.Provider
+
+        try {
+            chainId = Number(network);
+            if (!chainId || isNaN(chainId)) {
+                console.warn("Tried to add this network but it does not work :", network)
+                return false
+            }
+            if (this.keyExists(String(chainId))) {
+                console.log("Already connected");
+                return true
+            }
+            provider = new ethers.providers.JsonRpcProvider(getProviderUrl(chainId, this.apiKey))
+            contract = SwapERC20.getContract(provider, chainId);
+        } catch (err) {
+            return false
         }
 
-        const provider = ethers.providers.InfuraProvider.getWebSocketProvider(chainId, this.apiKey);
-        const contract = SwapERC20.getContract(provider, chainId);
         contract.on("SwapERC20", (nonce, signerWallet, signerToken, signerAmount, protocolFee, senderWallet, senderToken, senderAmount) => {
             this.onEvent(nonce, signerWallet);
         });
@@ -35,6 +44,7 @@ export class Web3SwapERC20Client {
         this.contracts.push(contract);
         this.registeredChains.push(String(chainId));
         console.log("Registered event SWAP ERC20 from chain", chainId)
+        return true
     }
 
     private keyExists(network: string): boolean {
