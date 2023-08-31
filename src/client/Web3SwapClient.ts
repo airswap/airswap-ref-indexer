@@ -46,7 +46,7 @@ export class Web3SwapClient {
         });
         this.contracts.push(contract);
         this.registeredChains.push(String(chainId));
-        console.log("Registered event SWAP from chain", chainId)
+        console.log("Registered event SWAP from chain:", chainId, "address:",contract.address)
         return true
     }
 

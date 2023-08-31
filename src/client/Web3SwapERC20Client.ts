@@ -45,7 +45,7 @@ export class Web3SwapERC20Client {
         });
         this.contracts.push(contract);
         this.registeredChains.push(String(chainId));
-        console.log("Registered event SWAP ERC20 from chain", chainId)
+        console.log("Registered event SWAP ERC20 from chain", chainId, "address:",contract.address)
         return true
     }
 
