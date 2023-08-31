@@ -7,5 +7,5 @@ export function getProviderUrl(chainId: number, apiKey: string) {
         throw new Error("Unknown chain ID");
     }
     
-    return host.includes("infura.io/v3") ? `https://${host}/${apiKey}` : `https://${host}`;
+    return host.includes("infura.io/v3") ? `wss://${host}/${apiKey}` : `https://${host}`;
 }
