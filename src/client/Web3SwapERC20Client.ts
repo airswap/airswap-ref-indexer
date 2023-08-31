@@ -35,10 +35,12 @@ export class Web3SwapERC20Client {
             return false
         }
 
-        contract.on("SwapERC20", (nonce, signerWallet, signerToken, signerAmount, protocolFee, senderWallet, senderToken, senderAmount) => {
+        contract.on("SwapERC20", (nonce, signerWallet) => {
+            console.log("Web3SwapERC20Client SwapERC20 event", nonce, signerWallet)
             this.onEvent(nonce, signerWallet);
         });
         contract.on("Cancel", (nonce, signerWallet) => {
+            console.log("Web3SwapERC20Client Cancel event", nonce, signerWallet)
             this.onEvent(nonce, signerWallet);
         });
         this.contracts.push(contract);
@@ -54,8 +56,12 @@ export class Web3SwapERC20Client {
     private onEvent(nonce: { _hex: string, _isBigNumber: boolean }, signerWallet: string) {
         if (nonce && signerWallet) {
             const decodedNonce = parseInt(nonce._hex, 16);
-            if (isNaN(decodedNonce)) return;
-
+            if (isNaN(decodedNonce)) {
+                console.log("Web3SwapERC20Client decoded nonce is NaN");
+                return;
+            }
+                
+            console.log("Web3SwapERC20Client will delete", decodedNonce, signerWallet.toLocaleLowerCase());
             this.database.deleteOrderERC20(decodedNonce, signerWallet.toLocaleLowerCase());
         }
     }

@@ -22,13 +22,13 @@ export class IndexerServer {
 
     async run() {
         this.server.get('*', async (request: Request, response: Response) => {
-            console.log("R<---", request.method, request.url, request.body);
+            console.log("R<--- ", request.socket.remoteAddress, request.method, request.url, request.body);
             const result = await this.rootService.get() as any;
             response.json(new JsonRpcResponse("-1", result));
         });
 
         this.server.post('*', async (request: Request, response: Response) => {
-            console.log("R<---", request.method, request.url, request.body);
+            console.log("R<---", request.socket.remoteAddress, request.method, request.url, JSON.stringify(request.body));
             const { id, method, params = [] } = request.body;
 
             if (Object.keys(METHODS).indexOf(method) === -1) {

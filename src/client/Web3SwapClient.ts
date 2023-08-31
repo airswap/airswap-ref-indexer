@@ -37,9 +37,11 @@ export class Web3SwapClient {
         }
         
         contract.on("Swap", (nonce, signerWallet) => {
+            console.log("Web3SwapClient SWAP event", nonce, signerWallet)
             this.onEvent(nonce, signerWallet);
         });
         contract.on("Cancel", (nonce, signerWallet) => {
+            console.log("Web3SwapClient Cancel event", nonce, signerWallet)
             this.onEvent(nonce, signerWallet);
         });
         this.contracts.push(contract);
@@ -55,8 +57,11 @@ export class Web3SwapClient {
     private onEvent(nonce: { _hex: string, _isBigNumber: boolean }, signerWallet: string) {
         if (nonce && signerWallet) {
             const decodedNonce = parseInt(nonce._hex, 16);
-            if (isNaN(decodedNonce)) return;
-            
+            if (isNaN(decodedNonce)){
+                console.log("Web3SwapClient decoded nonce is NaN");
+                return;
+            }
+            console.log("Web3SwapClient will delete", decodedNonce, signerWallet.toLocaleLowerCase());
             this.database.deleteOrder(decodedNonce, signerWallet.toLocaleLowerCase());
         }
     }
