@@ -17,6 +17,7 @@ export class InMemoryDatabase implements Database {
   }
 
   connect(databaseName: string, deleteOnStart: boolean): Promise<void> {
+    console.log("IN_MEMORY - In ram storage only -")
     return Promise.resolve();
   }
 
