@@ -32,7 +32,7 @@ export class Web3SwapClient {
             
             const url = getProviderUrl(chainId, this.apiKey)
             console.log("Web3SwapERC20Client rpc url :", url)
-            provider = new ethers.providers.JsonRpcProvider()
+            provider = new ethers.providers.JsonRpcProvider(url)
             contract = Swap.getContract(provider, chainId);
         } catch (err) {
             return false
