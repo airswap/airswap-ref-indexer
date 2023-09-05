@@ -50,21 +50,26 @@ export class Web3SwapERC20Client {
     }
 
     private async gatherEvents(provider: providers.Provider, startBlock: number | undefined, contract: Contract, chain: number) {
-        const endBlock = await provider.getBlockNumber();
-        if (!startBlock) {
-            startBlock = await provider.getBlockNumber();
+        try {
+            const endBlock = await provider.getBlockNumber();
+            if (!startBlock) {
+                startBlock = await provider.getBlockNumber();
+            }
+            const cancelEvents: Event[] = await contract.queryFilter(contract.filters.Cancel(), startBlock, endBlock);
+            const swapEvents: Event[] = await contract.queryFilter(contract.filters.SwapERC20(), startBlock, endBlock);
+            const allEvents = [...cancelEvents, ...swapEvents];
+    
+            allEvents
+                .filter(event => event.args)
+                .map(event => ({ nonce: event.args!.nonce, signerWallet: event.args!.signerWallet }))
+                .forEach(({ nonce, signerWallet }: { nonce: Nonce, signerWallet: string }) => {
+                    this.onEvent(nonce, signerWallet);
+                });
+            return endBlock
+        } catch (error) {
+            return startBlock
         }
-        const cancelEvents: Event[] = await contract.queryFilter(contract.filters.Cancel(), startBlock, endBlock);
-        const swapEvents: Event[] = await contract.queryFilter(contract.filters.SwapERC20(), startBlock, endBlock);
-        const allEvents = [...cancelEvents, ...swapEvents];
 
-        allEvents
-            .filter(event => event.args)
-            .map(event => ({ nonce: event.args!.nonce, signerWallet: event.args!.signerWallet }))
-            .forEach(({ nonce, signerWallet }: { nonce: Nonce, signerWallet: string }) => {
-                this.onEvent(nonce, signerWallet);
-            });
-        return endBlock
     }
 
     private keyExists(network: string): boolean {
