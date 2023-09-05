@@ -55,7 +55,7 @@ export class Web3SwapERC20Client {
             startBlock = await provider.getBlockNumber();
         }
         const cancelEvents: Event[] = await contract.queryFilter(contract.filters.Cancel(), startBlock, endBlock);
-        const swapEvents: Event[] = await contract.queryFilter(contract.filters.Swap(), startBlock, endBlock);
+        const swapEvents: Event[] = await contract.queryFilter(contract.filters.SwapERC20(), startBlock, endBlock);
         const allEvents = [...cancelEvents, ...swapEvents];
 
         allEvents
