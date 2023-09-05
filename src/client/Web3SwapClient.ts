@@ -33,7 +33,9 @@ export class Web3SwapClient {
             const contract = Swap.getContract(provider, chainId);
             setInterval(() => {
                 this.gatherEvents(provider, this.lastBlock[chainId], contract, chainId).then(endBlock => {
-                    this.lastBlock[chainId] = endBlock
+                    if(endBlock) {
+                        this.lastBlock[chainId] = endBlock
+                    }
                 })
             }, 1000 * 10)
             this.contracts.push(contract);

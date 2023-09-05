@@ -40,7 +40,9 @@ export class Web3SwapERC20Client {
 
         setInterval(() => {
             this.gatherEvents(provider, this.lastBlock[chainId], contract, chainId).then(endBlock => {
-                this.lastBlock[chainId] = endBlock
+                if (endBlock) {
+                    this.lastBlock[chainId] = endBlock
+                }
             })
         }, 1000 * 10)
         this.contracts.push(contract);
@@ -58,7 +60,7 @@ export class Web3SwapERC20Client {
             const cancelEvents: Event[] = await contract.queryFilter(contract.filters.Cancel(), startBlock, endBlock);
             const swapEvents: Event[] = await contract.queryFilter(contract.filters.SwapERC20(), startBlock, endBlock);
             const allEvents = [...cancelEvents, ...swapEvents];
-    
+
             allEvents
                 .filter(event => event.args)
                 .map(event => ({ nonce: event.args!.nonce, signerWallet: event.args!.signerWallet }))
