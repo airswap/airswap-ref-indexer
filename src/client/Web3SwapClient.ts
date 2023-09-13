@@ -54,7 +54,7 @@ export class Web3SwapClient {
             if (!startBlock) {
                 startBlock = await provider.getBlockNumber();
             }
-            const cancelEvents: Event[] = await contract.queryFilter(contract.filters.Cancel(), startBlock, endBlock);
+            const cancelEvents: Event[] = await (contract.queryFiltercontract.filters.Cancel(), startBlock, endBlock);
             const swapEvents: Event[] = await contract.queryFilter(contract.filters.Swap(), startBlock, endBlock);
             const allEvents = [...cancelEvents, ...swapEvents];
 

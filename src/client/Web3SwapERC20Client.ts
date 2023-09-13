@@ -35,6 +35,7 @@ export class Web3SwapERC20Client {
             provider = getProviderUrl(chainId, this.apiKey)
             contract = SwapERC20.getContract(provider, chainId);
         } catch (err) {
+            console.error(err)
             return false
         }
 
