@@ -34,22 +34,22 @@ export class Web3SwapERC20Client {
             }
             provider = getProviderUrl(chainId, this.apiKey)
             contract = SwapERC20.getContract(provider, chainId);
+
+            setInterval(() => {
+                this.gatherEvents(provider, this.lastBlock[chainId], contract, chainId).then(endBlock => {
+                    if (endBlock) {
+                        this.lastBlock[chainId] = endBlock
+                    }
+                })
+            }, 1000 * 10)
+            this.contracts.push(contract);
+            this.registeredChains.push(String(chainId));
+            console.log("Registered event SWAP ERC20 from chain", chainId, "address:", contract.address)
+            return true
         } catch (err) {
             console.error(err)
             return false
         }
-
-        setInterval(() => {
-            this.gatherEvents(provider, this.lastBlock[chainId], contract, chainId).then(endBlock => {
-                if (endBlock) {
-                    this.lastBlock[chainId] = endBlock
-                }
-            })
-        }, 1000 * 10)
-        this.contracts.push(contract);
-        this.registeredChains.push(String(chainId));
-        console.log("Registered event SWAP ERC20 from chain", chainId, "address:", contract.address)
-        return true
     }
 
     private async gatherEvents(provider: providers.Provider, startBlock: number | undefined, contract: Contract, chain: number) {

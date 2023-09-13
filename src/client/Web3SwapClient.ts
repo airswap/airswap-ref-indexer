@@ -1,4 +1,4 @@
-import { Contract, ethers, providers, Event } from 'ethers';
+import { Contract, providers, Event } from 'ethers';
 import { Database } from '../database/Database.js';
 import { Swap } from '@airswap/libraries'
 import { getProviderUrl } from './getProviderUrl.js';
@@ -18,25 +18,28 @@ export class Web3SwapClient {
     }
 
     public connectToChain(network: number | string): boolean {
-        const chainId = ethers.providers.getNetwork(network)?.chainId;
-        if (!chainId) {
-            console.warn("Tried to add this network but it does not work :", network)
-            return false;
-        }
-        if (this.keyExists(String(chainId))) {
-            console.log("Already connected");
-            return true;
-        }
+        let chainId: number
+        let contract: Contract
+        let provider: providers.Provider
 
         try {
-            const provider = getProviderUrl(chainId, this.apiKey)
-            const contract = Swap.getContract(provider, chainId);
-            setInterval(() => {
-                this.gatherEvents(provider, this.lastBlock[chainId], contract, chainId).then(endBlock => {
-                    if(endBlock) {
-                        this.lastBlock[chainId] = endBlock
-                    }
-                })
+            chainId = Number(network);
+            if (!chainId || isNaN(chainId)) {
+                console.warn("Tried to add this network but it does not work :", network)
+                return false
+            }
+            if (this.keyExists(String(chainId))) {
+                console.log("Already connected");
+                return true
+            }
+            provider = getProviderUrl(chainId, this.apiKey)
+            contract = Swap.getContract(provider, chainId);
+            setInterval(async () => {
+                const endBlock = await this.gatherEvents(provider, this.lastBlock[chainId], contract, chainId)
+                if(endBlock) {
+                    this.lastBlock[chainId] = endBlock
+                }
+                return Promise.resolve(endBlock)
             }, 1000 * 10)
             this.contracts.push(contract);
             this.registeredChains.push(String(chainId));
@@ -50,11 +53,13 @@ export class Web3SwapClient {
 
     private async gatherEvents(provider: providers.Provider, startBlock: number | undefined, contract: Contract, chain: number) {
         try {
-            const endBlock = await provider.getBlockNumber();
             if (!startBlock) {
                 startBlock = await provider.getBlockNumber();
             }
-            const cancelEvents: Event[] = await (contract.queryFiltercontract.filters.Cancel(), startBlock, endBlock);
+            const endBlock = await provider.getBlockNumber();
+            console.log("Looking for order events between", startBlock, endBlock)
+
+            const cancelEvents: Event[] = await contract.queryFilter(contract.filters.Cancel(), startBlock, endBlock);
             const swapEvents: Event[] = await contract.queryFilter(contract.filters.Swap(), startBlock, endBlock);
             const allEvents = [...cancelEvents, ...swapEvents];
 
@@ -75,6 +80,7 @@ export class Web3SwapClient {
     }
 
     private onEvent(nonce: Nonce, signerWallet: string) {
+        console.log("Order Event found:", nonce, signerWallet)
         if (nonce && signerWallet) {
             const decodedNonce = parseInt(nonce._hex, 16);
             if (isNaN(decodedNonce)) return;
