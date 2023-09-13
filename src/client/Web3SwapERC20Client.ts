@@ -58,6 +58,7 @@ export class Web3SwapERC20Client {
             if (!startBlock) {
                 startBlock = await provider.getBlockNumber();
             }
+            console.log("Looking for orderERC20 events between", startBlock, endBlock)
             const cancelEvents: Event[] = await contract.queryFilter(contract.filters.Cancel(), startBlock, endBlock);
             const swapEvents: Event[] = await contract.queryFilter(contract.filters.SwapERC20(), startBlock, endBlock);
             const allEvents = [...cancelEvents, ...swapEvents];
@@ -80,6 +81,7 @@ export class Web3SwapERC20Client {
     }
 
     private onEvent(nonce: { _hex: string, _isBigNumber: boolean }, signerWallet: string) {
+        console.log("OrderERC20 Event found:", nonce, signerWallet)
         if (nonce && signerWallet) {
             const decodedNonce = parseInt(nonce._hex, 16);
             if (isNaN(decodedNonce)) {
