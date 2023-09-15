@@ -179,7 +179,12 @@ export class InMemoryDatabase implements Database {
   }
 
   ////////////////////////////// Non ERC20
-  addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {
+  async addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {
+    const ordersToDelete = await this.findOrders((order: DbOrder) => {
+      return order.signer.wallet === indexedOrder.order.signer.wallet && order.signer.id === indexedOrder.order.signer.id
+    })
+    this.deleteOrders(ordersToDelete)
+
     this.orderDatabase[indexedOrder.hash!] = indexedOrder;
     this.addToken(indexedOrder.order.signer.token)
     this.addToken(indexedOrder.order.sender.token)
@@ -193,15 +198,30 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  deleteOrder(nonce: number, signerWallet: string): Promise<void> {
-    const orderToDelete = Object.values(this.orderDatabase).find((indexedOrder) => {
-      const order = indexedOrder.order as DbOrder
+  async deleteOrder(nonce: number, signerWallet: string): Promise<void> {
+    const ordersToDelete = await this.findOrders((order: DbOrder) => {
       return order.nonce === nonce && order.signer.wallet === signerWallet
-    });
-    if (orderToDelete && orderToDelete.hash) {
-      delete this.orderDatabase[orderToDelete.hash];
-    }
+    })
+    this.deleteOrders(ordersToDelete)
     return Promise.resolve();
+  }
+
+  private deleteOrders(orders: IndexedOrder<DbOrder>[]) {
+    if (orders && orders.length > 0) {
+      orders.forEach(orderDb => {
+        if (orderDb.hash) {
+          delete this.orderDatabase[orderDb.hash];
+        }
+      })
+    }
+  }
+
+  private findOrders(predicate: Function): Promise<IndexedOrder<DbOrder>[]> {
+    const orders = Object.values(this.orderDatabase).filter((indexedOrder) => {
+      const order = indexedOrder.order as DbOrder
+      return predicate(order)
+    });
+    return Promise.resolve(orders);
   }
 
   deleteExpiredOrder(timestampInSeconds: number): Promise<void> {

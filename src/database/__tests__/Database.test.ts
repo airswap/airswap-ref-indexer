@@ -150,6 +150,13 @@ describe("Database implementations", () => {
         })
     });
 
+    describe("Specific Order", () => {
+        describe("pair signerwallet-tokenId should be unique", () => {
+            test("inMemoryDb", async () => { await pairSignerwalletTokenIDIsUnique(inMemoryDatabase); });
+            test("acebaseDb", async () => { await pairSignerwalletTokenIDIsUnique(acebaseClient); });
+        })
+    });
+
     async function getOrdersERC20By(db: Database) {
         const dbOrder1: DbOrderERC20 = {
             nonce: 123,
@@ -839,6 +846,31 @@ describe("Database implementations", () => {
         const hash = db.generateHash(indexedOrder);
 
         expect(hash).toBe("86903491dd10421ee4bc866341c9852e18b296d429ed1fdc9fc9c30701d6d8cd");
+        return Promise.resolve();
+    }
+
+    async function pairSignerwalletTokenIDIsUnique(db: Database) {
+        const indexedOrderToOverwrite = forgeIndexedOrder(addedOn, expiryDate, "a_hash");
+        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate, "another_hash");
+        indexedOrder.order.signer.amount = "100000003"
+        const expectedIndexedOrder = forgeIndexedOrderResponse(addedOn, expiryDate, "another_hash");
+        expectedIndexedOrder.order.signer.amount = "100000003"
+
+        await db.addOrder(indexedOrderToOverwrite);
+        await db.addOrder(indexedOrder);
+
+        const removedOrder = await db.getOrder("a_hash");
+        const existingOrder = await db.getOrder("another_hash");
+
+        expect(removedOrder.pagination.total).toBe(0)
+        expect(existingOrder).toEqual({
+            orders: { another_hash: expectedIndexedOrder },
+            pagination: {
+                limit: 1,
+                offset: 0,
+                total: 1,
+            },
+        });
         return Promise.resolve();
     }
 });
