@@ -1,13 +1,16 @@
-import { Contract, ethers, providers } from 'ethers';
+import { Contract, providers, Event } from 'ethers';
 import { Database } from '../database/Database.js';
 import { Swap } from '@airswap/libraries'
 import { getProviderUrl } from './getProviderUrl.js';
+
+type Nonce = { _hex: string, _isBigNumber: boolean };
 
 export class Web3SwapClient {
     private contracts: Contract[] = [];
     private database: Database;
     private apiKey: string;
     private registeredChains: string[] = [];
+    private lastBlock: Record<number, number> = {};
 
     constructor(apiKey: string, database: Database) {
         this.database = database;
@@ -29,34 +32,58 @@ export class Web3SwapClient {
                 console.log("Already connected");
                 return true
             }
-    
-            provider = new ethers.providers.JsonRpcProvider(getProviderUrl(chainId, this.apiKey))
+            provider = getProviderUrl(chainId, this.apiKey)
             contract = Swap.getContract(provider, chainId);
+            setInterval(async () => {
+                const endBlock = await this.gatherEvents(provider, this.lastBlock[chainId], contract, chainId)
+                if(endBlock) {
+                    this.lastBlock[chainId] = endBlock
+                }
+                return Promise.resolve(endBlock)
+            }, 1000 * 10)
+            this.contracts.push(contract);
+            this.registeredChains.push(String(chainId));
+            console.log("Registered event SWAP from chain", chainId, "address:", contract.address)
+            return true
         } catch (err) {
+            console.error(err)
             return false
         }
-        
-        contract.on("Swap", (nonce, signerWallet) => {
-            this.onEvent(nonce, signerWallet);
-        });
-        contract.on("Cancel", (nonce, signerWallet) => {
-            this.onEvent(nonce, signerWallet);
-        });
-        this.contracts.push(contract);
-        this.registeredChains.push(String(chainId));
-        console.log("Registered event SWAP from chain", chainId)
-        return true
+    }
+
+    private async gatherEvents(provider: providers.Provider, startBlock: number | undefined, contract: Contract, chain: number) {
+        try {
+            if (!startBlock) {
+                startBlock = await provider.getBlockNumber();
+            }
+            const endBlock = await provider.getBlockNumber();
+            console.log("Looking for order events between", startBlock, endBlock)
+
+            const cancelEvents: Event[] = await contract.queryFilter(contract.filters.Cancel(), startBlock, endBlock);
+            const swapEvents: Event[] = await contract.queryFilter(contract.filters.Swap(), startBlock, endBlock);
+            const allEvents = [...cancelEvents, ...swapEvents];
+
+            allEvents
+                .filter(event => event.args)
+                .map(event => ({ nonce: event.args!.nonce, signerWallet: event.args!.signerWallet }))
+                .forEach(({ nonce, signerWallet }: { nonce: Nonce, signerWallet: string }) => {
+                    this.onEvent(nonce, signerWallet);
+                });
+            return endBlock
+        } catch (err) {
+            return startBlock
+        }
     }
 
     private keyExists(network: string): boolean {
         return this.registeredChains.includes(network);
     }
 
-    private onEvent(nonce: { _hex: string, _isBigNumber: boolean }, signerWallet: string) {
+    private onEvent(nonce: Nonce, signerWallet: string) {
+        console.log("Order Event found:", nonce, signerWallet)
         if (nonce && signerWallet) {
             const decodedNonce = parseInt(nonce._hex, 16);
             if (isNaN(decodedNonce)) return;
-            
             this.database.deleteOrder(decodedNonce, signerWallet.toLocaleLowerCase());
         }
     }

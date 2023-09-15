@@ -22,6 +22,7 @@ export class AceBaseClient implements Database {
         const options = { storage: { path: '.' }, logLevel: 'error' } as AceBaseLocalSettings;
         const dbName = `${databaseName}.acebase`;
         if (deleteOnStart && fs.existsSync(dbName)) {
+            console.log("ACEBASE - Removing previous data...")
             await fs.promises.rm(dbName, { recursive: true });
         }
         this.db = new AceBase(databaseName, options);
