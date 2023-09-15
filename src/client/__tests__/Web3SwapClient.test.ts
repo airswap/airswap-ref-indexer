@@ -12,15 +12,6 @@ jest.mock('@airswap/libraries', () => ({
 jest.mock('ethers');
 jest.useFakeTimers();
 
-beforeEach(() => {
-    jest.spyOn(global, 'setInterval');
-  });
-  
-  afterEach(() => {
-    // @ts-ignore
-    global.setInterval.mockRestore();
-  });
-
 const mockedEther = ethers as jest.Mocked<typeof ethers>;
 
 describe("Web3SwapClient", () => {
