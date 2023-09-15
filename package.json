@@ -11,7 +11,9 @@
     "test": "jest --verbose --coverage --no-cache",
     "benchERC20": "node benchmarking/benchERC20.js",
     "bench": "node benchmarking/bench.js",
-    "date": "node benchmarking/generateDateInRange.js"
+    "date": "node benchmarking/generateDateInRange.js",
+    "lint": "eslint src",
+    "prepare": "husky install"
   },
   "type": "module",
   "license": "MIT",
@@ -28,8 +30,9 @@
     "body-parser": "1.20.2",
     "cors": "2.8.5",
     "dotenv": "16.3.1",
-    "ethers": "5.7.0",
-    "express": "4.18.2"
+    "ethers": "5.7.2",
+    "express": "4.18.2",
+    "husky": "^8.0.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.14",
