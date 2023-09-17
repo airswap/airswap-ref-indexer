@@ -103,7 +103,7 @@ function getWeb3SwapClient(database: Database, network: number) {
   return { swapClientOrder, swapClientOrderERC20 };
 }
 
-async function gracefulShutdown(webserver: Webserver, database: Database, intervalId: NodeJS.Timer) {
+async function gracefulShutdown(webserver: Webserver, database: Database, intervalId: NodeJS.Timeout) {
   try {
     clearInterval(intervalId);
     await database.close();

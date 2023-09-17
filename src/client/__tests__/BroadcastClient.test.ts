@@ -1,14 +1,14 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { BroadcastClient } from '../BroadcastClient';
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-function axios200Response(data: object): AxiosResponse<any> {
+function axios200Response(data: object): Partial<AxiosResponse<any>> {
     return {
         data: data,
         status: 200,
         statusText: "OK",
-        config: {},
+        config: {} as InternalAxiosRequestConfig,
         headers: {}
     }
 };
