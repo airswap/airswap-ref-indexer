@@ -2,6 +2,7 @@ import { Contract, providers, Event } from 'ethers';
 import { Database } from '../database/Database.js';
 import { Swap } from '@airswap/libraries'
 import { getProviderUrl } from './getProviderUrl.js';
+import { DbOrder } from '../model/DbOrderTypes.js';
 
 type Nonce = { _hex: string, _isBigNumber: boolean };
 
@@ -49,6 +50,23 @@ export class Web3SwapClient {
             console.error(err)
             return false
         }
+    }
+
+    public async isValidOrder(dbOrder: DbOrder) {
+        let isValid = false;
+        const contract = this.contracts[0];
+        if (!contract) {
+            return Promise.resolve(isValid);
+        }
+        try {            
+            isValid = await contract.check(
+                dbOrder.sender.wallet,
+                dbOrder
+            )
+        } catch (err) {
+            console.error(err);
+        }
+        return Promise.resolve(isValid);
     }
 
     private async gatherEvents(provider: providers.Provider, startBlock: number | undefined, contract: Contract, chain: number) {

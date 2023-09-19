@@ -11,6 +11,7 @@ import { Web3SwapERC20Client } from '../client/Web3SwapERC20Client.js';
 import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
 import { Web3SwapClient } from '../client/Web3SwapClient';
+import { InvalidSignatureException } from '../model/error/InvalidSignatureException.js';
 
 
 export const METHODS = {
@@ -116,6 +117,10 @@ export class OrderService {
         const isNetworkAdded = this.web3SwapClient.connectToChain(indexedOrder.order.chainId)
         if(!isNetworkAdded){
             throw new ClientError("Chain ID unsupported");
+        }
+        const isOrderValid = await this.web3SwapClient.isValidOrder(indexedOrder.order);
+        if(!isOrderValid) {
+            throw new InvalidSignatureException();
         }
         await this.database.addOrder(indexedOrder);
         console.log("Added", indexedOrder.order)
