@@ -56,6 +56,7 @@ export class Web3SwapClient {
             if (!startBlock) {
                 startBlock = await provider.getBlockNumber();
             }
+            startBlock = startBlock! - 5;
             const endBlock = await provider.getBlockNumber();
             console.log("Looking for order events between", startBlock, endBlock)
 

@@ -182,7 +182,7 @@ export class InMemoryDatabase implements Database {
   ////////////////////////////// Non ERC20
   async addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {
     const ordersToDelete = await this.findOrders((order: DbOrder) => {
-      return order.signer.wallet === indexedOrder.order.signer.wallet && order.signer.id === indexedOrder.order.signer.id
+      return order.signer.id === indexedOrder.order.signer.id
     })
     this.deleteOrders(ordersToDelete)
 

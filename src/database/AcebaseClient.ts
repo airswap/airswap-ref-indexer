@@ -63,7 +63,6 @@ export class AceBaseClient implements Database {
 
     async addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {
         await this.refOrders.query()
-            .filter('order/signer/wallet', '==', indexedOrder.order.signer.wallet)
             .filter('order/signer/id', '==', indexedOrder.order.signer.id)
             .remove();
         await this.refOrders.push(indexedOrder);

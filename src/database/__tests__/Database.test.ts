@@ -151,9 +151,9 @@ describe("Database implementations", () => {
     });
 
     describe("Specific Order", () => {
-        describe("pair signerwallet-tokenId should be unique", () => {
-            test("inMemoryDb", async () => { await pairSignerwalletTokenIDIsUnique(inMemoryDatabase); });
-            test("acebaseDb", async () => { await pairSignerwalletTokenIDIsUnique(acebaseClient); });
+        describe("tokenId should be unique", () => {
+            test("inMemoryDb", async () => { await tokenIDIsUnique(inMemoryDatabase); });
+            test("acebaseDb", async () => { await tokenIDIsUnique(acebaseClient); });
         })
     });
 
@@ -396,12 +396,14 @@ describe("Database implementations", () => {
         dbOrder1.sender.token = "senderToken1"
         dbOrder1.signer.wallet = "aWalletAddress"
         dbOrder1.signer.amount = "1"
+        dbOrder1.signer.id = "1"
         dbOrder1.signer.approximatedAmount = BigInt(1)
         dbOrder1.signer.token = "signerToken1"
         const order1: FullOrder = forgeFullOrder(5);
         order1.nonce = "123"
         order1.signer.wallet = "aWalletAddress"
         order1.signer.amount = "1"
+        order1.signer.id = "1"
         order1.signer.token = "signerToken1"
         order1.sender.wallet = "aWalletAddress"
         order1.sender.amount = "1"
@@ -415,6 +417,7 @@ describe("Database implementations", () => {
         dbOrder2.sender.token = "senderToken2"
         dbOrder2.sender.id = "aTokenId"
         dbOrder2.signer.amount = "3"
+        dbOrder2.signer.id = "3"
         dbOrder2.signer.approximatedAmount = BigInt(3)
         dbOrder2.signer.token = "signerToken2"
         const order2: FullOrder = forgeFullOrder(1);
@@ -424,6 +427,7 @@ describe("Database implementations", () => {
         order2.sender.token = "senderToken2"
         order2.sender.id = "aTokenId"
         order2.signer.amount = "3"
+        order2.signer.id = "3"
         order2.signer.token = "signerToken2"
 
         const dbOrder3: DbOrder = forgeDbOrder(3);
@@ -849,12 +853,12 @@ describe("Database implementations", () => {
         return Promise.resolve();
     }
 
-    async function pairSignerwalletTokenIDIsUnique(db: Database) {
+    async function tokenIDIsUnique(db: Database) {
         const indexedOrderToOverwrite = forgeIndexedOrder(addedOn, expiryDate, "a_hash");
         const indexedOrder = forgeIndexedOrder(addedOn, expiryDate, "another_hash");
-        indexedOrder.order.signer.amount = "100000003"
+        indexedOrder.order.signer.wallet = "super_wallet"
         const expectedIndexedOrder = forgeIndexedOrderResponse(addedOn, expiryDate, "another_hash");
-        expectedIndexedOrder.order.signer.amount = "100000003"
+        expectedIndexedOrder.order.signer.wallet = "super_wallet"
 
         await db.addOrder(indexedOrderToOverwrite);
         await db.addOrder(indexedOrder);
