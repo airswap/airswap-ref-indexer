@@ -58,6 +58,7 @@ export class Web3SwapERC20Client {
             if (!startBlock) {
                 startBlock = await provider.getBlockNumber();
             }
+            startBlock = startBlock! - 5;
             console.log("Looking for orderERC20 events between", startBlock, endBlock)
             const cancelEvents: Event[] = await contract.queryFilter(contract.filters.Cancel(), startBlock, endBlock);
             const swapEvents: Event[] = await contract.queryFilter(contract.filters.SwapERC20(), startBlock, endBlock);
