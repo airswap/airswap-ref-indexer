@@ -16,8 +16,8 @@ describe("Database implementations", () => {
     beforeAll(async () => {
         inMemoryDatabase = new InMemoryDatabase();
         acebaseClient = new AceBaseClient();
-        await acebaseClient.connect("dbtest", true);
-        await inMemoryDatabase.connect("dbtest", true);
+        await acebaseClient.connect("dbtest", true, '.');
+        await inMemoryDatabase.connect("dbtest", true, '.');
     });
 
     beforeEach(async () => {

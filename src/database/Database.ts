@@ -31,7 +31,7 @@ export interface Database {
 
     getTokens(): Promise<string[]>;
 
-    connect(databaseName: string, deleteOnStart: boolean): Promise<void>;
+    connect(databaseName: string, deleteOnStart: boolean, databasePath: string): Promise<void>;
 
     close(): Promise<void>;
 

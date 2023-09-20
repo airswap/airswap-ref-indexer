@@ -18,8 +18,8 @@ export class AceBaseClient implements Database {
     private refERC20!: DataReference;
     private refOrders!: DataReference;
 
-    public async connect(databaseName: string, deleteOnStart = false): Promise<void> {
-        const options = { storage: { path: '.' }, logLevel: 'error' } as AceBaseLocalSettings;
+    public async connect(databaseName: string, deleteOnStart = false, databasePath: string): Promise<void> {
+        const options = { storage: { path: databasePath }, logLevel: 'error' } as AceBaseLocalSettings;
         const dbName = `${databaseName}.acebase`;
         if (deleteOnStart && fs.existsSync(dbName)) {
             console.log("ACEBASE - Removing previous data...")
