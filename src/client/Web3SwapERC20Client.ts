@@ -2,11 +2,12 @@ import { Contract, providers, Event } from 'ethers';
 import { Database } from '../database/Database.js';
 import { SwapERC20 } from '@airswap/libraries'
 import { getProviderUrl } from './getProviderUrl.js';
+import { DbOrderERC20 } from '../model/DbOrderTypes.js';
 
 type Nonce = { _hex: string, _isBigNumber: boolean };
 
 export class Web3SwapERC20Client {
-    private contracts: Contract[] = [];
+    private contracts: Record<string, Contract> = {};
     private database: Database;
     private apiKey: string;
     private registeredChains: string[] = [];
@@ -42,7 +43,7 @@ export class Web3SwapERC20Client {
                     }
                 })
             }, 1000 * 10)
-            this.contracts.push(contract);
+            this.contracts[chainId] = contract;
             this.registeredChains.push(String(chainId));
             console.log("Registered event SWAP ERC20 from chain", chainId, "address:", contract.address)
             return true
@@ -50,6 +51,32 @@ export class Web3SwapERC20Client {
             console.error(err)
             return false
         }
+    }
+
+    public async isValidOrder(dbOrder: DbOrderERC20) {
+        let isValid = false;
+        const contract = this.contracts[dbOrder.chainId];
+        if (!contract) {
+            return Promise.resolve(isValid);
+        }
+        try {
+            isValid = await contract.check(
+                dbOrder.senderWallet,
+                dbOrder.nonce,
+                dbOrder.expiry,
+                dbOrder.signerWallet,
+                dbOrder.signerToken,
+                dbOrder.signerAmount,
+                dbOrder.senderToken,
+                dbOrder.senderAmount,
+                dbOrder.v,
+                dbOrder.r,
+                dbOrder.s
+            )
+        } catch (err) {
+            console.error(err);
+        }
+        return Promise.resolve(isValid);
     }
 
     private async gatherEvents(provider: providers.Provider, startBlock: number | undefined, contract: Contract, chain: number) {
@@ -76,8 +103,8 @@ export class Web3SwapERC20Client {
 
     }
 
-    private keyExists(network: string): boolean {
-        return this.registeredChains.includes(network);
+    private keyExists(chainId: string): boolean {
+        return Object.keys(this.contracts).includes(chainId);
     }
 
     private onEvent(nonce: { _hex: string, _isBigNumber: boolean }, signerWallet: string) {

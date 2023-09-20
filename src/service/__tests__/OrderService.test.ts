@@ -35,10 +35,12 @@ describe("Order service", () => {
             deleteOrderERC20: jest.fn(() => Promise.resolve()),
         };
         fakeWeb3SwapERC20Client = {
-            connectToChain: jest.fn()
+            connectToChain: jest.fn(),
+            isValidOrder: jest.fn(),
         }
         fakeWeb3SwapClient = {
-            connectToChain: jest.fn()
+            connectToChain: jest.fn(),
+            isValidOrder: jest.fn(),
         }
     })
 
@@ -178,6 +180,8 @@ describe("Order service", () => {
             fakeDb.orderERC20Exists.mockImplementation(() => false);
             //@ts-ignore
             fakeWeb3SwapERC20Client.connectToChain.mockImplementation(() => true)
+            //@ts-ignore
+            fakeWeb3SwapERC20Client.isValidOrder.mockImplementation(() => true)
 
             await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, maxResultByQuery).addOrderERC20(order);
 
@@ -185,6 +189,37 @@ describe("Order service", () => {
             expect(fakeDb.orderERC20Exists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrderERC20).toHaveBeenCalledWith(expected);
             expect(fakeWeb3SwapERC20Client.connectToChain).toHaveBeenCalledWith(5);
+            expect(fakeWeb3SwapERC20Client.isValidOrder).toHaveBeenCalledTimes(1);
+        });
+
+        test("Add order invalid signature", async () => {
+            const order = forgeFullOrderERC20(1653900784796);
+            const expectedForgeHash = { order: forgeDbOrderERC20(1653900784796), addedOn: 1653900784706 }
+            const expected = forgeIndexedOrderERC20(1653900784706, 1653900784796);
+            expected.hash = "a";
+
+            //@ts-ignore
+            fakeDb.generateHashERC20.mockImplementation((order) => {
+                expect(order).toEqual(expectedForgeHash); // https://github.com/facebook/jest/issues/7950
+                return "a";
+            });
+            //@ts-ignore
+            fakeDb.orderERC20Exists.mockImplementation(() => false);
+            //@ts-ignore
+            fakeWeb3SwapERC20Client.connectToChain.mockImplementation(() => true)
+            //@ts-ignore
+            fakeWeb3SwapERC20Client.isValidOrder.mockImplementation(() => false)
+
+            await expect(async () => {
+                // @ts-ignore
+                await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, maxResultByQuery).addOrderERC20(order);
+            }).rejects.toThrow("Invalid signature");
+
+            expect(fakeDb.generateHashERC20).toHaveBeenCalledTimes(1);
+            expect(fakeDb.orderERC20Exists).toHaveBeenCalledWith("a");
+            expect(fakeDb.addOrderERC20).not.toHaveBeenCalled();
+            expect(fakeWeb3SwapERC20Client.connectToChain).toHaveBeenCalledWith(5);
+            expect(fakeWeb3SwapERC20Client.isValidOrder).toHaveBeenCalledTimes(1);
         });
 
         test("not adding on unsupported chain", async () => {
@@ -306,6 +341,8 @@ describe("Order service", () => {
             fakeDb.orderExists.mockImplementation(() => false);
             //@ts-ignore
             fakeWeb3SwapClient.connectToChain.mockImplementation(() => true)
+            //@ts-ignore
+            fakeWeb3SwapClient.isValidOrder.mockImplementation(() => true)
 
             await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, maxResultByQuery).addOrder(order);
 
@@ -313,6 +350,37 @@ describe("Order service", () => {
             expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
             expect(fakeDb.addOrder).toHaveBeenCalledWith(expected);
             expect(fakeWeb3SwapClient.connectToChain).toHaveBeenCalledWith(5);
+            expect(fakeWeb3SwapClient.isValidOrder).toHaveBeenCalledTimes(1);
+        });
+
+        test("Add order invalid signature", async () => {
+            const order = forgeFullOrder(1653900784796);
+            const expectedForgeHash = { order: forgeDbOrder(1653900784796), addedOn: 1653900784706 }
+            const expected = forgeIndexedOrder(1653900784706, 1653900784796);
+            expected.hash = "a";
+
+            //@ts-ignore
+            fakeDb.generateHash.mockImplementation((order) => {
+                expect(order).toEqual(expectedForgeHash); // https://github.com/facebook/jest/issues/7950
+                return "a";
+            });
+            //@ts-ignore
+            fakeDb.orderExists.mockImplementation(() => false);
+            //@ts-ignore
+            fakeWeb3SwapClient.connectToChain.mockImplementation(() => true)
+            //@ts-ignore
+            fakeWeb3SwapClient.isValidOrder.mockImplementation(() => false)
+
+            await expect(async () => {
+                // @ts-ignore
+                await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, maxResultByQuery).addOrder(order);
+            }).rejects.toThrow("Invalid signature");
+
+            expect(fakeDb.generateHash).toHaveBeenCalledTimes(1);
+            expect(fakeDb.orderExists).toHaveBeenCalledWith("a");
+            expect(fakeDb.addOrder).not.toHaveBeenCalled();
+            expect(fakeWeb3SwapClient.connectToChain).toHaveBeenCalledWith(5);
+            expect(fakeWeb3SwapClient.isValidOrder).toHaveBeenCalledTimes(1);
         });
 
         test("not adding on unsupported chain", async () => {

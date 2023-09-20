@@ -7,10 +7,9 @@ import { DbOrder } from '../model/DbOrderTypes.js';
 type Nonce = { _hex: string, _isBigNumber: boolean };
 
 export class Web3SwapClient {
-    private contracts: Contract[] = [];
+    private contracts: Record<string, Contract> = {};
     private database: Database;
     private apiKey: string;
-    private registeredChains: string[] = [];
     private lastBlock: Record<number, number> = {};
 
     constructor(apiKey: string, database: Database) {
@@ -35,15 +34,15 @@ export class Web3SwapClient {
             }
             provider = getProviderUrl(chainId, this.apiKey)
             contract = Swap.getContract(provider, chainId);
+            
             setInterval(async () => {
                 const endBlock = await this.gatherEvents(provider, this.lastBlock[chainId], contract, chainId)
-                if(endBlock) {
+                if (endBlock) {
                     this.lastBlock[chainId] = endBlock
                 }
                 return Promise.resolve(endBlock)
             }, 1000 * 10)
-            this.contracts.push(contract);
-            this.registeredChains.push(String(chainId));
+            this.contracts[chainId] = contract;
             console.log("Registered event SWAP from chain", chainId, "address:", contract.address)
             return true
         } catch (err) {
@@ -54,11 +53,11 @@ export class Web3SwapClient {
 
     public async isValidOrder(dbOrder: DbOrder) {
         let isValid = false;
-        const contract = this.contracts[0];
+        const contract = this.contracts[dbOrder.chainId];
         if (!contract) {
             return Promise.resolve(isValid);
         }
-        try {            
+        try {
             isValid = await contract.check(
                 dbOrder.sender.wallet,
                 dbOrder
@@ -93,8 +92,8 @@ export class Web3SwapClient {
         }
     }
 
-    private keyExists(network: string): boolean {
-        return this.registeredChains.includes(network);
+    private keyExists(chainId: string): boolean {
+        return Object.keys(this.contracts).includes(chainId);
     }
 
     private onEvent(nonce: Nonce, signerWallet: string) {
