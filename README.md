@@ -29,7 +29,6 @@ MAX_RESULTS_FOR_QUERY=100
 ########### smartcontract definition ###########
 NETWORK=1
 API_KEY="<add your api key>"
-########### feature flipping ###########
 </pre>
 
 > $ yarn start
