@@ -10,7 +10,6 @@ export class Web3SwapERC20Client {
     private contracts: Record<string, Contract> = {};
     private database: Database;
     private apiKey: string;
-    private registeredChains: string[] = [];
     private lastBlock: Record<number, number> = {};
 
     constructor(apiKey: string, database: Database) {
@@ -44,7 +43,6 @@ export class Web3SwapERC20Client {
                 })
             }, 1000 * 10)
             this.contracts[chainId] = contract;
-            this.registeredChains.push(String(chainId));
             console.log("Registered event SWAP ERC20 from chain", chainId, "address:", contract.address)
             return true
         } catch (err) {
@@ -73,6 +71,7 @@ export class Web3SwapERC20Client {
                 dbOrder.r,
                 dbOrder.s
             )
+            console.log("checking if valid")
         } catch (err) {
             console.error(err);
         }
