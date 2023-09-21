@@ -71,7 +71,6 @@ export class Web3SwapERC20Client {
                 dbOrder.r,
                 dbOrder.s
             )
-            console.log("checking if valid")
         } catch (err) {
             console.error(err);
         }
