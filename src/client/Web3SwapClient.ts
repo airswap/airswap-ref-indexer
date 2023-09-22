@@ -128,12 +128,12 @@ enum OrderErrors {
     Unauthorized,
     SignatoryUnauthorized,
     SignatureInvalid,
+    SenderInvalid,
+    SenderTokenInvalid,
+    SenderTokenKindUnknown,
 }
 
 enum OrderSenderErrors {
-    SenderInvalid,
     SenderAllowanceLow,
-    SenderTokenInvalid,
-    SenderTokenKindUnknown,
     SenderBalanceLow,
 }
