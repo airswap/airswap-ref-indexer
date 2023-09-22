@@ -121,7 +121,7 @@ export class OrderService {
         if(!isNetworkAdded){
             throw new ClientError("Chain ID unsupported");
         }
-        const isOrderValid = await this.web3SwapClient.isValidOrder(indexedOrder.order);
+        const isOrderValid = await this.web3SwapClient.isValidOrder(body);
         if(!isOrderValid) {
             throw new InvalidSignatureException();
         }
@@ -156,6 +156,7 @@ export class OrderService {
 function areERC20NumberFieldsValid(order: FullOrderERC20) {
     return isNumeric(order.senderAmount) && isNumeric(order.signerAmount) && isNumeric(order.expiry) && isNumeric(order.nonce)
 }
+
 function areOrderNumberFieldsValid(order: FullOrder) {
     return isNumeric(order.sender.amount) && isNumeric(order.signer.amount) && isNumeric(order.expiry) && isNumeric(order.affiliateAmount) && isNumeric(order.nonce)
 }

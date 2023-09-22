@@ -1,8 +1,9 @@
-import { Contract, providers, Event } from 'ethers';
+import { Contract, providers, Event, errors } from 'ethers';
 import { Database } from '../database/Database.js';
 import { SwapERC20 } from '@airswap/libraries'
 import { getProviderUrl } from './getProviderUrl.js';
 import { DbOrderERC20 } from '../model/DbOrderTypes.js';
+import { checkResultToErrors } from '@airswap/utils';
 
 type Nonce = { _hex: string, _isBigNumber: boolean };
 
@@ -36,7 +37,7 @@ export class Web3SwapERC20Client {
             contract = SwapERC20.getContract(provider, chainId);
 
             setInterval(() => {
-                this.gatherEvents(provider, this.lastBlock[chainId], contract, chainId).then(endBlock => {
+                this.gatherEvents(provider, this.lastBlock[chainId], contract).then(endBlock => {
                     if (endBlock) {
                         this.lastBlock[chainId] = endBlock
                     }
@@ -58,7 +59,7 @@ export class Web3SwapERC20Client {
             return Promise.resolve(isValid);
         }
         try {
-            isValid = await contract.check(
+            const response = await contract.check(
                 dbOrder.senderWallet,
                 dbOrder.nonce,
                 dbOrder.expiry,
@@ -71,13 +72,16 @@ export class Web3SwapERC20Client {
                 dbOrder.r,
                 dbOrder.s
             )
+            const errors = checkResultToErrors(response[0], response[1])
+            isValid = !errors.includes("SignatureInvalid")
         } catch (err) {
             console.error(err);
         }
+        console.log("THE ORDER IS", isValid)
         return Promise.resolve(isValid);
     }
 
-    private async gatherEvents(provider: providers.Provider, startBlock: number | undefined, contract: Contract, chain: number) {
+    private async gatherEvents(provider: providers.Provider, startBlock: number | undefined, contract: Contract) {
         try {
             const endBlock = await provider.getBlockNumber();
             if (!startBlock) {

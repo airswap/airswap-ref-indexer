@@ -3,6 +3,7 @@ import { Database } from '../database/Database.js';
 import { Swap } from '@airswap/libraries'
 import { getProviderUrl } from './getProviderUrl.js';
 import { DbOrder } from '../model/DbOrderTypes.js';
+import { checkResultToErrors } from '@airswap/utils';
 
 type Nonce = { _hex: string, _isBigNumber: boolean };
 
@@ -34,9 +35,9 @@ export class Web3SwapClient {
             }
             provider = getProviderUrl(chainId, this.apiKey)
             contract = Swap.getContract(provider, chainId);
-            
+
             setInterval(async () => {
-                const endBlock = await this.gatherEvents(provider, this.lastBlock[chainId], contract, chainId)
+                const endBlock = await this.gatherEvents(provider, this.lastBlock[chainId], contract)
                 if (endBlock) {
                     this.lastBlock[chainId] = endBlock
                 }
@@ -51,24 +52,33 @@ export class Web3SwapClient {
         }
     }
 
-    public async isValidOrder(dbOrder: DbOrder) {
-        let isValid = false;
-        const contract = this.contracts[dbOrder.chainId];
+    public async isValidOrder(fullOrder: DbOrder) {
+        let isValid = true;
+        const contract = this.contracts[fullOrder.chainId];
         if (!contract) {
-            return Promise.resolve(isValid);
+            return Promise.resolve(false);
         }
         try {
-            isValid = await contract.check(
-                dbOrder.sender.wallet,
-                dbOrder
+            const response = await contract.check(
+                fullOrder.sender.wallet,
+                fullOrder
             )
+            const errors = checkResultToErrors(response[1], response[0])
+            console.log(errors)
+            for (let index in errors) {
+                if(Object.keys(OrderErrors).includes(errors[index])) {
+                    isValid = false;
+                    break;
+                }                
+            }
         } catch (err) {
+            isValid = false;
             console.error(err);
         }
         return Promise.resolve(isValid);
     }
 
-    private async gatherEvents(provider: providers.Provider, startBlock: number | undefined, contract: Contract, chain: number) {
+    private async gatherEvents(provider: providers.Provider, startBlock: number | undefined, contract: Contract) {
         try {
             if (!startBlock) {
                 startBlock = await provider.getBlockNumber();
@@ -104,4 +114,26 @@ export class Web3SwapClient {
             this.database.deleteOrder(decodedNonce, signerWallet.toLocaleLowerCase());
         }
     }
+}
+
+enum OrderErrors {
+    FeeInvalid,
+    AffiliateAmountInvalid,
+    SignerBalanceLow,
+    SignerAllowanceLow,
+    SignerTokenKindUnknown,
+    OrderExpired,
+    NonceTooLow,
+    NonceAlreadyUsed,
+    Unauthorized,
+    SignatoryUnauthorized,
+    SignatureInvalid,
+}
+
+enum OrderSenderErrors {
+    SenderInvalid,
+    SenderAllowanceLow,
+    SenderTokenInvalid,
+    SenderTokenKindUnknown,
+    SenderBalanceLow,
 }
