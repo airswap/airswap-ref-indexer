@@ -20,12 +20,13 @@ Then :
 The .env should be like this : 
 
 <pre>
-########### server configuration
-EXPRESS_PORT=3000
+########### server configuration ###########
+EXPRESS_PORT=4001
 NODE_URL="http://localhost:3000/"
-DELETE_DB_ON_START=1
-DATABASE_TYPE="IN_MEMORY"
-########### smartcontract definition
+DATABASE_TYPE="ACEBASE"
+DATABASE_PATH="/var/lib/airswap"
+MAX_RESULTS_FOR_QUERY=100
+########### smartcontract definition ###########
 NETWORK=1
 API_KEY="<add your api key>"
 </pre>
