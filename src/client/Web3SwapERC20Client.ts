@@ -53,10 +53,10 @@ export class Web3SwapERC20Client {
     }
 
     public async isValidOrder(dbOrder: DbOrderERC20) {
-        let isValid = false;
+        let isValid = true;
         const contract = this.contracts[dbOrder.chainId];
         if (!contract) {
-            return Promise.resolve(isValid);
+            return Promise.resolve(false);
         }
         try {
             const response = await contract.check(
@@ -73,11 +73,17 @@ export class Web3SwapERC20Client {
                 dbOrder.s
             )
             const errors = checkResultToErrors(response[0], response[1])
-            isValid = !errors.includes("SignatureInvalid")
+            console.log(errors)
+            for (let index in errors) {
+                if(Object.keys(ERC20Errors).includes(errors[index])) {
+                    isValid = false;
+                    break;
+                }                
+            }
         } catch (err) {
+            isValid = false
             console.error(err);
         }
-        console.log("THE ORDER IS", isValid)
         return Promise.resolve(isValid);
     }
 
@@ -120,4 +126,21 @@ export class Web3SwapERC20Client {
             this.database.deleteOrderERC20(decodedNonce, signerWallet.toLocaleLowerCase());
         }
     }
+}
+
+enum ERC20Errors {
+    SignatureInvalid,
+    SignatoryUnauthorized,
+    Unauthorized,
+    NonceAlreadyUsed,
+    OrderExpired,
+    SenderAllowanceLow,
+    SenderBalanceLow,
+    SignerAllowanceLow,
+    SignerBalanceLow,
+}
+
+enum SenderERC20Errors {
+    SenderAllowanceLow,
+    SenderBalanceLow,
 }
