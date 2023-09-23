@@ -11,11 +11,9 @@ jest.mock('@airswap/libraries', () => ({
 }));
 
 jest.mock("ethers", () => {
-    const original = jest.requireActual("ethers");
-    return {
-        ...original,
-        ethers: jest.fn()
-    };
+    const original ={ ...jest.requireActual("ethers")};
+    original.providers = jest.fn()
+    return original
 });
 jest.useFakeTimers();
 
