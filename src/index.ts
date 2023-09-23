@@ -73,7 +73,7 @@ if (registryClient === null) {
 const rootController = new RootService(peers, database, network);
 
 // Network register & synchronization 
-let peersFromRegistry: string[] = []//await registryClient.getPeersFromRegistry();
+let peersFromRegistry: string[] = await registryClient.getPeersFromRegistry();
 console.log("Available peers:", peersFromRegistry);
 
 await requestDataFromOtherPeer(peersFromRegistry, database, peers);
