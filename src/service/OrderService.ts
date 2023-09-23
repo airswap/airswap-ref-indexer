@@ -11,7 +11,7 @@ import { Web3SwapERC20Client } from '../client/Web3SwapERC20Client.js';
 import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
 import { Web3SwapClient } from '../client/Web3SwapClient';
-
+import { InvalidSignatureException } from '../model/error/InvalidSignatureException.js';
 
 export const METHODS = {
     getOrdersERC20: "getOrdersERC20",
@@ -68,6 +68,10 @@ export class OrderService {
         if(!isNetworkAdded){
             throw new ClientError("Chain ID unsupported");
         }
+        const isOrderValid = await this.web3SwapERC20Client.isValidOrder(indexedOrder.order);
+        if(!isOrderValid) {
+            throw new InvalidSignatureException();
+        }
         await this.database.addOrderERC20(indexedOrder);
         console.log("Added", indexedOrder.order)
         return Promise.resolve();
@@ -117,6 +121,10 @@ export class OrderService {
         if(!isNetworkAdded){
             throw new ClientError("Chain ID unsupported");
         }
+        const isOrderValid = await this.web3SwapClient.isValidOrder(body);
+        if(!isOrderValid) {
+            throw new InvalidSignatureException();
+        }
         await this.database.addOrder(indexedOrder);
         console.log("Added", indexedOrder.order)
         return Promise.resolve();
@@ -148,6 +156,7 @@ export class OrderService {
 function areERC20NumberFieldsValid(order: FullOrderERC20) {
     return isNumeric(order.senderAmount) && isNumeric(order.signerAmount) && isNumeric(order.expiry) && isNumeric(order.nonce)
 }
+
 function areOrderNumberFieldsValid(order: FullOrder) {
     return isNumeric(order.sender.amount) && isNumeric(order.signer.amount) && isNumeric(order.expiry) && isNumeric(order.affiliateAmount) && isNumeric(order.nonce)
 }

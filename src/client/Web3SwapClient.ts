@@ -2,14 +2,15 @@ import { Contract, providers, Event } from 'ethers';
 import { Database } from '../database/Database.js';
 import { Swap } from '@airswap/libraries'
 import { getProviderUrl } from './getProviderUrl.js';
+import { DbOrder } from '../model/DbOrderTypes.js';
+import { checkResultToErrors } from '@airswap/utils';
 
 type Nonce = { _hex: string, _isBigNumber: boolean };
 
 export class Web3SwapClient {
-    private contracts: Contract[] = [];
+    private contracts: Record<string, Contract> = {};
     private database: Database;
     private apiKey: string;
-    private registeredChains: string[] = [];
     private lastBlock: Record<number, number> = {};
 
     constructor(apiKey: string, database: Database) {
@@ -34,15 +35,15 @@ export class Web3SwapClient {
             }
             provider = getProviderUrl(chainId, this.apiKey)
             contract = Swap.getContract(provider, chainId);
+
             setInterval(async () => {
-                const endBlock = await this.gatherEvents(provider, this.lastBlock[chainId], contract, chainId)
-                if(endBlock) {
+                const endBlock = await this.gatherEvents(provider, this.lastBlock[chainId], contract)
+                if (endBlock) {
                     this.lastBlock[chainId] = endBlock
                 }
                 return Promise.resolve(endBlock)
             }, 1000 * 10)
-            this.contracts.push(contract);
-            this.registeredChains.push(String(chainId));
+            this.contracts[chainId] = contract;
             console.log("Registered event SWAP from chain", chainId, "address:", contract.address)
             return true
         } catch (err) {
@@ -51,7 +52,27 @@ export class Web3SwapClient {
         }
     }
 
-    private async gatherEvents(provider: providers.Provider, startBlock: number | undefined, contract: Contract, chain: number) {
+    public async isValidOrder(fullOrder: DbOrder) {
+        let isValid = true;
+        const contract = this.contracts[fullOrder.chainId];
+        if (!contract) {
+            return Promise.resolve(false);
+        }
+        try {
+            const response = await contract.check(
+                fullOrder.sender.wallet,
+                fullOrder
+            )
+            const errors = checkResultToErrors(response[1], response[0])
+            isValid = !errors.some(error => Object.keys(OrderErrors).includes(error));
+        } catch (err) {
+            isValid = false;
+            console.error(err);
+        }
+        return Promise.resolve(isValid);
+    }
+
+    private async gatherEvents(provider: providers.Provider, startBlock: number | undefined, contract: Contract) {
         try {
             if (!startBlock) {
                 startBlock = await provider.getBlockNumber();
@@ -76,8 +97,8 @@ export class Web3SwapClient {
         }
     }
 
-    private keyExists(network: string): boolean {
-        return this.registeredChains.includes(network);
+    private keyExists(chainId: string): boolean {
+        return Object.keys(this.contracts).includes(chainId);
     }
 
     private onEvent(nonce: Nonce, signerWallet: string) {
@@ -88,4 +109,21 @@ export class Web3SwapClient {
             this.database.deleteOrder(decodedNonce, signerWallet.toLocaleLowerCase());
         }
     }
+}
+
+enum OrderErrors {
+    FeeInvalid,
+    AffiliateAmountInvalid,
+    SignerBalanceLow,
+    SignerAllowanceLow,
+    SignerTokenKindUnknown,
+    OrderExpired,
+    NonceTooLow,
+    NonceAlreadyUsed,
+    Unauthorized,
+    SignatoryUnauthorized,
+    SignatureInvalid,
+    SenderInvalid,
+    SenderTokenInvalid,
+    SenderTokenKindUnknown,
 }
