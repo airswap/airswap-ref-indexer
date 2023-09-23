@@ -64,7 +64,6 @@ export class Web3SwapClient {
                 fullOrder
             )
             const errors = checkResultToErrors(response[1], response[0])
-            console.log(errors)
             for (let index in errors) {
                 if(Object.keys(OrderErrors).includes(errors[index])) {
                     isValid = false;
@@ -131,9 +130,4 @@ enum OrderErrors {
     SenderInvalid,
     SenderTokenInvalid,
     SenderTokenKindUnknown,
-}
-
-enum OrderSenderErrors {
-    SenderAllowanceLow,
-    SenderBalanceLow,
 }

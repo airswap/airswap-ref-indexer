@@ -73,9 +73,9 @@ export class Web3SwapERC20Client {
                 dbOrder.s
             )
             const errors = checkResultToErrors(response[0], response[1])
-            console.log(errors)
             for (let index in errors) {
                 if(Object.keys(ERC20Errors).includes(errors[index])) {
+                    console.log(Object.keys(ERC20Errors), errors[index])
                     isValid = false;
                     break;
                 }                
@@ -134,13 +134,6 @@ enum ERC20Errors {
     Unauthorized,
     NonceAlreadyUsed,
     OrderExpired,
-    SenderAllowanceLow,
-    SenderBalanceLow,
     SignerAllowanceLow,
     SignerBalanceLow,
-}
-
-enum SenderERC20Errors {
-    SenderAllowanceLow,
-    SenderBalanceLow,
 }

@@ -11,7 +11,7 @@ jest.mock('@airswap/libraries', () => ({
 }));
 
 jest.mock("ethers", () => {
-    const original = jest.requireActual("ethers"); // Step 2.
+    const original = jest.requireActual("ethers");
     return {
         ...original,
         ethers: jest.fn()
@@ -322,7 +322,7 @@ describe("Web3SwapClient", () => {
                   '0x0000000000000000000000000000000000000000000000000000000000000000',
                   '0x0000000000000000000000000000000000000000000000000000000000000000'
                 ],
-                BigNumber.from(0x02)
+                BigNumber.from(0x03)
               ])
             // @ts-ignore
             Swap.getContract = jest.fn((provider, chainId) => ({
@@ -346,7 +346,7 @@ describe("Web3SwapClient", () => {
             swapClient.connectToChain(network);
 
             const isValid = await swapClient.isValidOrder(forgeDbOrder(1));
-            expect(isValid).toBe(true)
+            expect(isValid).toBe(false)
         })
     })
 });
