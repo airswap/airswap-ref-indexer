@@ -75,7 +75,6 @@ export class Web3SwapERC20Client {
             const errors = checkResultToErrors(response[0], response[1])
             for (let index in errors) {
                 if(Object.keys(ERC20Errors).includes(errors[index])) {
-                    console.log(Object.keys(ERC20Errors), errors[index])
                     isValid = false;
                     break;
                 }                
