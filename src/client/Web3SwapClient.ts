@@ -64,12 +64,7 @@ export class Web3SwapClient {
                 fullOrder
             )
             const errors = checkResultToErrors(response[1], response[0])
-            for (let index in errors) {
-                if(Object.keys(OrderErrors).includes(errors[index])) {
-                    isValid = false;
-                    break;
-                }                
-            }
+            isValid = !errors.some(error => Object.keys(OrderErrors).includes(error));
         } catch (err) {
             isValid = false;
             console.error(err);
