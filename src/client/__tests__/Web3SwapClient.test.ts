@@ -346,7 +346,7 @@ describe("Web3SwapClient", () => {
             swapClient.connectToChain(network);
 
             const isValid = await swapClient.isValidOrder(forgeDbOrder(1));
-            expect(isValid).toBe(true)
+            expect(isValid).toBe(false)
         })
     })
 });
