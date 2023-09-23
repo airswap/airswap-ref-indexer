@@ -1,4 +1,4 @@
-import { Contract, providers, Event, errors } from 'ethers';
+import { Contract, providers, Event } from 'ethers';
 import { Database } from '../database/Database.js';
 import { SwapERC20 } from '@airswap/libraries'
 import { getProviderUrl } from './getProviderUrl.js';
