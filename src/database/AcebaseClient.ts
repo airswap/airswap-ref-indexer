@@ -10,6 +10,7 @@ import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 
 const ENTRY_REF_ERC20 = "erc20Orders";
 const ENTRY_REF_ORDERS = "orders";
+const ENTRY_BLOCKS = "lastCheckedBlock";
 
 export class AceBaseClient implements Database {
 
@@ -17,6 +18,7 @@ export class AceBaseClient implements Database {
     private tokens: string[];
     private refERC20!: DataReference;
     private refOrders!: DataReference;
+    private blocks!: DataReference;
 
     public async connect(databaseName: string, deleteOnStart = false, databasePath: string): Promise<void> {
         const options = { storage: { path: databasePath }, logLevel: 'error' } as AceBaseLocalSettings;
@@ -28,6 +30,8 @@ export class AceBaseClient implements Database {
         this.db = new AceBase(databaseName, options);
         return new Promise((resolve, reject) => {
             this.db.ready(() => {
+                this.blocks = this.db.ref(ENTRY_BLOCKS);
+
                 this.refERC20 = this.db.ref(ENTRY_REF_ERC20);
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, 'hash');
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, 'addedOn');
@@ -61,6 +65,20 @@ export class AceBaseClient implements Database {
 
     public constructor() {
         this.tokens = [];
+    }
+
+    async getLastCheckedBlock(address: string, chainId: number): Promise<number | undefined> {
+        const query = await this.refOrders.query()
+            .filter('address', '==', address)
+            .filter('chainId', '==', chainId)
+            .get();
+        const serializedBlock = query.values()?.next()?.value?.val();
+        if (serializedBlock) {
+            return Promise.resolve(serializedBlock["block"]);
+        }
+    }
+    async setLastCheckedBlock(address: string, chainId: number, block: number): Promise<void> {
+        await this.blocks.update({ address, chainId, block });
     }
 
     async addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {

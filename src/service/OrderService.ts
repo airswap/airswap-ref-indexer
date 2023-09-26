@@ -117,7 +117,7 @@ export class OrderService {
         }
 
         indexedOrder.hash = hash;
-        const isNetworkAdded = this.web3SwapClient.connectToChain(indexedOrder.order.chainId)
+        const isNetworkAdded = await this.web3SwapClient.connectToChain(indexedOrder.order.chainId)
         if(!isNetworkAdded){
             throw new ClientError("Chain ID unsupported");
         }

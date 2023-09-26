@@ -31,6 +31,9 @@ export interface Database {
 
     getTokens(): Promise<string[]>;
 
+    getLastCheckedBlock(address: string, chainId: number): Promise<number | void>;
+    setLastCheckedBlock(address: string, chainId: number, block: number): Promise<void>;
+
     connect(databaseName: string, deleteOnStart: boolean, databasePath: string): Promise<void>;
 
     close(): Promise<void>;

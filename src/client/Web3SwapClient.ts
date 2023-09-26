@@ -18,7 +18,7 @@ export class Web3SwapClient {
         this.apiKey = apiKey;
     }
 
-    public connectToChain(network: number | string): boolean {
+    public async connectToChain(network: number | string): Promise<boolean> {
         let chainId: number
         let contract: Contract
         let provider: providers.Provider
@@ -36,10 +36,16 @@ export class Web3SwapClient {
             provider = getProviderUrl(chainId, this.apiKey)
             contract = Swap.getContract(provider, chainId);
 
+            const backedUpBlock = await this.database.getLastCheckedBlock(contract.address, chainId);
+            if (backedUpBlock) {
+                this.lastBlock[chainId] = backedUpBlock
+            }
+
             setInterval(async () => {
                 const endBlock = await this.gatherEvents(provider, this.lastBlock[chainId], contract)
                 if (endBlock) {
                     this.lastBlock[chainId] = endBlock
+                    this.database.setLastCheckedBlock(contract.address, chainId, endBlock);
                 }
                 return Promise.resolve(endBlock)
             }, 1000 * 10)

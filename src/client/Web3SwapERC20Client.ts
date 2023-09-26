@@ -18,7 +18,7 @@ export class Web3SwapERC20Client {
         this.apiKey = apiKey;
     }
 
-    public connectToChain(network: number | string): boolean {
+    public async connectToChain(network: number | string): Promise<boolean> {
         let chainId: number
         let contract: Contract
         let provider: providers.Provider
@@ -35,11 +35,16 @@ export class Web3SwapERC20Client {
             }
             provider = getProviderUrl(chainId, this.apiKey)
             contract = SwapERC20.getContract(provider, chainId);
+            const backedUpBlock = await this.database.getLastCheckedBlock(contract.address, chainId);
+            if (backedUpBlock) {
+                this.lastBlock[chainId] = backedUpBlock
+            }
 
             setInterval(() => {
                 this.gatherEvents(provider, this.lastBlock[chainId], contract).then(endBlock => {
                     if (endBlock) {
                         this.lastBlock[chainId] = endBlock
+                        this.database.setLastCheckedBlock(contract.address, chainId, endBlock);
                     }
                 })
             }, 1000 * 10)
