@@ -37,6 +37,7 @@ export class Web3SwapERC20Client {
             contract = SwapERC20.getContract(provider, chainId);
             const backedUpBlock = await this.database.getLastCheckedBlock(contract.address, chainId);
             if (backedUpBlock) {
+                console.log('Last Backed block for chain:', chainId, backedUpBlock)
                 this.lastBlock[chainId] = backedUpBlock
             }
 

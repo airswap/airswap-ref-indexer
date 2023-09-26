@@ -34,7 +34,7 @@ console.log("HOST is", host);
 // Injection
 const broadcastClient = new BroadcastClient();
 
-const database = await getDatabase(process.env.DELETE_DB_ON_START == "1", process.env.DATABASE_TYPE as string,  process.env.DATABASE_PATH as string);
+const database = await getDatabase(process.env.DELETE_DB_ON_START == "1", process.env.DATABASE_TYPE as string, process.env.DATABASE_PATH as string);
 if (!database) {
   console.error("Unknown database, check env file !")
   process.exit(5);
@@ -100,6 +100,13 @@ async function getWeb3SwapClient(database: Database, network: number) {
 
   await swapClientOrder.connectToChain(network);
   await swapClientOrderERC20.connectToChain(network);
+  const previsousChainObserved = await database.getAllChainIds()
+  if (previsousChainObserved.length > 0) {
+    previsousChainObserved.forEach(async chainId => {
+      await swapClientOrder.connectToChain(chainId);
+      await swapClientOrderERC20.connectToChain(chainId);
+    })
+  }
   return { swapClientOrder, swapClientOrderERC20 };
 }
 

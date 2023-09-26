@@ -10,12 +10,14 @@ export class InMemoryDatabase implements Database {
   private orderDatabase: Record<string, IndexedOrder<DbOrder>>;
   private blocks: Record<string, number>;
   private tokens: string[];
+  private chainIds: number[]
 
   constructor() {
     this.erc20Database = {};
     this.orderDatabase = {};
     this.blocks = {};
     this.tokens = [];
+    this.chainIds = [];
   }
 
   connect(databaseName: string, deleteOnStart: boolean, databasePath: string): Promise<void> {
@@ -94,6 +96,9 @@ export class InMemoryDatabase implements Database {
     const order = indexedOrder.order as DbOrderERC20;
     this.addToken(order.signerToken);
     this.addToken(order.senderToken);
+    if (!this.chainIds.includes(order.chainId)) {
+      this.chainIds.push(order.chainId)
+    }
     return Promise.resolve();
   }
 
@@ -201,6 +206,9 @@ export class InMemoryDatabase implements Database {
     this.orderDatabase[indexedOrder.hash!] = indexedOrder;
     this.addToken(indexedOrder.order.signer.token)
     this.addToken(indexedOrder.order.sender.token)
+    if (!this.chainIds.includes(indexedOrder.order.chainId)) {
+      this.chainIds.push(indexedOrder.order.chainId)
+    }
     return Promise.resolve()
   }
 
@@ -337,6 +345,10 @@ export class InMemoryDatabase implements Database {
 
   orderExists(hash: string): Promise<boolean> {
     return Promise.resolve(!!this.orderDatabase[hash])
+  }
+
+  getAllChainIds(): Promise<number[]> {
+    return Promise.resolve(this.chainIds)
   }
 
   /////////////////////////////

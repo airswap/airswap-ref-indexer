@@ -33,6 +33,7 @@ export interface Database {
 
     getLastCheckedBlock(address: string, chainId: number): Promise<number | void>;
     setLastCheckedBlock(address: string, chainId: number, block: number): Promise<void>;
+    getAllChainIds(): Promise<number[]>;
 
     connect(databaseName: string, deleteOnStart: boolean, databasePath: string): Promise<void>;
 

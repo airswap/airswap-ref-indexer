@@ -38,6 +38,7 @@ export class Web3SwapClient {
 
             const backedUpBlock = await this.database.getLastCheckedBlock(contract.address, chainId);
             if (backedUpBlock) {
+                console.log('Last Backed block for chain:', chainId, backedUpBlock)
                 this.lastBlock[chainId] = backedUpBlock
             }
 
