@@ -1,5 +1,5 @@
 import { DbOrderFilter } from "model/DbOrderTypes.js";
-import { toNumber, toArray, toBigInt } from "../converter/index.js";
+import { toNumber, toArray, toBigInt, toString } from "../converter/index.js";
 import { isNumeric } from '../validator/index.js';
 import { toSortField, toSortOrder } from '@airswap/libraries';
 
@@ -21,7 +21,9 @@ export function mapAnyToOrderFilter(data: any, maxResultByQuery: number): DbOrde
     }
 
     return {
-        nonce: toNumber(data.nonce),
+        chainId: toNumber(data.chainId),
+        excludeNonces: toArray(data.excludeNonces),
+        nonce: toString(data.nonce),
         senderIds: toArray(data.senderIds),
         signerIds: toArray(data.signerIds),
         signerWallet: data.signerWallet?.toLocaleLowerCase(),

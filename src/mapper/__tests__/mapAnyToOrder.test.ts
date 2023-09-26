@@ -20,7 +20,7 @@ describe("mapAnyToDbOrder", () => {
             swapContract: AddressZero
         })).toEqual({
             expiry: 1653900784706,
-            nonce: 123,
+            nonce: "123",
             senderAmount: "10",
             senderToken: "eth",
             signerAmount: "5",

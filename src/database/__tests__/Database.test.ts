@@ -159,7 +159,7 @@ describe("Database implementations", () => {
 
     async function getOrdersERC20By(db: Database) {
         const dbOrder1: DbOrderERC20 = {
-            nonce: 123,
+            nonce: "123",
             expiry: 1653138423535,
             signerWallet: "signerWallet1",
             signerToken: "signerToken",
@@ -171,7 +171,7 @@ describe("Database implementations", () => {
             v: "v",
             r: "r",
             s: "s",
-            chainId: 5,
+            chainId: 15,
             swapContract: AddressZero,
             protocolFee: "4",
             senderWallet: "senderWallet1",
@@ -189,11 +189,11 @@ describe("Database implementations", () => {
             s: "s",
             protocolFee: "4",
             senderWallet: "senderWallet1",
-            chainId: 5,
+            chainId: 15,
             swapContract: AddressZero
         };
         const dbOrder2: DbOrderERC20 = {
-            nonce: 124,
+            nonce: "124",
             expiry: 1653138423536,
             signerWallet: "signerWallet2",
             signerToken: "blip",
@@ -227,7 +227,7 @@ describe("Database implementations", () => {
             swapContract: AddressZero
         };
         const dbOrder3: DbOrderERC20 = {
-            nonce: 1,
+            nonce: "1",
             expiry: 1653138423537,
             signerWallet: "signerWallet3",
             signerToken: "signerToken",
@@ -363,8 +363,14 @@ describe("Database implementations", () => {
         const specifiSenderWallet = await db.getOrdersERC20By({ offset: 0, limit: 10, senderWallet: order3.senderWallet });
         expect(Object.keys(specifiSenderWallet.orders)).toEqual(["id3"]);
 
-        const byNonce = await db.getOrdersERC20By({ offset: 0, limit: 10, nonce: 123 });
+        const byNonce = await db.getOrdersERC20By({ offset: 0, limit: 10, nonce: "123" });
         expect(Object.keys(byNonce.orders)).toEqual(["id1"]);
+
+        const byExcludedNonce = await db.getOrdersERC20By({ offset: 0, limit: 10, excludeNonces: ["123"] });
+        expect(Object.keys(byExcludedNonce.orders)).toEqual(["id3", "id2"]);
+
+        const byChainId = await db.getOrdersERC20By({ offset: 0, limit: 10, chainId: 15 });
+        expect(Object.keys(byChainId.orders)).toEqual(["id1"]);
 
         const specificOne = await db.getOrdersERC20By({
             offset: 0, limit: 10,
@@ -389,7 +395,8 @@ describe("Database implementations", () => {
 
     async function getOrdersBy(db: Database) {
         const dbOrder1: DbOrder = forgeDbOrder(5);
-        dbOrder1.nonce = 123
+        dbOrder1.nonce = "123"
+        dbOrder1.chainId = 15
         dbOrder1.sender.wallet = "aWalletAddress"
         dbOrder1.sender.amount = "1"
         dbOrder1.sender.approximatedAmount = BigInt(1)
@@ -401,6 +408,7 @@ describe("Database implementations", () => {
         dbOrder1.signer.token = "signerToken1"
         const order1: FullOrder = forgeFullOrder(5);
         order1.nonce = "123"
+        order1.chainId = 15
         order1.signer.wallet = "aWalletAddress"
         order1.signer.amount = "1"
         order1.signer.id = "1"
@@ -410,7 +418,7 @@ describe("Database implementations", () => {
         order1.sender.token = "senderToken1"
 
         const dbOrder2: DbOrder = forgeDbOrder(1);
-        dbOrder2.nonce = 124
+        dbOrder2.nonce = "124"
         dbOrder2.sender.wallet = "anotherWalletAddress"
         dbOrder2.sender.amount = "2"
         dbOrder2.sender.approximatedAmount = BigInt(2)
@@ -431,7 +439,7 @@ describe("Database implementations", () => {
         order2.signer.token = "signerToken2"
 
         const dbOrder3: DbOrder = forgeDbOrder(3);
-        dbOrder3.nonce = 1
+        dbOrder3.nonce = "1"
         dbOrder3.sender.amount = "3"
         dbOrder3.sender.approximatedAmount = BigInt(3)
         dbOrder3.sender.token = "senderToken3"
@@ -527,8 +535,14 @@ describe("Database implementations", () => {
         const bySignerId = await db.getOrdersBy({ offset: 0, limit: 10, signerIds: ["aTokenId"] });
         expect(Object.keys(bySignerId.orders)).toEqual(["id3"]);
 
-        const byNonce = await db.getOrdersBy({ offset: 0, limit: 10, nonce: 123 });
+        const byNonce = await db.getOrdersBy({ offset: 0, limit: 10, nonce: "123" });
         expect(Object.keys(byNonce.orders)).toEqual(["id1"]);
+
+        const byExcludedNonce = await db.getOrdersBy({ offset: 0, limit: 10, excludeNonces: ["123"] });
+        expect(Object.keys(byExcludedNonce.orders)).toEqual(["id3", "id2"]);
+
+        const byChainId = await db.getOrdersBy({ offset: 0, limit: 10, chainId: 15 });
+        expect(Object.keys(byChainId.orders)).toEqual(["id1"]);
 
         const specificOne = await db.getOrdersBy({
             offset: 0, limit: 10,
@@ -647,7 +661,7 @@ describe("Database implementations", () => {
         const indexedOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
         await db.addOrderERC20(indexedOrder);
 
-        await db.deleteOrderERC20(123, AddressZero);
+        await db.deleteOrderERC20("123", AddressZero);
         const orders = await db.getOrdersERC20();
 
         expect(orders).toEqual({
@@ -665,7 +679,7 @@ describe("Database implementations", () => {
         const indexedOrder: IndexedOrder<DbOrder> = forgeIndexedOrder(addedOn, expiryDate);
         await db.addOrder(indexedOrder);
 
-        await db.deleteOrder(123, AddressZero);
+        await db.deleteOrder("123", AddressZero);
         const orders = await db.getOrders();
 
         expect(orders).toEqual({
@@ -840,7 +854,7 @@ describe("Database implementations", () => {
 
         const hash = db.generateHashERC20(indexedOrder);
 
-        expect(hash).toBe("5488777f61ade4df7cdb64996137382be7d70172fd7d6562281200ae2a2d1ba7");
+        expect(hash).toBe("e43be220494c38a9b98c892a2871d58f7151e7f3bdc8043cd3e769d569d8247c");
         return Promise.resolve();
     }
 
@@ -849,7 +863,7 @@ describe("Database implementations", () => {
 
         const hash = db.generateHash(indexedOrder);
 
-        expect(hash).toBe("86903491dd10421ee4bc866341c9852e18b296d429ed1fdc9fc9c30701d6d8cd");
+        expect(hash).toBe("674e834981936d61708eff55802e71b6484a5f2bf35d155110437ea814c0d1bd");
         return Promise.resolve();
     }
 

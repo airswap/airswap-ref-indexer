@@ -118,7 +118,7 @@ export class Web3SwapERC20Client {
                 return;
             }
 
-            this.database.deleteOrderERC20(decodedNonce, signerWallet.toLocaleLowerCase());
+            this.database.deleteOrderERC20(`${decodedNonce}`, signerWallet.toLocaleLowerCase());
         }
     }
 }

@@ -38,6 +38,7 @@ export class AceBaseClient implements Database {
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/senderToken");
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/senderWallet");
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/signerWallet");
+                this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/chainId");
 
                 this.refOrders = this.db.ref(ENTRY_REF_ORDERS);
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, 'hash');
@@ -52,6 +53,7 @@ export class AceBaseClient implements Database {
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/token");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/id");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/id");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/chainId");
                 resolve();
             });
         });
@@ -76,7 +78,7 @@ export class AceBaseClient implements Database {
         }));
         return Promise.resolve();
     }
-    async deleteOrder(nonce: number, signerWallet: string): Promise<void> {
+    async deleteOrder(nonce: string, signerWallet: string): Promise<void> {
         await this.refOrders.query()
             .filter('order/nonce', '==', nonce)
             .filter('order/signer/wallet', '==', signerWallet)
@@ -138,6 +140,9 @@ export class AceBaseClient implements Database {
         if (orderFilter.nonce != undefined) {
             query.filter('order/nonce', '==', orderFilter.nonce);
         }
+        if (orderFilter.excludeNonces != undefined) {
+            query.filter('order/nonce', '!in', orderFilter.excludeNonces);
+        }
         if (orderFilter.senderWallet != undefined) {
             query.filter('order/sender/wallet', '==', orderFilter.senderWallet);
         }
@@ -167,6 +172,9 @@ export class AceBaseClient implements Database {
         }
         if (orderFilter.senderIds != undefined) {
             query.filter('order/sender/id', 'in', orderFilter.senderIds);
+        }
+        if (orderFilter.chainId != undefined) {
+            query.filter('order/chainId', '==', orderFilter.chainId);
         }
 
         const isAscSort = orderFilter.sortOrder == SortOrder.ASC;
@@ -217,6 +225,9 @@ export class AceBaseClient implements Database {
         if (orderFilter.nonce != undefined) {
             query.filter('order/nonce', '==', orderFilter.nonce);
         }
+        if (orderFilter.excludeNonces != undefined) {
+            query.filter('order/nonce', '!in', orderFilter.excludeNonces);
+        }
         if (orderFilter.signerTokens != undefined) {
             query.filter('order/signerToken', 'in', orderFilter.signerTokens);
         }
@@ -240,6 +251,9 @@ export class AceBaseClient implements Database {
         }
         if (orderFilter.signerWallet != undefined) {
             query.filter('order/signerWallet', '==', orderFilter.signerWallet);
+        }
+        if (orderFilter.chainId != undefined) {
+            query.filter('order/chainId', '==', orderFilter.chainId);
         }
 
         const isAscSort = orderFilter.sortOrder == SortOrder.ASC;
@@ -289,7 +303,7 @@ export class AceBaseClient implements Database {
         return Promise.resolve();
     }
 
-    async deleteOrderERC20(nonce: number, signerWallet: string): Promise<void> {
+    async deleteOrderERC20(nonce: string, signerWallet: string): Promise<void> {
         await this.refERC20.query()
             .filter('order/nonce', '==', nonce)
             .filter('order/signerWallet', '==', signerWallet)
