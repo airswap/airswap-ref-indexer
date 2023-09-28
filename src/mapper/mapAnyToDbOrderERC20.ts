@@ -8,7 +8,7 @@ import { toBigInt, toNumber } from '../converter/index.js';
  */
 export function mapAnyToDbOrderERC20(data: any): DbOrderERC20 {
     return {
-        nonce: Number(data.nonce),
+        nonce: String(data.nonce),
         signerWallet: String(data.signerWallet).toLocaleLowerCase(),
         signerToken: String(data.signerToken).toLocaleLowerCase(),
         signerAmount: String(data.signerAmount),

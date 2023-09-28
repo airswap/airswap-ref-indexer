@@ -33,6 +33,8 @@ export class InMemoryDatabase implements Database {
       if (orderFilter.signerMinAmount != undefined) { if (order.approximatedSignerAmount < orderFilter.signerMinAmount) return false; }
       if (orderFilter.signerMaxAmount != undefined) { if (order.approximatedSignerAmount > orderFilter.signerMaxAmount) return false; }
       if (orderFilter.nonce != undefined) { if (order.nonce !== orderFilter.nonce) return false; }
+      if (orderFilter.excludeNonces != undefined) { if (orderFilter.excludeNonces.indexOf(`${order.nonce}`) !== -1) return false; }
+      if (orderFilter.chainId != undefined) { if (orderFilter.chainId != order.chainId) return false; }
       return true;
     })
       .sort((a, b) => {
@@ -50,9 +52,9 @@ export class InMemoryDatabase implements Database {
         }
         else if (orderFilter.sortField == SortField.NONCE) {
           if (orderFilter.sortOrder == SortOrder.ASC) {
-            return Number(a.order.nonce - b.order.nonce)
+            return Number(a.order.nonce.localeCompare(b.order.nonce))
           }
-          return Number(b.order.nonce - a.order.nonce)
+          return Number(b.order.nonce.localeCompare(a.order?.nonce))
         }
         if (orderFilter.sortOrder == SortOrder.ASC) {
           return Number(a.order.expiry - b.order.expiry)
@@ -92,7 +94,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  deleteOrderERC20(nonce: number, signerWallet: string): Promise<void> {
+  deleteOrderERC20(nonce: string, signerWallet: string): Promise<void> {
     const orderToDelete = Object.values(this.erc20Database).find((indexedOrder) => {
       const order = indexedOrder.order as DbOrderERC20
       return order.nonce === nonce && order.signerWallet === signerWallet
@@ -199,7 +201,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve();
   }
 
-  async deleteOrder(nonce: number, signerWallet: string): Promise<void> {
+  async deleteOrder(nonce: string, signerWallet: string): Promise<void> {
     const ordersToDelete = await this.findOrders((order: DbOrder) => {
       return order.nonce === nonce && order.signer.wallet === signerWallet
     })
@@ -274,8 +276,11 @@ export class InMemoryDatabase implements Database {
       if (orderFilter.signerTokens != undefined) { if (orderFilter.signerTokens.indexOf(order.signer.token) === -1) return false; }
       if (orderFilter.senderTokens != undefined) { if (orderFilter.senderTokens.indexOf(order.sender.token) === -1) return false; }
       if (orderFilter.nonce != undefined) { if (order.nonce !== orderFilter.nonce) return false; }
+      if (orderFilter.excludeNonces != undefined) { if (orderFilter.excludeNonces.indexOf(`${order.nonce}`) !== -1) return false; }
       if (orderFilter.signerIds != undefined) { if (orderFilter.signerIds.indexOf(order.signer.id) === -1) return false; }
       if (orderFilter.senderIds != undefined) { if (orderFilter.senderIds.indexOf(order.sender.id) === -1) return false; }
+      if (orderFilter.chainId != undefined) { if (order.chainId !== orderFilter.chainId) return false; }
+
       return true;
     })
       .sort((a, b) => {
@@ -293,9 +298,9 @@ export class InMemoryDatabase implements Database {
         }
         else if (orderFilter.sortField == SortField.NONCE) {
           if (orderFilter.sortOrder == SortOrder.ASC) {
-            return Number(a.order.nonce - b.order.nonce)
+            return Number(a.order.nonce.localeCompare(b.order.nonce))
           }
-          return Number(b.order.nonce - a.order.nonce)
+          return Number(b.order.nonce.localeCompare(a.order.nonce))
         }
         if (orderFilter.sortOrder == SortOrder.ASC) {
           return Number(a.order.expiry - b.order.expiry)

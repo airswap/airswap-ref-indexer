@@ -11,6 +11,9 @@ export function toArray(value: string[]): string[] | undefined {
     return undefined;
 }
 
+export function toString(value: string): string | undefined {
+    return value == undefined ? undefined : String(value)
+}
 export function toNumber(value: string): number | undefined {
     return isNumeric(value) ? +value : undefined
 }
