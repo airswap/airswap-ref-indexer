@@ -368,6 +368,8 @@ describe("Database implementations", () => {
 
         const byExcludedNonce = await db.getOrdersERC20By({ offset: 0, limit: 10, excludeNonces: ["123"] });
         expect(Object.keys(byExcludedNonce.orders)).toEqual(["id3", "id2"]);
+        const byExcludedNonceEmpty = await db.getOrdersERC20By({ offset: 0, limit: 10, excludeNonces: [], sortField: SortField.NONCE, sortOrder: SortOrder.ASC });
+        expect(Object.keys(byExcludedNonceEmpty.orders)).toEqual(["id3", "id1", "id2"]);
 
         const byChainId = await db.getOrdersERC20By({ offset: 0, limit: 10, chainId: 15 });
         expect(Object.keys(byChainId.orders)).toEqual(["id1"]);
@@ -540,6 +542,9 @@ describe("Database implementations", () => {
 
         const byExcludedNonce = await db.getOrdersBy({ offset: 0, limit: 10, excludeNonces: ["123"] });
         expect(Object.keys(byExcludedNonce.orders)).toEqual(["id3", "id2"]);
+        
+        const byExcludedNonceEmpty = await db.getOrdersBy({ offset: 0, limit: 10, excludeNonces: [], sortOrder: SortOrder.ASC, sortField: SortField.NONCE });
+        expect(Object.keys(byExcludedNonceEmpty.orders)).toEqual(["id3", "id1", "id2"]);
 
         const byChainId = await db.getOrdersBy({ offset: 0, limit: 10, chainId: 15 });
         expect(Object.keys(byChainId.orders)).toEqual(["id1"]);
