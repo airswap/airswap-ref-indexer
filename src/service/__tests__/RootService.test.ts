@@ -1,3 +1,4 @@
+import { Web3RegistryClient } from 'client/Web3RegistryClient';
 import { Database } from '../../database/Database';
 import { forgeIndexedOrderResponseERC20, forgeIndexedOrderResponse } from '../../Fixtures';
 import { Peers } from '../../peer/Peers';
@@ -48,7 +49,7 @@ describe("Root service", () => {
             registry: '0x05545815a5579d80Bd4c380da3487EAC2c4Ce299',
         };
 
-        const result = await new RootService(fakePeers as Peers, fakeDb as Database, 5).get();
+        const result = await new RootService(fakePeers as Peers, fakeDb as Database, new Web3RegistryClient("", 5, {} as Peers)).get();
 
         expect(result).toEqual(expected);
     });

@@ -1,7 +1,7 @@
 import { Peers } from './../peer/Peers.js';
 import { Web3RegistryClient } from './Web3RegistryClient.js';
 
-export function getRegistry(conf: any, peers: Peers): Web3RegistryClient | null {
+export function getRegistry(conf: any, peers: Peers, previsousChainObserved: number[]): Web3RegistryClient | null {
     const apiKey: string = conf.API_KEY;
     const network: string = conf.NETWORK;
 
@@ -9,6 +9,11 @@ export function getRegistry(conf: any, peers: Peers): Web3RegistryClient | null 
         console.error("Invalid registry configuration, apiKey, or network are incorrect, check env file !")
         return null;
     }
-    return new Web3RegistryClient(apiKey, +network, peers);
+    
+    const registry =  new Web3RegistryClient(apiKey, +network, peers);
+    previsousChainObserved.forEach(chainId => {
+        registry.connect(chainId)
+    })
+    return registry;
 }
 

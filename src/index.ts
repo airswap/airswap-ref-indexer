@@ -46,7 +46,9 @@ const intervalId = setInterval(() => {
   database.deleteExpiredOrder(currentTimestampInSeconds);
 }, 1000 * 60);
 
-const swapClients = await getWeb3SwapClient(database, network);
+const previsousChainObserved  = await database.getAllChainIds()
+
+const swapClients = await getWeb3SwapClient(database, network, previsousChainObserved);
 if (swapClients?.swapClientOrderERC20 === null) {
   console.log("Could connect to SwapERC20 smart contract");
   process.exit(4);
@@ -62,15 +64,16 @@ if (!isNumeric(process.env.MAX_RESULTS_FOR_QUERY)) {
   process.exit(6);
 }
 
-const orderService = new OrderService(database, swapClients!.swapClientOrderERC20, swapClients!.swapClientOrder, +process.env.MAX_RESULTS_FOR_QUERY!);
 const peers = new Peers(database, host, broadcastClient);
 
-const registryClient = getRegistry(process.env, peers);
+const registryClient = getRegistry(process.env, peers, previsousChainObserved);
 if (registryClient === null) {
   process.exit(3);
 }
 
-const rootController = new RootService(peers, database, network);
+const orderService = new OrderService(database, swapClients!.swapClientOrderERC20, swapClients!.swapClientOrder, registryClient, +process.env.MAX_RESULTS_FOR_QUERY!);
+
+const rootController = new RootService(peers, database, registryClient);
 
 // Network register & synchronization 
 let peersFromRegistry: string[] = await registryClient.getPeersFromRegistry();
@@ -89,7 +92,7 @@ process.on("SIGINT", () => {
   gracefulShutdown(webserver, database, intervalId);
 });
 
-async function getWeb3SwapClient(database: Database, network: number) {
+async function getWeb3SwapClient(database: Database, network: number, previsousChainObserved: number[]) {
   if (!network) {
     return null;
   }
@@ -100,7 +103,6 @@ async function getWeb3SwapClient(database: Database, network: number) {
 
   await swapClientOrder.connectToChain(network);
   await swapClientOrderERC20.connectToChain(network);
-  const previsousChainObserved = await database.getAllChainIds()
   if (previsousChainObserved.length > 0) {
     previsousChainObserved.forEach(async chainId => {
       await swapClientOrder.connectToChain(chainId);
