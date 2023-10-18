@@ -68,7 +68,7 @@ export class OrderService {
 
         indexedOrder.hash = hash;
         const isNetworkAdded = this.web3SwapERC20Client.connectToChain(indexedOrder.order.chainId)
-        this.web3RegistryClient.connect(indexedOrder.order.chainId)
+        await this.web3RegistryClient.connect(indexedOrder.order.chainId)
         if(!isNetworkAdded){
             throw new ClientError("Chain ID unsupported");
         }

@@ -45,6 +45,7 @@ describe("Order service", () => {
             isValidOrder: jest.fn(),
         }
         fakeWebRegistryClient = {
+            connect: jest.fn()
         }
     })
 
@@ -215,8 +216,7 @@ describe("Order service", () => {
             fakeWeb3SwapERC20Client.isValidOrder.mockImplementation(() => false)
 
             await expect(async () => {
-                // @ts-ignore
-                await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, maxResultByQuery).addOrderERC20(order);
+                await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, fakeWebRegistryClient as Web3RegistryClient, maxResultByQuery).addOrderERC20(order);
             }).rejects.toThrow("Invalid signature");
 
             expect(fakeDb.generateHashERC20).toHaveBeenCalledTimes(1);
@@ -224,6 +224,7 @@ describe("Order service", () => {
             expect(fakeDb.addOrderERC20).not.toHaveBeenCalled();
             expect(fakeWeb3SwapERC20Client.connectToChain).toHaveBeenCalledWith(5);
             expect(fakeWeb3SwapERC20Client.isValidOrder).toHaveBeenCalledTimes(1);
+            expect(fakeWebRegistryClient.connect).toHaveBeenCalledWith(5);
         });
 
         test("not adding on unsupported chain", async () => {
@@ -376,8 +377,7 @@ describe("Order service", () => {
             fakeWeb3SwapClient.isValidOrder.mockImplementation(() => false)
 
             await expect(async () => {
-                // @ts-ignore
-                await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, maxResultByQuery).addOrder(order);
+                await new OrderService(fakeDb as Database, fakeWeb3SwapERC20Client as Web3SwapERC20Client, fakeWeb3SwapClient as Web3SwapClient, fakeWebRegistryClient as Web3RegistryClient, maxResultByQuery).addOrder(order);
             }).rejects.toThrow("Invalid signature");
 
             expect(fakeDb.generateHash).toHaveBeenCalledTimes(1);
@@ -385,6 +385,7 @@ describe("Order service", () => {
             expect(fakeDb.addOrder).not.toHaveBeenCalled();
             expect(fakeWeb3SwapClient.connectToChain).toHaveBeenCalledWith(5);
             expect(fakeWeb3SwapClient.isValidOrder).toHaveBeenCalledTimes(1);
+            expect(fakeWebRegistryClient.connect).toHaveBeenCalledWith(5);
         });
 
         test("not adding on unsupported chain", async () => {
