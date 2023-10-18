@@ -24,9 +24,10 @@ export class AceBaseClient implements Database {
     public async connect(databaseName: string, deleteOnStart = false, databasePath: string): Promise<void> {
         const options = { storage: { path: databasePath }, logLevel: 'error' } as AceBaseLocalSettings;
         const dbName = `${databaseName}.acebase`;
-        if (deleteOnStart && fs.existsSync(dbName)) {
+        const fullPath = `${databasePath}/${dbName}`
+        if (deleteOnStart && fs.existsSync(fullPath)) {
             console.log("ACEBASE - Removing previous data...")
-            await fs.promises.rm(dbName, { recursive: true });
+            await fs.promises.rm(fullPath, { recursive: true });
         }
         this.db = new AceBase(databaseName, options);
         return new Promise((resolve, reject) => {

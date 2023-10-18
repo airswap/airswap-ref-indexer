@@ -57,6 +57,35 @@ describe("Database implementations", () => {
         test("acebaseDb", async () => { await shouldAddfiltersOnER20CAdd(acebaseClient); });
     });
 
+    describe("Should returns the chainIds from all orders in db", () => {
+        test("inMemoryDb", async () => { await shouldReturnsChainIdSet(inMemoryDatabase); });
+        test("acebaseDb", async () => { await shouldReturnsChainIdSet(acebaseClient); });
+    });
+
+    describe("Should load chainIds if exists on startup", () => {
+        test("acebaseDb", async () => { 
+            const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
+            indexedOrder.order.chainId = 1
+            const anotherOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
+            anotherOrder.hash = "another_hash";
+    
+            await acebaseClient.addAllOrderERC20({ "another_hash": anotherOrder });
+            await acebaseClient.addAllOrder({ "hash": indexedOrder });
+
+            const newAcebaseClient = new AceBaseClient();
+            await newAcebaseClient.connect("dbtest", false, '.');
+            const chainIds = await newAcebaseClient.getAllChainIds();
+
+            expect(chainIds).toEqual([1, 5]);
+            return Promise.resolve();
+         });
+    });
+
+    describe("Should bachup last checked blocks", () => {
+        test("inMemoryDb", async () => { await shouldSaveBlock(inMemoryDatabase); });
+        test("acebaseDb", async () => { await shouldSaveBlock(acebaseClient); });
+    });
+
     describe("Should add all & get", () => {
         describe('OrderErc20', () => {
             test("inMemoryDb", async () => { await addAllAndGetOrdersERC20(inMemoryDatabase); });
@@ -659,6 +688,29 @@ describe("Database implementations", () => {
         const filters = await db.getTokens();
 
         expect(filters).toEqual(["0x0000000000000000000000000000000000000000"]);
+        return Promise.resolve();
+    }
+
+    async function shouldReturnsChainIdSet(db: Database) {
+        const indexedOrder = forgeIndexedOrder(addedOn, expiryDate);
+        indexedOrder.order.chainId = 1
+        const anotherOrder = forgeIndexedOrderERC20(addedOn, expiryDate);
+        anotherOrder.hash = "another_hash";
+
+        await db.addAllOrderERC20({ "another_hash": anotherOrder });
+        await db.addAllOrder({ "hash": indexedOrder });
+        const chainIds = await db.getAllChainIds()
+
+        expect(chainIds).toEqual([5, 1]);
+        return Promise.resolve();
+    }
+
+    async function shouldSaveBlock(db: Database) {
+
+        await db.setLastCheckedBlock("addr", 5, 18);
+        const backedUpBlock = await db.getLastCheckedBlock("addr", 5);
+
+        expect(backedUpBlock).toEqual(18);
         return Promise.resolve();
     }
 
