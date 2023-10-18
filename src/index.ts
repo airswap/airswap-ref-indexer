@@ -66,7 +66,7 @@ if (!isNumeric(process.env.MAX_RESULTS_FOR_QUERY)) {
 
 const peers = new Peers(database, host, broadcastClient);
 
-const registryClient = getRegistry(process.env, peers, previsousChainObserved);
+const registryClient = await getRegistry(process.env, peers, previsousChainObserved);
 if (registryClient === null) {
   process.exit(3);
 }

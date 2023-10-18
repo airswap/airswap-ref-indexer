@@ -1,7 +1,7 @@
 import { Peers } from './../peer/Peers.js';
 import { Web3RegistryClient } from './Web3RegistryClient.js';
 
-export function getRegistry(conf: any, peers: Peers, previsousChainObserved: number[]): Web3RegistryClient | null {
+export async function getRegistry(conf: any, peers: Peers, previsousChainObserved: number[]): Promise<Web3RegistryClient | null> {
     const apiKey: string = conf.API_KEY;
     const network: string = conf.NETWORK;
 
@@ -11,9 +11,9 @@ export function getRegistry(conf: any, peers: Peers, previsousChainObserved: num
     }
     
     const registry =  new Web3RegistryClient(apiKey, peers);
-    previsousChainObserved.forEach(chainId => {
-        registry.connect(chainId)
-    })
+    for (const chain of previsousChainObserved){
+        await registry.connect(chain)
+    }
     return registry;
 }
 
