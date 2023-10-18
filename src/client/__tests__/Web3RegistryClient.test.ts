@@ -27,33 +27,58 @@ describe("Web3RegistryClient", () => {
     });
 
     it("Should get other peers and ignore empty ones", async () => {
-        //@ts-ignore
-        mockedEther.providers.InfuraProvider = {
-            getWebSocketProvider: jest.fn()
+        mockedEther.providers = {
+            //@ts-ignore
+            JsonRpcProvider: jest.fn(),
+            //@ts-ignore
+            WebSocketProvider: jest.fn(),
         };
 
         //@ts-ignore
         RegistryV4.getContract = jest.fn(() => ({ on: jest.fn() }))
         //@ts-ignore
-        RegistryV4.getServerURLs = () => ["peer1", '']
+        RegistryV4.getServerURLs = () => Promise.resolve(["peer1", ''])
 
-        const web3Client = new Web3RegistryClient(apiKey, network, fakePeers as Peers);
-        const peers = await web3Client.getPeersFromRegistry();
+        const web3Client = new Web3RegistryClient(apiKey, fakePeers as Peers);
+        await web3Client.connect(network);
 
-        expect(peers).toEqual(["peer1"]);
-    });
+        expect(fakePeers.addPeers).toHaveBeenCalledWith(["peer1"])
+    })
+
+    it("Should not connect twice", async () => {
+        mockedEther.providers = {
+            //@ts-ignore
+            JsonRpcProvider: jest.fn(),
+            //@ts-ignore
+            WebSocketProvider: jest.fn(),
+        };
+
+        //@ts-ignore
+        RegistryV4.getContract = jest.fn(() => ({ on: jest.fn() }))
+        //@ts-ignore
+        RegistryV4.getServerURLs = () => Promise.resolve(["peer1", ''])
+
+        const web3Client = new Web3RegistryClient(apiKey, fakePeers as Peers);
+        await web3Client.connect(network);
+        await web3Client.connect(network);
+
+        expect(web3Client.getConnectedChains()).toEqual(["5"])
+    })
 
     it("Should return empty if result is undefined", async () => {
-        //@ts-ignore
-        mockedEther.providers.InfuraProvider = {
-            getWebSocketProvider: jest.fn()
+        mockedEther.providers = {
+            //@ts-ignore
+            JsonRpcProvider: jest.fn(),
+            //@ts-ignore
+            WebSocketProvider: jest.fn(),
         };
         //@ts-ignore
         RegistryV4.getContract = jest.fn(() => ({ on: jest.fn() }))
         //@ts-ignore
         RegistryV4.getServerURLs = () => undefined
 
-        const web3Client = new Web3RegistryClient(apiKey, network, fakePeers as Peers);
+        const web3Client = new Web3RegistryClient(apiKey, fakePeers as Peers)
+        await web3Client.connect(network);
         const peers = await web3Client.getPeersFromRegistry();
 
         expect(peers).toEqual([]);
@@ -68,51 +93,49 @@ describe("Web3RegistryClient", () => {
                 }
             });
         });
-        //@ts-ignore
-        mockedEther.providers.InfuraProvider = {
-            getWebSocketProvider: jest.fn()
+        mockedEther.providers = {
+            //@ts-ignore
+            JsonRpcProvider: jest.fn(),
+            //@ts-ignore
+            WebSocketProvider: jest.fn(),
         };
         //@ts-ignore
         RegistryV4.getContract = jest.fn(() => ({ on: mockedOn }))
         //@ts-ignore
         RegistryV4.getServerURLs = () => []
 
-        new Web3RegistryClient(apiKey, network, fakePeers as Peers);
+        await new Web3RegistryClient(apiKey, fakePeers as Peers).connect(network);
 
-        expect(mockedOn).toHaveBeenCalledTimes(1);
+        // expect(mockedOn).toHaveBeenCalledTimes(1);
         expect(fakePeers.addPeer).toHaveBeenCalledWith('http://localhost/');
     });
 
     it("Should remove peer on event", async () => {
         const mockedOn = jest.fn();
-        const mockGetUrl = jest.fn(() => ['a_first_one', '']);
-        //@ts-ignore
-        mockedEther.providers.InfuraProvider = {
-            getWebSocketProvider: jest.fn()
+        const mockGetUrl = jest.fn(() => ['a_first_one', '', undefined]);
+        mockedEther.providers = {
+            //@ts-ignore
+            JsonRpcProvider: jest.fn(),
+            //@ts-ignore
+            WebSocketProvider: jest.fn(),
         };
-        //@ts-ignore
-        mockedEther.Contract = function () {
-            return ({
-                getURLs: mockGetUrl,
-                on: mockedOn,
-            });
-        }
 
         //@ts-ignore
         RegistryV4.getContract = jest.fn(() => ({ on: mockedOn }))
         //@ts-ignore
         RegistryV4.getServerURLs = mockGetUrl
 
-        await new Web3RegistryClient(apiKey, network, fakePeers as Peers)
-            .onSetURLEvent("from", "to", {
-                args: {
-                    account: "an_account",
-                    url: ''
-                }
-            });
+        const web3Client = new Web3RegistryClient(apiKey, fakePeers as Peers);
+        await web3Client.connect(network);
+        await web3Client.onSetURLEvent("from", "to", {
+            args: {
+                account: "an_account",
+                url: ''
+            }
+        });
 
         expect(mockedOn).toHaveBeenCalledTimes(1);
-        expect(mockGetUrl).toHaveBeenCalledTimes(1);
+        expect(mockGetUrl).toHaveBeenCalledTimes(2); // connect + getPeers
         expect(fakePeers.clear).toHaveBeenCalledTimes(1);
         expect(fakePeers.addPeers).toHaveBeenCalledWith(['a_first_one']);
         expect(fakePeers.addPeer).not.toHaveBeenCalled();

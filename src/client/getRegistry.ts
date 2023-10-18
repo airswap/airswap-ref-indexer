@@ -10,7 +10,7 @@ export function getRegistry(conf: any, peers: Peers, previsousChainObserved: num
         return null;
     }
     
-    const registry =  new Web3RegistryClient(apiKey, +network, peers);
+    const registry =  new Web3RegistryClient(apiKey, peers);
     previsousChainObserved.forEach(chainId => {
         registry.connect(chainId)
     })

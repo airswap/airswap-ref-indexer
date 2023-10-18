@@ -11,10 +11,11 @@ jest.mock('@airswap/libraries', () => ({
 }));
 
 jest.mock("ethers", () => {
-    const original ={ ...jest.requireActual("ethers")};
+    const original = { ...jest.requireActual("ethers") };
     original.providers = jest.fn()
     return original
 });
+
 jest.useFakeTimers();
 
 const mockedEther = ethers as jest.Mocked<typeof ethers>;
@@ -27,7 +28,8 @@ describe("Web3SwapClient", () => {
     beforeEach(() => {
         fakeDatabase = {
             deleteOrder: jest.fn(),
-            getLastCheckedBlock: jest.fn()
+            getLastCheckedBlock: jest.fn(),
+            setLastCheckedBlock: jest.fn()
         };
     });
 
@@ -84,7 +86,7 @@ describe("Web3SwapClient", () => {
         });
     });
 
-    it("Should remove order on event Swap", async () => {
+    it("Should remove order on event Swap", (done) => {
         const mockQueryFilter = jest.fn((event, start, end) => {
             if (event === "Swap") {
                 return ([{
@@ -117,15 +119,17 @@ describe("Web3SwapClient", () => {
 
         new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
 
-        jest.advanceTimersByTime(11000);
+        jest.advanceTimersByTimeAsync(11000);
         // @ts-ignore
         fakeDatabase.deleteOrder.mockImplementation((nonce, wallet) => {
             expect(nonce).toEqual(245);
             expect(wallet).toEqual("a_wall3t");
+            expect(mockQueryFilter).toHaveBeenCalledWith("Swap", -5, 0);
+            done()
         })
     });
 
-    it("Should remove order on event Cancel", async () => {
+    it("Should remove order on event Cancel", (done) => {
         const mockQueryFilter = jest.fn((event, start, end) => {
             if (event === "Cancel") {
                 return ([{
@@ -157,12 +161,47 @@ describe("Web3SwapClient", () => {
 
         new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
 
-        jest.advanceTimersByTime(11000);
+        jest.advanceTimersByTimeAsync(11000);
         // @ts-ignore
         fakeDatabase.deleteOrder.mockImplementation((nonce, wallet) => {
-            expect(nonce).toEqual(245,);
+            expect(nonce).toEqual(245);
             expect(wallet).toEqual("a_wall3t");
+            expect(mockQueryFilter).toHaveBeenCalledWith("Cancel", -5, 0);
+            done()
         })
+    });
+
+    it("Should start from last savedBlock", (done) => {
+        const mockQueryFilter = jest.fn((event, start, end) => {
+            expect(event).toEqual("Cancel");
+            expect(start).toEqual(15);
+            expect(end).toEqual(50);
+            done()
+            return []
+        });
+        //@ts-ignore
+        Swap.getContract = jest.fn((provider, chainId) => ({
+            address: "an_address" + chainId,
+            queryFilter: mockQueryFilter,
+            filters: {
+                Cancel: () => "Cancel",
+                Swap: () => "Swap"
+            }
+        }))
+        //@ts-ignore
+        mockedEther.providers = {
+            //@ts-ignore
+            JsonRpcProvider: jest.fn(),
+            //@ts-ignore
+            WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(50) })),
+        };
+
+        //@ts-ignore
+        fakeDatabase.getLastCheckedBlock.mockImplementation(() => Promise.resolve(20))
+
+        new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
+
+        jest.advanceTimersByTimeAsync(11000);
     });
 
     describe("Do nothing", () => {
@@ -255,27 +294,27 @@ describe("Web3SwapClient", () => {
 
     describe("isValidOrder", () => {
         it("should return true, ignore 'SenderAllowanceLow', 'SenderBalanceLow'", async () => {
-            const mockCheck = jest.fn().mockResolvedValue( [
+            const mockCheck = jest.fn().mockResolvedValue([
                 [
-                  '0x53656e646572416c6c6f77616e63654c6f770000000000000000000000000000',
-                  '0x53656e64657242616c616e63654c6f7700000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000'
+                    '0x53656e646572416c6c6f77616e63654c6f770000000000000000000000000000',
+                    '0x53656e64657242616c616e63654c6f7700000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000'
                 ],
                 BigNumber.from(0x02)
-              ])
+            ])
             // @ts-ignore
             Swap.getContract = jest.fn((provider, chainId) => ({
                 address: "an_address" + chainId,
@@ -293,7 +332,7 @@ describe("Web3SwapClient", () => {
                 //@ts-ignore
                 WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) })),
             };
-    
+
             const swapClient = new Web3SwapClient(apiKey, fakeDatabase as Database);
             await swapClient.connectToChain(network);
 
@@ -302,27 +341,27 @@ describe("Web3SwapClient", () => {
         })
 
         it("should return false", async () => {
-            const mockCheck = jest.fn().mockResolvedValue( [
+            const mockCheck = jest.fn().mockResolvedValue([
                 [
-                  '0x53656e646572416c6c6f77616e63654c6f770000000000000000000000000000',
-                  '0x53656e64657242616c616e63654c6f7700000000000000000000000000000000',
-                  '0x5369676e6174757265496e76616c696400000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000',
-                  '0x0000000000000000000000000000000000000000000000000000000000000000'
+                    '0x53656e646572416c6c6f77616e63654c6f770000000000000000000000000000',
+                    '0x53656e64657242616c616e63654c6f7700000000000000000000000000000000',
+                    '0x5369676e6174757265496e76616c696400000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000'
                 ],
                 BigNumber.from(0x03)
-              ])
+            ])
             // @ts-ignore
             Swap.getContract = jest.fn((provider, chainId) => ({
                 address: "an_address" + chainId,
@@ -340,7 +379,7 @@ describe("Web3SwapClient", () => {
                 //@ts-ignore
                 WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) })),
             };
-    
+
             const swapClient = new Web3SwapClient(apiKey, fakeDatabase as Database);
             swapClient.connectToChain(network);
 

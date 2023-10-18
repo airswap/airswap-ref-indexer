@@ -1,4 +1,4 @@
-import { Contract, ethers } from 'ethers';
+import { Contract, providers } from 'ethers';
 import { Peers } from './../peer/Peers.js';
 import { RegistryV4 } from '@airswap/libraries';
 import { Protocols } from '@airswap/constants';
@@ -9,7 +9,7 @@ export class Web3RegistryClient {
     private contracts: Record<number, Contract>;
     private peers: Peers;
 
-    constructor(apiKey: string, network: number, peers: Peers) {
+    constructor(apiKey: string, peers: Peers) {
         this.peers = peers;
         this.apiKey = apiKey;
         this.contracts = {};
@@ -19,10 +19,11 @@ export class Web3RegistryClient {
         if (this.contracts[chainId]) return;
         const provider = getProviderUrl(chainId, this.apiKey)
         const contract = RegistryV4.getContract(provider, chainId);
-        const nodes = await RegistryV4.getServerURLs(provider, +chainId, Protocols.StorageERC20);
+        const nodes = await this.getCleanedUrls(provider, +chainId)
         this.peers.addPeers(nodes);
         contract.on("SetServerURL", this.onSetURLEvent);
         this.contracts[chainId] = contract;
+        return Promise.resolve()
     }
 
     async getPeersFromRegistry(): Promise<any> {
@@ -30,12 +31,17 @@ export class Web3RegistryClient {
         Object.keys(this.contracts).forEach(
             async (chainId) => {
                 const provider = getProviderUrl(+chainId, this.apiKey)
-                const nodes = await RegistryV4.getServerURLs(provider, +chainId, Protocols.StorageERC20)
+                const nodes = await this.getCleanedUrls(provider, +chainId)
                 urls = [...urls, ...nodes,]
             }
         );
 
         console.log(urls)
+        return urls
+    }
+
+    private async getCleanedUrls(provider: providers.Provider, chainId: number) {
+        const urls = await RegistryV4.getServerURLs(provider, +chainId, Protocols.StorageERC20);
         return Promise.resolve(urls?.filter((url: string) => url && url.trim() != "") || []);
     }
 

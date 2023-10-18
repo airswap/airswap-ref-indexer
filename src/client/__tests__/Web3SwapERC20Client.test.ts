@@ -27,7 +27,8 @@ describe("Web3SwapERC20Client", () => {
     beforeEach(() => {
         fakeDatabase = {
             deleteOrderERC20: jest.fn(),
-            getLastCheckedBlock: jest.fn()
+            getLastCheckedBlock: jest.fn(),
+            setLastCheckedBlock: jest.fn()
         };
     });
 
@@ -84,7 +85,7 @@ describe("Web3SwapERC20Client", () => {
         });
     });
 
-    it("Should remove order on event SwapERC20", async () => {
+    it("Should remove order on event SwapERC20", (done) => {
         const mockQueryFilter = jest.fn((event, start, end) => {
             if (event === "SwapERC20") {
                 return ([{
@@ -117,15 +118,17 @@ describe("Web3SwapERC20Client", () => {
 
         new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
 
-        jest.advanceTimersByTime(11000);
+        jest.advanceTimersByTimeAsync(11000);
         // @ts-ignore
         fakeDatabase.deleteOrderERC20.mockImplementation((nonce, wallet) => {
             expect(nonce).toEqual(245);
             expect(wallet).toEqual("a_wall3t");
+            expect(mockQueryFilter).toHaveBeenCalledWith("SwapERC20", -5, 0);
+            done()
         })
     });
 
-    it("Should remove order on event Cancel", async () => {
+    it("Should remove order on event Cancel", (done) => {
         const mockQueryFilter = jest.fn((event, start, end) => {
             if (event === "Cancel") {
                 return ([{
@@ -157,12 +160,47 @@ describe("Web3SwapERC20Client", () => {
 
         new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
 
-        jest.advanceTimersByTime(11000);
+        jest.advanceTimersByTimeAsync(11000);
         // @ts-ignore
         fakeDatabase.deleteOrderERC20.mockImplementation((nonce, wallet) => {
-            expect(nonce).toEqual(245,);
+            expect(nonce).toEqual(245);
             expect(wallet).toEqual("a_wall3t");
+            expect(mockQueryFilter).toHaveBeenCalledWith("Cancel", -5, 0);
+            done()
         })
+    });
+
+    it("Should start from last savedBlock", (done) => {
+        const mockQueryFilter = jest.fn((event, start, end) => {
+            expect(event).toEqual("Cancel");
+            expect(start).toEqual(15);
+            expect(end).toEqual(50);
+            done()
+            return []
+        });
+        //@ts-ignore
+        SwapERC20.getContract = jest.fn((provider, chainId) => ({
+            address: "an_address" + chainId,
+            queryFilter: mockQueryFilter,
+            filters: {
+                Cancel: () => "Cancel",
+                Swap: () => "Swap"
+            }
+        }))
+        //@ts-ignore
+        mockedEther.providers = {
+            //@ts-ignore
+            JsonRpcProvider: jest.fn(),
+            //@ts-ignore
+            WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(50) })),
+        };
+
+        //@ts-ignore
+        fakeDatabase.getLastCheckedBlock.mockImplementation(() => Promise.resolve(20))
+
+        new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
+
+        jest.advanceTimersByTimeAsync(11000);
     });
 
     describe("Do nothing", () => {
