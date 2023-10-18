@@ -140,7 +140,7 @@ export class AceBaseClient implements Database {
         if (orderFilter.nonce != undefined) {
             query.filter('order/nonce', '==', orderFilter.nonce);
         }
-        if (orderFilter.excludeNonces != undefined) {
+        if (orderFilter.excludeNonces?.length && orderFilter.excludeNonces?.length > 0) {
             query.filter('order/nonce', '!in', orderFilter.excludeNonces);
         }
         if (orderFilter.senderWallet != undefined) {
@@ -225,7 +225,7 @@ export class AceBaseClient implements Database {
         if (orderFilter.nonce != undefined) {
             query.filter('order/nonce', '==', orderFilter.nonce);
         }
-        if (orderFilter.excludeNonces != undefined) {
+        if (orderFilter.excludeNonces?.length && orderFilter.excludeNonces?.length > 0) {
             query.filter('order/nonce', '!in', orderFilter.excludeNonces);
         }
         if (orderFilter.signerTokens != undefined) {
