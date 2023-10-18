@@ -419,6 +419,8 @@ export class AceBaseClient implements Database {
 
     async erase() {
         this.tokens = [];
+        this.chainIds = [];
+        await this.db.ref(ENTRY_BLOCKS).remove();
         await this.db.ref(ENTRY_REF_ERC20).remove();
         return await this.db.ref(ENTRY_REF_ORDERS).remove();
     }

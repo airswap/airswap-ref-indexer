@@ -355,7 +355,9 @@ export class InMemoryDatabase implements Database {
   erase() {
     this.erc20Database = {};
     this.orderDatabase = {};
+    this.blocks = {};
     this.tokens = [];
+    this.chainIds = [];
     return Promise.resolve();
   }
 

@@ -122,7 +122,7 @@ describe("Web3SwapClient", () => {
         jest.advanceTimersByTimeAsync(11000);
         // @ts-ignore
         fakeDatabase.deleteOrder.mockImplementation((nonce, wallet) => {
-            expect(nonce).toEqual(245);
+            expect(nonce).toEqual("245");
             expect(wallet).toEqual("a_wall3t");
             expect(mockQueryFilter).toHaveBeenCalledWith("Swap", -5, 0);
             done()
@@ -161,14 +161,15 @@ describe("Web3SwapClient", () => {
 
         new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
 
-        jest.advanceTimersByTimeAsync(11000);
         // @ts-ignore
         fakeDatabase.deleteOrder.mockImplementation((nonce, wallet) => {
-            expect(nonce).toEqual(245);
+            expect(nonce).toEqual("245");
             expect(wallet).toEqual("a_wall3t");
             expect(mockQueryFilter).toHaveBeenCalledWith("Cancel", -5, 0);
             done()
         })
+
+        jest.advanceTimersByTimeAsync(11000);
     });
 
     it("Should start from last savedBlock", (done) => {

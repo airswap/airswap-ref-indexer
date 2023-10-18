@@ -121,7 +121,7 @@ describe("Web3SwapERC20Client", () => {
         jest.advanceTimersByTimeAsync(11000);
         // @ts-ignore
         fakeDatabase.deleteOrderERC20.mockImplementation((nonce, wallet) => {
-            expect(nonce).toEqual(245);
+            expect(nonce).toEqual("245");
             expect(wallet).toEqual("a_wall3t");
             expect(mockQueryFilter).toHaveBeenCalledWith("SwapERC20", -5, 0);
             done()
@@ -163,7 +163,7 @@ describe("Web3SwapERC20Client", () => {
         jest.advanceTimersByTimeAsync(11000);
         // @ts-ignore
         fakeDatabase.deleteOrderERC20.mockImplementation((nonce, wallet) => {
-            expect(nonce).toEqual(245);
+            expect(nonce).toEqual("245");
             expect(wallet).toEqual("a_wall3t");
             expect(mockQueryFilter).toHaveBeenCalledWith("Cancel", -5, 0);
             done()
