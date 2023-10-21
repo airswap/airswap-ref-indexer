@@ -11,6 +11,7 @@ export async function getRegistry(conf: any, peers: Peers, previsousChainObserve
     }
     
     const registry =  new Web3RegistryClient(apiKey, peers);
+    await registry.connect(+network)
     for (const chain of previsousChainObserved){
         await registry.connect(chain)
     }

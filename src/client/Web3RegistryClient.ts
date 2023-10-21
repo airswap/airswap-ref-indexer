@@ -28,15 +28,12 @@ export class Web3RegistryClient {
 
     async getPeersFromRegistry(): Promise<any> {
         let urls: string[] = []
-        Object.keys(this.contracts).forEach(
-            async (chainId) => {
-                const provider = getProviderUrl(+chainId, this.apiKey)
-                const nodes = await this.getCleanedUrls(provider, +chainId)
-                urls = [...urls, ...nodes,]
-            }
-        );
-
-        console.log(urls)
+        const chainIds = Object.keys(this.contracts);
+        for (const chainId of chainIds){
+            const provider = getProviderUrl(+chainId, this.apiKey)
+            const nodes = await this.getCleanedUrls(provider, +chainId)
+            urls = [...urls, ...nodes,]
+        }
         return urls
     }
 
