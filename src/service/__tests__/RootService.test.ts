@@ -47,7 +47,7 @@ describe("Root service", () => {
             )),
         };
         fakePeers = {
-            getPeers: jest.fn(() => []),
+            getConnectablePeers: jest.fn(() => []),
             addPeers: jest.fn()
         };
     })

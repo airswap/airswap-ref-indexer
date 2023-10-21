@@ -27,7 +27,7 @@ export class RootService {
         }, {} as Record<string, string>)
         
         return {
-            peers: this.peers.getPeers(),
+            peers: this.peers.getConnectablePeers(),
             networks: chains,
             registry: registry,
             databaseOrdersERC20: Object.keys(ordersERC20.orders).length,
