@@ -10,24 +10,30 @@ import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 
 const ENTRY_REF_ERC20 = "erc20Orders";
 const ENTRY_REF_ORDERS = "orders";
+const ENTRY_BLOCKS = "lastCheckedBlock";
 
 export class AceBaseClient implements Database {
 
     private db!: AceBase;
     private tokens: string[];
+    private chainIds: number[];
     private refERC20!: DataReference;
     private refOrders!: DataReference;
+    private refBlocks!: DataReference;
 
     public async connect(databaseName: string, deleteOnStart = false, databasePath: string): Promise<void> {
         const options = { storage: { path: databasePath }, logLevel: 'error' } as AceBaseLocalSettings;
         const dbName = `${databaseName}.acebase`;
-        if (deleteOnStart && fs.existsSync(dbName)) {
+        const fullPath = `${databasePath}/${dbName}`
+        if (deleteOnStart && fs.existsSync(fullPath)) {
             console.log("ACEBASE - Removing previous data...")
-            await fs.promises.rm(dbName, { recursive: true });
+            await fs.promises.rm(fullPath, { recursive: true });
         }
         this.db = new AceBase(databaseName, options);
         return new Promise((resolve, reject) => {
-            this.db.ready(() => {
+            this.db.ready(async () => {
+                this.refBlocks = this.db.ref(ENTRY_BLOCKS);
+
                 this.refERC20 = this.db.ref(ENTRY_REF_ERC20);
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, 'hash');
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, 'addedOn');
@@ -54,13 +60,51 @@ export class AceBaseClient implements Database {
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/id");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/id");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/chainId");
+
+                await this.loadChainIdsForCache();
                 resolve();
             });
         });
     }
 
+    private async loadChainIdsForCache() {
+        const dataOrder = await this.refOrders.query().take(1000000).get(); // bypass default limitation 
+        const dataERC20 = await this.refERC20.query().take(1000000).get(); // bypass default limitation 
+
+        let chainIds: number[] = []
+        dataOrder.forEach((dataSnapshot) => {
+            const order = dataSnapshot.val() as IndexedOrder<FullOrder>;
+            chainIds.push(order.order.chainId)
+        });
+        dataERC20.forEach((dataSnapshot) => {
+            const order = dataSnapshot.val() as IndexedOrder<FullOrderERC20>;
+            chainIds.push(order.order.chainId)
+        });
+        this.chainIds = [...new Set(chainIds)]
+        console.log("caching previous chainIds:", this.chainIds)
+    }
+
     public constructor() {
         this.tokens = [];
+        this.chainIds = [];
+    }
+
+    async getLastCheckedBlock(address: string, chainId: number): Promise<number | undefined> {
+        const query = await this.refBlocks.query()
+            .filter('address', '==', address)
+            .filter('chainId', '==', chainId)
+            .get();
+        const serializedBlock = query.values()?.next()?.value?.val();
+        if (serializedBlock) {
+            return Promise.resolve(serializedBlock["block"]);
+        }
+    }
+    async setLastCheckedBlock(address: string, chainId: number, block: number): Promise<void> {
+        await this.refBlocks.query()
+            .filter('address', '==', address)
+            .filter('chainId', '==', chainId)
+            .remove();
+        await this.refBlocks.push({ address, chainId, block });
     }
 
     async addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {
@@ -70,6 +114,9 @@ export class AceBaseClient implements Database {
         await this.refOrders.push(indexedOrder);
         this.addToken(indexedOrder.order.signer.token)
         this.addToken(indexedOrder.order.sender.token)
+        if (!this.chainIds.includes(indexedOrder.order.chainId)) {
+            this.chainIds.push(indexedOrder.order.chainId)
+        }
         return Promise.resolve();
     }
     async addAllOrder(indexedOrders: Record<string, IndexedOrder<DbOrder>>): Promise<void> {
@@ -293,6 +340,9 @@ export class AceBaseClient implements Database {
         const order = indexedOrder.order as DbOrderERC20
         this.addToken(indexedOrder.order.signerToken)
         this.addToken(indexedOrder.order.senderToken)
+        if (!this.chainIds.includes(order.chainId)) {
+            this.chainIds.push(order.chainId)
+        }
         return Promise.resolve();
     }
 
@@ -363,8 +413,14 @@ export class AceBaseClient implements Database {
         });
     }
 
+    getAllChainIds(): Promise<number[]> {
+        return Promise.resolve(this.chainIds)
+    }
+
     async erase() {
         this.tokens = [];
+        this.chainIds = [];
+        await this.db.ref(ENTRY_BLOCKS).remove();
         await this.db.ref(ENTRY_REF_ERC20).remove();
         return await this.db.ref(ENTRY_REF_ORDERS).remove();
     }

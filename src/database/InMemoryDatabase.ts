@@ -8,17 +8,29 @@ import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
 export class InMemoryDatabase implements Database {
   private erc20Database: Record<string, IndexedOrder<DbOrderERC20>>;
   private orderDatabase: Record<string, IndexedOrder<DbOrder>>;
+  private blocks: Record<string, number>;
   private tokens: string[];
+  private chainIds: number[]
 
   constructor() {
     this.erc20Database = {};
     this.orderDatabase = {};
+    this.blocks = {};
     this.tokens = [];
+    this.chainIds = [];
   }
 
   connect(databaseName: string, deleteOnStart: boolean, databasePath: string): Promise<void> {
     console.log("IN_MEMORY - In ram storage only -")
     return Promise.resolve();
+  }
+
+  async getLastCheckedBlock(address: string, chainId: number): Promise<number | undefined> {
+    return Promise.resolve(this.blocks[this.generateKeyForBlock(address, chainId)])
+  }
+
+  async setLastCheckedBlock(address: string, chainId: number, block: number): Promise<void> {
+    this.blocks[this.generateKeyForBlock(address, chainId)] = block
   }
 
   getOrdersERC20By(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrderERC20>> {
@@ -84,6 +96,9 @@ export class InMemoryDatabase implements Database {
     const order = indexedOrder.order as DbOrderERC20;
     this.addToken(order.signerToken);
     this.addToken(order.senderToken);
+    if (!this.chainIds.includes(order.chainId)) {
+      this.chainIds.push(order.chainId)
+    }
     return Promise.resolve();
   }
 
@@ -191,6 +206,9 @@ export class InMemoryDatabase implements Database {
     this.orderDatabase[indexedOrder.hash!] = indexedOrder;
     this.addToken(indexedOrder.order.signer.token)
     this.addToken(indexedOrder.order.sender.token)
+    if (!this.chainIds.includes(indexedOrder.order.chainId)) {
+      this.chainIds.push(indexedOrder.order.chainId)
+    }
     return Promise.resolve()
   }
 
@@ -329,11 +347,17 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve(!!this.orderDatabase[hash])
   }
 
+  getAllChainIds(): Promise<number[]> {
+    return Promise.resolve(this.chainIds)
+  }
+
   /////////////////////////////
   erase() {
     this.erc20Database = {};
     this.orderDatabase = {};
+    this.blocks = {};
     this.tokens = [];
+    this.chainIds = [];
     return Promise.resolve();
   }
 
@@ -355,5 +379,9 @@ export class InMemoryDatabase implements Database {
       addedOn: indexedOrder.addedOn,
       order: mapAnyToFullOrder(indexedOrder.order)
     };
+  }
+
+  private generateKeyForBlock(address: string, chainId: number) {
+    return `${chainId}_${address}`
   }
 }

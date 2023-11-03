@@ -18,7 +18,7 @@ export class Web3SwapClient {
         this.apiKey = apiKey;
     }
 
-    public connectToChain(network: number | string): boolean {
+    public async connectToChain(network: number | string): Promise<boolean> {
         let chainId: number
         let contract: Contract
         let provider: providers.Provider
@@ -36,13 +36,22 @@ export class Web3SwapClient {
             provider = getProviderUrl(chainId, this.apiKey)
             contract = Swap.getContract(provider, chainId);
 
+            const backedUpBlock = await this.database.getLastCheckedBlock(contract.address, chainId);
+            if (backedUpBlock) {
+                console.log('Last Backed block for chain:', chainId, backedUpBlock)
+                this.lastBlock[chainId] = backedUpBlock
+            }
+
             setInterval(async () => {
-                const endBlock = await this.gatherEvents(provider, this.lastBlock[chainId], contract)
-                if (endBlock) {
-                    this.lastBlock[chainId] = endBlock
-                }
-                return Promise.resolve(endBlock)
+                this.gatherEvents(provider, this.lastBlock[chainId], contract)
+                .then((endBlock) => {
+                    if (endBlock) {
+                        this.lastBlock[chainId] = endBlock
+                        this.database.setLastCheckedBlock(contract.address, chainId, endBlock);
+                    }
+                })
             }, 1000 * 10)
+            
             this.contracts[chainId] = contract;
             console.log("Registered event SWAP from chain", chainId, "address:", contract.address)
             return true
@@ -91,9 +100,9 @@ export class Web3SwapClient {
                 .forEach(({ nonce, signerWallet }: { nonce: Nonce, signerWallet: string }) => {
                     this.onEvent(nonce, signerWallet);
                 });
-            return endBlock
+            return Promise.resolve(endBlock)
         } catch (err) {
-            return startBlock
+            return Promise.resolve(startBlock)
         }
     }
 

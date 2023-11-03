@@ -34,7 +34,7 @@ console.log("HOST is", host);
 // Injection
 const broadcastClient = new BroadcastClient();
 
-const database = await getDatabase(process.env.DELETE_DB_ON_START == "1", process.env.DATABASE_TYPE as string,  process.env.DATABASE_PATH as string);
+const database = await getDatabase(process.env.DELETE_DB_ON_START == "1", process.env.DATABASE_TYPE as string, process.env.DATABASE_PATH as string);
 if (!database) {
   console.error("Unknown database, check env file !")
   process.exit(5);
@@ -46,7 +46,9 @@ const intervalId = setInterval(() => {
   database.deleteExpiredOrder(currentTimestampInSeconds);
 }, 1000 * 60);
 
-const swapClients = getWeb3SwapClient(database, network);
+const previsousChainObserved  = await database.getAllChainIds()
+
+const swapClients = await getWeb3SwapClient(database, network, previsousChainObserved);
 if (swapClients?.swapClientOrderERC20 === null) {
   console.log("Could connect to SwapERC20 smart contract");
   process.exit(4);
@@ -62,15 +64,16 @@ if (!isNumeric(process.env.MAX_RESULTS_FOR_QUERY)) {
   process.exit(6);
 }
 
-const orderService = new OrderService(database, swapClients!.swapClientOrderERC20, swapClients!.swapClientOrder, +process.env.MAX_RESULTS_FOR_QUERY!);
 const peers = new Peers(database, host, broadcastClient);
 
-const registryClient = getRegistry(process.env, peers);
+const registryClient = await getRegistry(process.env, peers, previsousChainObserved);
 if (registryClient === null) {
   process.exit(3);
 }
 
-const rootController = new RootService(peers, database, network);
+const orderService = new OrderService(database, swapClients!.swapClientOrderERC20, swapClients!.swapClientOrder, registryClient, +process.env.MAX_RESULTS_FOR_QUERY!);
+
+const rootController = new RootService(peers, database, registryClient);
 
 // Network register & synchronization 
 let peersFromRegistry: string[] = await registryClient.getPeersFromRegistry();
@@ -89,7 +92,7 @@ process.on("SIGINT", () => {
   gracefulShutdown(webserver, database, intervalId);
 });
 
-function getWeb3SwapClient(database: Database, network: number) {
+async function getWeb3SwapClient(database: Database, network: number, previsousChainObserved: number[]) {
   if (!network) {
     return null;
   }
@@ -98,8 +101,14 @@ function getWeb3SwapClient(database: Database, network: number) {
   const swapClientOrderERC20 = new Web3SwapERC20Client(apiKey, database);
   const swapClientOrder = new Web3SwapClient(apiKey, database);
 
-  swapClientOrder.connectToChain(network);
-  swapClientOrderERC20.connectToChain(network);
+  await swapClientOrder.connectToChain(network);
+  await swapClientOrderERC20.connectToChain(network);
+  if (previsousChainObserved.length > 0) {
+    previsousChainObserved.forEach(async chainId => {
+      await swapClientOrder.connectToChain(chainId);
+      await swapClientOrderERC20.connectToChain(chainId);
+    })
+  }
   return { swapClientOrder, swapClientOrderERC20 };
 }
 

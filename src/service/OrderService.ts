@@ -12,6 +12,7 @@ import { DbOrderERC20, DbOrder } from '../model/DbOrderTypes.js';
 import { mapAnyToDbOrder } from '../mapper/mapAnyToDbOrder.js';
 import { Web3SwapClient } from '../client/Web3SwapClient';
 import { InvalidSignatureException } from '../model/error/InvalidSignatureException.js';
+import { Web3RegistryClient } from 'client/Web3RegistryClient.js';
 
 export const METHODS = {
     getOrdersERC20: "getOrdersERC20",
@@ -25,13 +26,15 @@ export class OrderService {
     private database: Database;
     private web3SwapERC20Client: Web3SwapERC20Client;
     private web3SwapClient: Web3SwapClient;
+    private web3RegistryClient: Web3RegistryClient;
     private maxResultByQuery: number;
 
-    constructor(database: Database, web3ERC20SwapClient: Web3SwapERC20Client, web3SwapClient: Web3SwapClient, maxResultByQuery: number) {
+    constructor(database: Database, web3ERC20SwapClient: Web3SwapERC20Client, web3SwapClient: Web3SwapClient, web3RegistryClient: Web3RegistryClient, maxResultByQuery: number) {
         this.database = database;
         this.web3SwapERC20Client = web3ERC20SwapClient;
         this.web3SwapClient = web3SwapClient;
         this.maxResultByQuery = maxResultByQuery;
+        this.web3RegistryClient = web3RegistryClient;
 
         const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter((name) => name !== "constructor").sort();
         if (!(methods.length === Object.keys(METHODS).length && methods.every((value: string) => value === METHODS[value]))) {
@@ -65,6 +68,7 @@ export class OrderService {
 
         indexedOrder.hash = hash;
         const isNetworkAdded = this.web3SwapERC20Client.connectToChain(indexedOrder.order.chainId)
+        await this.web3RegistryClient.connect(indexedOrder.order.chainId)
         if(!isNetworkAdded){
             throw new ClientError("Chain ID unsupported");
         }
@@ -117,7 +121,8 @@ export class OrderService {
         }
 
         indexedOrder.hash = hash;
-        const isNetworkAdded = this.web3SwapClient.connectToChain(indexedOrder.order.chainId)
+        const isNetworkAdded = await this.web3SwapClient.connectToChain(indexedOrder.order.chainId)
+        this.web3RegistryClient.connect(indexedOrder.order.chainId)
         if(!isNetworkAdded){
             throw new ClientError("Chain ID unsupported");
         }

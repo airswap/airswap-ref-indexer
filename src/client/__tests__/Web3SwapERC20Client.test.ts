@@ -27,11 +27,13 @@ describe("Web3SwapERC20Client", () => {
     beforeEach(() => {
         fakeDatabase = {
             deleteOrderERC20: jest.fn(),
+            getLastCheckedBlock: jest.fn(),
+            setLastCheckedBlock: jest.fn()
         };
     });
 
     describe("addContractIfNotExists", () => {
-        it("Add another network", () => {
+        it("Add another network", async () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
@@ -43,12 +45,12 @@ describe("Web3SwapERC20Client", () => {
             SwapERC20.getContract = jest.fn(() => ({ address: "an_address" }))
 
             const client = new Web3SwapERC20Client(apiKey, fakeDatabase as Database);
-            client.connectToChain(5);
+            await client.connectToChain(5);
 
             expect(mockedEther.providers.WebSocketProvider).toHaveBeenCalledWith("wss://goerli.infura.io/ws/v3/apikey");
         });
 
-        it("Network is not found", () => {
+        it("Network is not found", async () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
@@ -58,12 +60,12 @@ describe("Web3SwapERC20Client", () => {
             SwapERC20.getContract = jest.fn(() => ({ on: jest.fn() }))
 
             const client = new Web3SwapERC20Client(apiKey, fakeDatabase as Database);
-            client.connectToChain("aze");
+            await client.connectToChain("aze");
 
             expect(mockedEther.providers.JsonRpcProvider).not.toHaveBeenCalled();
         });
 
-        it("Network can't be added twice", () => {
+        it("Network can't be added twice", async () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
@@ -75,15 +77,15 @@ describe("Web3SwapERC20Client", () => {
             SwapERC20.getContract = jest.fn(() => ({ address: "an_address" }))
 
             const client = new Web3SwapERC20Client(apiKey, fakeDatabase as Database);
-            client.connectToChain(5);
-            client.connectToChain(5);
+            await client.connectToChain(5);
+            await client.connectToChain(5);
 
             expect(mockedEther.providers.WebSocketProvider).toHaveBeenCalledTimes(1)
             expect(mockedEther.providers.WebSocketProvider).toBeCalledWith("wss://goerli.infura.io/ws/v3/apikey")
         });
     });
 
-    it("Should remove order on event SwapERC20", async () => {
+    it("Should remove order on event SwapERC20", (done) => {
         const mockQueryFilter = jest.fn((event, start, end) => {
             if (event === "SwapERC20") {
                 return ([{
@@ -116,15 +118,17 @@ describe("Web3SwapERC20Client", () => {
 
         new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
 
-        jest.advanceTimersByTime(11000);
+        jest.advanceTimersByTimeAsync(11000);
         // @ts-ignore
         fakeDatabase.deleteOrderERC20.mockImplementation((nonce, wallet) => {
-            expect(nonce).toEqual(245);
+            expect(nonce).toEqual("245");
             expect(wallet).toEqual("a_wall3t");
+            expect(mockQueryFilter).toHaveBeenCalledWith("SwapERC20", -5, 0);
+            done()
         })
     });
 
-    it("Should remove order on event Cancel", async () => {
+    it("Should remove order on event Cancel", (done) => {
         const mockQueryFilter = jest.fn((event, start, end) => {
             if (event === "Cancel") {
                 return ([{
@@ -156,12 +160,47 @@ describe("Web3SwapERC20Client", () => {
 
         new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
 
-        jest.advanceTimersByTime(11000);
+        jest.advanceTimersByTimeAsync(11000);
         // @ts-ignore
         fakeDatabase.deleteOrderERC20.mockImplementation((nonce, wallet) => {
-            expect(nonce).toEqual(245,);
+            expect(nonce).toEqual("245");
             expect(wallet).toEqual("a_wall3t");
+            expect(mockQueryFilter).toHaveBeenCalledWith("Cancel", -5, 0);
+            done()
         })
+    });
+
+    it("Should start from last savedBlock", (done) => {
+        const mockQueryFilter = jest.fn((event, start, end) => {
+            expect(event).toEqual("Cancel");
+            expect(start).toEqual(15);
+            expect(end).toEqual(50);
+            done()
+            return []
+        });
+        //@ts-ignore
+        SwapERC20.getContract = jest.fn((provider, chainId) => ({
+            address: "an_address" + chainId,
+            queryFilter: mockQueryFilter,
+            filters: {
+                Cancel: () => "Cancel",
+                Swap: () => "Swap"
+            }
+        }))
+        //@ts-ignore
+        mockedEther.providers = {
+            //@ts-ignore
+            JsonRpcProvider: jest.fn(),
+            //@ts-ignore
+            WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(50) })),
+        };
+
+        //@ts-ignore
+        fakeDatabase.getLastCheckedBlock.mockImplementation(() => Promise.resolve(20))
+
+        new Web3SwapERC20Client(apiKey, fakeDatabase as Database).connectToChain(network);
+
+        jest.advanceTimersByTimeAsync(11000);
     });
 
     describe("Do nothing", () => {
@@ -294,7 +333,7 @@ describe("Web3SwapERC20Client", () => {
             };
 
             const swapClient = new Web3SwapERC20Client(apiKey, fakeDatabase as Database);
-            swapClient.connectToChain(network);
+            await swapClient.connectToChain(network);
 
             const isValid = await swapClient.isValidOrder(forgeDbOrderERC20(1));
             expect(isValid).toBe(true)

@@ -1,7 +1,20 @@
+import { ethers } from 'ethers';
+import { Web3RegistryClient } from '../../client/Web3RegistryClient';
 import { Database } from '../../database/Database';
 import { forgeIndexedOrderResponseERC20, forgeIndexedOrderResponse } from '../../Fixtures';
 import { Peers } from '../../peer/Peers';
 import { RootService } from '../RootService';
+
+jest.mock('@airswap/libraries', () => ({
+    RegistryV4: {
+        getContract: jest.fn(() => ({ on: jest.fn() })),
+        getServerURLs: jest.fn(),
+        addresses: {
+            5: '0xanaddrres'
+        }
+    }
+}));
+jest.mock('ethers');
 
 describe("Root service", () => {
 
@@ -34,7 +47,8 @@ describe("Root service", () => {
             )),
         };
         fakePeers = {
-            getPeers: jest.fn(() => [])
+            getConnectablePeers: jest.fn(() => []),
+            addPeers: jest.fn()
         };
     })
 
@@ -44,11 +58,13 @@ describe("Root service", () => {
             databaseOrders: 1,
             databaseOrdersERC20: 1,
             peers: [],
-            network: 5,
-            registry: '0x05545815a5579d80Bd4c380da3487EAC2c4Ce299',
+            networks: ['5'],
+            registry: { '5': '0xanaddrres' },
         };
 
-        const result = await new RootService(fakePeers as Peers, fakeDb as Database, 5).get();
+        const registryClient = new Web3RegistryClient("", fakePeers as Peers)
+        await registryClient.connect(5)
+        const result = await new RootService(fakePeers as Peers, fakeDb as Database, registryClient).get();
 
         expect(result).toEqual(expected);
     });
