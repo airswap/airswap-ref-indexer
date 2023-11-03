@@ -1,5 +1,5 @@
-import { toBigInt } from '../converter/index.js';
-import { DbOrder, DbOrderParty } from 'model/DbOrderTypes.js';
+import { toBigInt } from "../converter/index.js";
+import { DbOrder, DbOrderParty } from "model/DbOrderTypes.js";
 
 export function mapAnyToDbOrder(data: any): DbOrder {
     return {
@@ -15,7 +15,7 @@ export function mapAnyToDbOrder(data: any): DbOrder {
         swapContract: String(data.swapContract).toLocaleLowerCase(),
         affiliateWallet: String(data.affiliateWallet).toLocaleLowerCase(),
         affiliateAmount: String(data.affiliateAmount)
-    }
+    };
 }
 
 function mapToOrderParty(field: any): DbOrderParty {
@@ -26,5 +26,5 @@ function mapToOrderParty(field: any): DbOrderParty {
         id: String(field.id).toLocaleLowerCase(),
         amount: String(field.amount),
         approximatedAmount: toBigInt(field.amount)!
-    }
+    };
 }

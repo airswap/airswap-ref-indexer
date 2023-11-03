@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 export class BroadcastClient {
     async broadcastTo(method: string, url: string, data?: any) {
         console.log("S--->", method, url, data);
@@ -17,5 +17,4 @@ export class BroadcastClient {
             console.log("Client did not answer !", method, url, data, e);
         }
     }
-
 }

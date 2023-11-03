@@ -1,8 +1,8 @@
-import { Server } from '@airswap/libraries';
-import { Database } from '../database/Database.js';
-import { mapAllIndexedOrderResponseToDbOrderERC20 } from '../mapper/mapIndexedOrderResponseToDbOrderERC20.js';
-import { mapAllIndexedOrderResponseToDbOrder } from '../mapper/mapIndexedOrderResponseToDbOrder.js';
-import { Peers } from './../peer/Peers.js';
+import { Server } from "@airswap/libraries";
+import { Database } from "../database/Database.js";
+import { mapAllIndexedOrderResponseToDbOrderERC20 } from "../mapper/mapIndexedOrderResponseToDbOrderERC20.js";
+import { mapAllIndexedOrderResponseToDbOrder } from "../mapper/mapIndexedOrderResponseToDbOrder.js";
+import { Peers } from "./../peer/Peers.js";
 
 export async function requestDataFromOtherPeer(peersFromRegistry: string[], database: Database, peers: Peers) {
     if (peersFromRegistry.length > 0) {

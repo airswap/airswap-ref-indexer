@@ -1,11 +1,11 @@
 import { Express, Request, Response } from "express";
-import { SuccessResponse } from '../model/response/SuccessResponse.js';
-import { ClientError } from './../model/error/ClientError.js';
-import { IndexedOrderError, JsonRpcResponse } from '@airswap/libraries';
-import { NotFound } from '../model/error/NotFound.js';
-import { RootService } from '../service/RootService.js';
-import { Peers } from './../peer/Peers.js';
-import { OrderService, METHODS } from './../service/OrderService.js';
+import { SuccessResponse } from "../model/response/SuccessResponse.js";
+import { ClientError } from "./../model/error/ClientError.js";
+import { IndexedOrderError, JsonRpcResponse } from "@airswap/libraries";
+import { NotFound } from "../model/error/NotFound.js";
+import { RootService } from "../service/RootService.js";
+import { Peers } from "./../peer/Peers.js";
+import { OrderService, METHODS } from "./../service/OrderService.js";
 
 export class IndexerServer {
     private server: Express;
@@ -13,7 +13,7 @@ export class IndexerServer {
     private rootService: RootService;
     private peers: Peers;
 
-    constructor(server: Express, orderService: OrderService, rootService: RootService, peers: Peers,) {
+    constructor(server: Express, orderService: OrderService, rootService: RootService, peers: Peers) {
         this.server = server;
         this.rootService = rootService;
         this.orderService = orderService;
@@ -21,13 +21,13 @@ export class IndexerServer {
     }
 
     async run() {
-        this.server.get('*', async (request: Request, response: Response) => {
+        this.server.get("*", async (request: Request, response: Response) => {
             console.log("R<--- ", request.socket.remoteAddress, request.method, request.url, request.body);
-            const result = await this.rootService.get() as any;
+            const result = (await this.rootService.get()) as any;
             response.json(new JsonRpcResponse("-1", result));
         });
 
-        this.server.post('*', async (request: Request, response: Response) => {
+        this.server.post("*", async (request: Request, response: Response) => {
             console.log("R<---", request.socket.remoteAddress, request.method, request.url, JSON.stringify(request.body));
             const { id, method, params = [] } = request.body;
 
@@ -83,7 +83,7 @@ export class IndexerServer {
                 }
                 response.json(result);
             } catch (error) {
-                console.log("error", error)
+                console.log("error", error);
                 const err = error as IndexedOrderError;
                 response.status(err.code || 500);
                 response.json(new JsonRpcResponse(id, err));

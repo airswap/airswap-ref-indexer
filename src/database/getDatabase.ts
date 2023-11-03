@@ -1,6 +1,6 @@
-import { InMemoryDatabase } from './InMemoryDatabase.js';
-import { AceBaseClient } from './AcebaseClient.js';
-import { Database } from './Database.js';
+import { InMemoryDatabase } from "./InMemoryDatabase.js";
+import { AceBaseClient } from "./AcebaseClient.js";
+import { Database } from "./Database.js";
 
 export async function getDatabase(deleteDbOnStart: boolean, databaseType: string, databasePath = "."): Promise<Database | null> {
     if (databaseType === "ACEBASE") {

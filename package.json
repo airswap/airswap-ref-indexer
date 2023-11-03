@@ -13,6 +13,7 @@
     "bench": "node benchmarking/bench.js",
     "date": "node benchmarking/generateDateInRange.js",
     "lint": "eslint src",
+    "prettier": "prettier src --write",
     "prepare": "husky install"
   },
   "type": "module",

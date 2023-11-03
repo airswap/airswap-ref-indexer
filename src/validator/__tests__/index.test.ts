@@ -1,9 +1,7 @@
-import { isNumeric, isDateInRange } from '../index';
+import { isNumeric, isDateInRange } from "../index";
 
-jest
-    .useFakeTimers()
-    .setSystemTime(new Date(603001));
-    
+jest.useFakeTimers().setSystemTime(new Date(603001));
+
 describe("Validator", () => {
     describe("isNumeric", () => {
         test("should return false", () => {

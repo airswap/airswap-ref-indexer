@@ -1,8 +1,7 @@
-import { IndexedOrder } from '@airswap/types';
-import { FullOrder } from '@airswap/types';
-import { DbOrder } from 'model/DbOrderTypes.js';
-import { mapAnyToDbOrder } from './mapAnyToDbOrder.js';
-
+import { IndexedOrder } from "@airswap/types";
+import { FullOrder } from "@airswap/types";
+import { DbOrder } from "model/DbOrderTypes.js";
+import { mapAnyToDbOrder } from "./mapAnyToDbOrder.js";
 
 function mapIndexedOrderResponseToDbOrder(indexedOrderResponse: IndexedOrder<FullOrder>): Record<string, IndexedOrder<DbOrder>> | undefined {
     if (!indexedOrderResponse) return undefined;

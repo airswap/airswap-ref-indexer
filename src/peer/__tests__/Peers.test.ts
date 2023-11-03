@@ -1,8 +1,7 @@
-import { BroadcastClient } from './../../client/BroadcastClient';
-import { Database } from '../../database/Database';
-import { Peers } from './../Peers';
+import { BroadcastClient } from "./../../client/BroadcastClient";
+import { Database } from "../../database/Database";
+import { Peers } from "./../Peers";
 describe("Peers", () => {
-
     let fakeDb: Partial<Database>;
     let fakeBroadcastClient: Partial<BroadcastClient>;
 
@@ -11,10 +10,9 @@ describe("Peers", () => {
         fakeBroadcastClient = {
             broadcastTo: jest.fn()
         };
+    });
 
-    })
-
-    describe('Add', () => {
+    describe("Add", () => {
         test("can't add several times the same url", () => {
             const peer = new Peers(fakeDb as Database, "http://localhost/", fakeBroadcastClient as BroadcastClient);
             peer.addPeer("a_url");
@@ -98,20 +96,20 @@ describe("Peers", () => {
 
         test("return true if peers is empty", () => {
             const peer = new Peers(fakeDb as Database, "http://localhost/", fakeBroadcastClient as BroadcastClient);
-            expect(peer.containsUnknownPeers(['a_url'])).toBe(true);
+            expect(peer.containsUnknownPeers(["a_url"])).toBe(true);
         });
 
         test("containsUnknownPeers return false if peers is already knonwn", () => {
             const peer = new Peers(fakeDb as Database, "http://localhost/", fakeBroadcastClient as BroadcastClient);
-            peer.addPeers(['another', 'a_url']);
-            expect(peer.containsUnknownPeers(['a_url', 'another'])).toBe(false);
+            peer.addPeers(["another", "a_url"]);
+            expect(peer.containsUnknownPeers(["a_url", "another"])).toBe(false);
         });
 
         test("containsUnknownPeers return true if one of peers is unknonwn", () => {
             const peer = new Peers(fakeDb as Database, "http://localhost/", fakeBroadcastClient as BroadcastClient);
             peer.addPeer("a_url");
             peer.addPeer("another_one");
-            expect(peer.containsUnknownPeers(['a_url', 'another', 'a_third'])).toBe(true);
+            expect(peer.containsUnknownPeers(["a_url", "another", "a_third"])).toBe(true);
         });
     });
 
@@ -128,8 +126,8 @@ describe("Peers", () => {
                 const peers = new Peers(fakeDb as Database, "http://localhost/", fakeBroadcastClient as BroadcastClient);
                 peers.addPeers(["http://localhost/", "http://another/", "http://a_third/"]);
                 peers.broadcast("POST", "/a_url", { key: "body" });
-                expect(fakeBroadcastClient.broadcastTo).toHaveBeenNthCalledWith(1, "POST", "http://another/a_url", { "key": "body" });
-                expect(fakeBroadcastClient.broadcastTo).toHaveBeenNthCalledWith(2, "POST", "http://a_third/a_url", { "key": "body" });
+                expect(fakeBroadcastClient.broadcastTo).toHaveBeenNthCalledWith(1, "POST", "http://another/a_url", { key: "body" });
+                expect(fakeBroadcastClient.broadcastTo).toHaveBeenNthCalledWith(2, "POST", "http://a_third/a_url", { key: "body" });
             });
         });
     });

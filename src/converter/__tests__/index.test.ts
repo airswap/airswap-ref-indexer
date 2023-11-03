@@ -1,7 +1,6 @@
-import { toNumber, toArray } from '../index'
+import { toNumber, toArray } from "../index";
 
 describe("converter", () => {
-
     describe("toNumber", () => {
         test("should return undefined", () => {
             expect(toNumber("a")).toBeUndefined();
@@ -40,12 +39,11 @@ describe("converter", () => {
             expect(toArray({})).toBeUndefined();
         });
 
-        test("should map to array", () => {            
+        test("should map to array", () => {
             expect(toArray([])).toEqual([]);
             expect(toArray(["a"])).toEqual(["a"]);
             //@ts-ignore
             expect(toArray(["a", 1, "", " "])).toEqual(["a", "1"]);
         });
-
     });
 });

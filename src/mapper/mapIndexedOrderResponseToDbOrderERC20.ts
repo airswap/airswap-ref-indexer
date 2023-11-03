@@ -1,8 +1,7 @@
-import { IndexedOrder } from '@airswap/types';
-import { FullOrderERC20 } from '@airswap/types';
-import { mapAnyToDbOrderERC20 } from './mapAnyToDbOrderERC20.js';
-import { DbOrderERC20 } from 'model/DbOrderTypes.js';
-
+import { IndexedOrder } from "@airswap/types";
+import { FullOrderERC20 } from "@airswap/types";
+import { mapAnyToDbOrderERC20 } from "./mapAnyToDbOrderERC20.js";
+import { DbOrderERC20 } from "model/DbOrderTypes.js";
 
 function mapIndexedOrderResponseToDbOrderERC20(indexedOrderResponse: IndexedOrder<FullOrderERC20>): Record<string, IndexedOrder<DbOrderERC20>> | undefined {
     if (!indexedOrderResponse) return undefined;

@@ -1,4 +1,4 @@
-import { IndexedOrderError } from '@airswap/libraries';
+import { IndexedOrderError } from "@airswap/libraries";
 
 export class AlreadyExistsError extends IndexedOrderError {
     constructor() {

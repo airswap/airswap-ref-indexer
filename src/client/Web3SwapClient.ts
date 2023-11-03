@@ -1,11 +1,11 @@
-import { Contract, providers, Event } from 'ethers';
-import { Database } from '../database/Database.js';
-import { Swap } from '@airswap/libraries'
-import { getProviderUrl } from './getProviderUrl.js';
-import { DbOrder } from '../model/DbOrderTypes.js';
-import { checkResultToErrors } from '@airswap/utils';
+import { Contract, providers, Event } from "ethers";
+import { Database } from "../database/Database.js";
+import { Swap } from "@airswap/libraries";
+import { getProviderUrl } from "./getProviderUrl.js";
+import { DbOrder } from "../model/DbOrderTypes.js";
+import { checkResultToErrors } from "@airswap/utils";
 
-type Nonce = { _hex: string, _isBigNumber: boolean };
+type Nonce = { _hex: string; _isBigNumber: boolean };
 
 export class Web3SwapClient {
     private contracts: Record<string, Contract> = {};
@@ -19,45 +19,44 @@ export class Web3SwapClient {
     }
 
     public async connectToChain(network: number | string): Promise<boolean> {
-        let chainId: number
-        let contract: Contract
-        let provider: providers.Provider
+        let chainId: number;
+        let contract: Contract;
+        let provider: providers.Provider;
 
         try {
             chainId = Number(network);
             if (!chainId || isNaN(chainId)) {
-                console.warn("Tried to add this network but it does not work :", network)
-                return false
+                console.warn("Tried to add this network but it does not work :", network);
+                return false;
             }
             if (this.keyExists(String(chainId))) {
                 console.log("Already connected");
-                return true
+                return true;
             }
-            provider = getProviderUrl(chainId, this.apiKey)
+            provider = getProviderUrl(chainId, this.apiKey);
             contract = Swap.getContract(provider, chainId);
 
             const backedUpBlock = await this.database.getLastCheckedBlock(contract.address, chainId);
             if (backedUpBlock) {
-                console.log('Last Backed block for chain:', chainId, backedUpBlock)
-                this.lastBlock[chainId] = backedUpBlock
+                console.log("Last Backed block for chain:", chainId, backedUpBlock);
+                this.lastBlock[chainId] = backedUpBlock;
             }
 
             setInterval(async () => {
-                this.gatherEvents(provider, this.lastBlock[chainId], contract)
-                .then((endBlock) => {
+                this.gatherEvents(provider, this.lastBlock[chainId], contract).then((endBlock) => {
                     if (endBlock) {
-                        this.lastBlock[chainId] = endBlock
+                        this.lastBlock[chainId] = endBlock;
                         this.database.setLastCheckedBlock(contract.address, chainId, endBlock);
                     }
-                })
-            }, 1000 * 10)
-            
+                });
+            }, 1000 * 10);
+
             this.contracts[chainId] = contract;
-            console.log("Registered event SWAP from chain", chainId, "address:", contract.address)
-            return true
+            console.log("Registered event SWAP from chain", chainId, "address:", contract.address);
+            return true;
         } catch (err) {
-            console.error(err)
-            return false
+            console.error(err);
+            return false;
         }
     }
 
@@ -68,12 +67,9 @@ export class Web3SwapClient {
             return Promise.resolve(false);
         }
         try {
-            const response = await contract.check(
-                fullOrder.sender.wallet,
-                fullOrder
-            )
-            const errors = checkResultToErrors(response[1], response[0])
-            isValid = !errors.some(error => Object.keys(OrderErrors).includes(error));
+            const response = await contract.check(fullOrder.sender.wallet, fullOrder);
+            const errors = checkResultToErrors(response[1], response[0]);
+            isValid = !errors.some((error) => Object.keys(OrderErrors).includes(error));
         } catch (err) {
             isValid = false;
             console.error(err);
@@ -88,21 +84,21 @@ export class Web3SwapClient {
             }
             startBlock = startBlock! - 5;
             const endBlock = await provider.getBlockNumber();
-            console.log("Looking for order events between", startBlock, endBlock)
+            console.log("Looking for order events between", startBlock, endBlock);
 
             const cancelEvents: Event[] = await contract.queryFilter(contract.filters.Cancel(), startBlock, endBlock);
             const swapEvents: Event[] = await contract.queryFilter(contract.filters.Swap(), startBlock, endBlock);
             const allEvents = [...cancelEvents, ...swapEvents];
 
             allEvents
-                .filter(event => event.args)
-                .map(event => ({ nonce: event.args!.nonce, signerWallet: event.args!.signerWallet }))
-                .forEach(({ nonce, signerWallet }: { nonce: Nonce, signerWallet: string }) => {
+                .filter((event) => event.args)
+                .map((event) => ({ nonce: event.args!.nonce, signerWallet: event.args!.signerWallet }))
+                .forEach(({ nonce, signerWallet }: { nonce: Nonce; signerWallet: string }) => {
                     this.onEvent(nonce, signerWallet);
                 });
-            return Promise.resolve(endBlock)
+            return Promise.resolve(endBlock);
         } catch (err) {
-            return Promise.resolve(startBlock)
+            return Promise.resolve(startBlock);
         }
     }
 
@@ -111,7 +107,7 @@ export class Web3SwapClient {
     }
 
     private onEvent(nonce: Nonce, signerWallet: string) {
-        console.log("Order Event found:", nonce, signerWallet)
+        console.log("Order Event found:", nonce, signerWallet);
         if (nonce && signerWallet) {
             const decodedNonce = parseInt(nonce._hex, 16);
             if (isNaN(decodedNonce)) return;
@@ -134,5 +130,5 @@ enum OrderErrors {
     SignatureInvalid,
     SenderInvalid,
     SenderTokenInvalid,
-    SenderTokenKindUnknown,
+    SenderTokenKindUnknown
 }

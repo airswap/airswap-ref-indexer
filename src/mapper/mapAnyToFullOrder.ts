@@ -1,4 +1,4 @@
-import { FullOrder, OrderParty } from '@airswap/types';
+import { FullOrder, OrderParty } from "@airswap/types";
 
 export function mapAnyToFullOrder(data: any): FullOrder {
     return {
@@ -14,7 +14,7 @@ export function mapAnyToFullOrder(data: any): FullOrder {
         swapContract: String(data.swapContract),
         affiliateWallet: String(data.affiliateWallet),
         affiliateAmount: String(data.affiliateAmount)
-    }
+    };
 }
 
 function mapToOrderParty(field: any): OrderParty {
@@ -24,5 +24,5 @@ function mapToOrderParty(field: any): OrderParty {
         kind: String(field.kind),
         id: String(field.id),
         amount: String(field.amount)
-    }
+    };
 }

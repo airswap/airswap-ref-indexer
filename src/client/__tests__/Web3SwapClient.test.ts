@@ -1,10 +1,10 @@
-import { BigNumber, ethers } from 'ethers';
-import { Database } from '../../database/Database';
-import { Web3SwapClient } from './../Web3SwapClient';
-import { Swap } from '@airswap/libraries';
-import { forgeDbOrder } from '../../Fixtures';
+import { BigNumber, ethers } from "ethers";
+import { Database } from "../../database/Database";
+import { Web3SwapClient } from "./../Web3SwapClient";
+import { Swap } from "@airswap/libraries";
+import { forgeDbOrder } from "../../Fixtures";
 
-jest.mock('@airswap/libraries', () => ({
+jest.mock("@airswap/libraries", () => ({
     Swap: {
         getContract: () => jest.fn()
     }
@@ -12,8 +12,8 @@ jest.mock('@airswap/libraries', () => ({
 
 jest.mock("ethers", () => {
     const original = { ...jest.requireActual("ethers") };
-    original.providers = jest.fn()
-    return original
+    original.providers = jest.fn();
+    return original;
 });
 
 jest.useFakeTimers();
@@ -40,10 +40,10 @@ describe("Web3SwapClient", () => {
                 //@ts-ignore
                 JsonRpcProvider: jest.fn(),
                 //@ts-ignore
-                WebSocketProvider: jest.fn(),
+                WebSocketProvider: jest.fn()
             };
             //@ts-ignore
-            Swap.getContract = jest.fn(() => ({ address: "an_address" }))
+            Swap.getContract = jest.fn(() => ({ address: "an_address" }));
 
             const client = new Web3SwapClient(apiKey, fakeDatabase as Database);
             await client.connectToChain(5);
@@ -55,10 +55,10 @@ describe("Web3SwapClient", () => {
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
-                JsonRpcProvider: jest.fn(),
+                JsonRpcProvider: jest.fn()
             };
             //@ts-ignore
-            Swap.getContract = jest.fn(() => ({ on: jest.fn() }))
+            Swap.getContract = jest.fn(() => ({ on: jest.fn() }));
 
             const client = new Web3SwapClient(apiKey, fakeDatabase as Database);
             await client.connectToChain("aze");
@@ -72,31 +72,33 @@ describe("Web3SwapClient", () => {
                 //@ts-ignore
                 JsonRpcProvider: jest.fn(),
                 //@ts-ignore
-                WebSocketProvider: jest.fn(),
+                WebSocketProvider: jest.fn()
             };
             //@ts-ignore
-            Swap.getContract = jest.fn(() => ({ address: "an_address" }))
+            Swap.getContract = jest.fn(() => ({ address: "an_address" }));
 
             const client = new Web3SwapClient(apiKey, fakeDatabase as Database);
             await client.connectToChain(5);
             await client.connectToChain(5);
 
-            expect(mockedEther.providers.WebSocketProvider).toHaveBeenCalledTimes(1)
-            expect(mockedEther.providers.WebSocketProvider).toBeCalledWith("wss://goerli.infura.io/ws/v3/apikey")
+            expect(mockedEther.providers.WebSocketProvider).toHaveBeenCalledTimes(1);
+            expect(mockedEther.providers.WebSocketProvider).toBeCalledWith("wss://goerli.infura.io/ws/v3/apikey");
         });
     });
 
     it("Should remove order on event Swap", (done) => {
         const mockQueryFilter = jest.fn((event, start, end) => {
             if (event === "Swap") {
-                return ([{
-                    args: {
-                        nonce: { _hex: "0xf5", _isBigNumber: true },
-                        signerWallet: "a_wAll3t"
+                return [
+                    {
+                        args: {
+                            nonce: { _hex: "0xf5", _isBigNumber: true },
+                            signerWallet: "a_wAll3t"
+                        }
                     }
-                }])
+                ];
             } else {
-                return []
+                return [];
             }
         });
 
@@ -108,13 +110,13 @@ describe("Web3SwapClient", () => {
                 Cancel: () => "Cancel",
                 Swap: () => "Swap"
             }
-        }))
+        }));
         //@ts-ignore
         mockedEther.providers = {
             //@ts-ignore
             JsonRpcProvider: jest.fn(),
             //@ts-ignore
-            WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) })),
+            WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) }))
         };
 
         new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
@@ -125,21 +127,23 @@ describe("Web3SwapClient", () => {
             expect(nonce).toEqual("245");
             expect(wallet).toEqual("a_wall3t");
             expect(mockQueryFilter).toHaveBeenCalledWith("Swap", -5, 0);
-            done()
-        })
+            done();
+        });
     });
 
     it("Should remove order on event Cancel", (done) => {
         const mockQueryFilter = jest.fn((event, start, end) => {
             if (event === "Cancel") {
-                return ([{
-                    args: {
-                        nonce: { _hex: "0xf5", _isBigNumber: true },
-                        signerWallet: "a_wAll3t"
+                return [
+                    {
+                        args: {
+                            nonce: { _hex: "0xf5", _isBigNumber: true },
+                            signerWallet: "a_wAll3t"
+                        }
                     }
-                }])
+                ];
             } else {
-                return []
+                return [];
             }
         });
         //@ts-ignore
@@ -150,13 +154,13 @@ describe("Web3SwapClient", () => {
                 Cancel: () => "Cancel",
                 Swap: () => "Swap"
             }
-        }))
+        }));
         //@ts-ignore
         mockedEther.providers = {
             //@ts-ignore
             JsonRpcProvider: jest.fn(),
             //@ts-ignore
-            WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) })),
+            WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) }))
         };
 
         new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
@@ -166,8 +170,8 @@ describe("Web3SwapClient", () => {
             expect(nonce).toEqual("245");
             expect(wallet).toEqual("a_wall3t");
             expect(mockQueryFilter).toHaveBeenCalledWith("Cancel", -5, 0);
-            done()
-        })
+            done();
+        });
 
         jest.advanceTimersByTimeAsync(11000);
     });
@@ -177,8 +181,8 @@ describe("Web3SwapClient", () => {
             expect(event).toEqual("Cancel");
             expect(start).toEqual(15);
             expect(end).toEqual(50);
-            done()
-            return []
+            done();
+            return [];
         });
         //@ts-ignore
         Swap.getContract = jest.fn((provider, chainId) => ({
@@ -188,17 +192,17 @@ describe("Web3SwapClient", () => {
                 Cancel: () => "Cancel",
                 Swap: () => "Swap"
             }
-        }))
+        }));
         //@ts-ignore
         mockedEther.providers = {
             //@ts-ignore
             JsonRpcProvider: jest.fn(),
             //@ts-ignore
-            WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(50) })),
+            WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(50) }))
         };
 
         //@ts-ignore
-        fakeDatabase.getLastCheckedBlock.mockImplementation(() => Promise.resolve(20))
+        fakeDatabase.getLastCheckedBlock.mockImplementation(() => Promise.resolve(20));
 
         new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
 
@@ -208,7 +212,7 @@ describe("Web3SwapClient", () => {
     describe("Do nothing", () => {
         it("no results", () => {
             const mockQueryFilter = jest.fn((event, start, end) => {
-                return []
+                return [];
             });
             //@ts-ignore
             Swap.getContract = jest.fn((provider, chainId) => ({
@@ -218,13 +222,13 @@ describe("Web3SwapClient", () => {
                     Cancel: () => "Cancel",
                     Swap: () => "Swap"
                 }
-            }))
+            }));
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
                 JsonRpcProvider: jest.fn(),
                 //@ts-ignore
-                WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) })),
+                WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) }))
             };
 
             new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
@@ -235,7 +239,7 @@ describe("Web3SwapClient", () => {
 
         it("args is undefined", () => {
             const mockQueryFilter = jest.fn((event, start, end) => {
-                return [{ args: undefined }]
+                return [{ args: undefined }];
             });
             //@ts-ignore
             Swap.getContract = jest.fn((provider, chainId) => ({
@@ -245,13 +249,13 @@ describe("Web3SwapClient", () => {
                     Cancel: () => "Cancel",
                     Swap: () => "Swap"
                 }
-            }))
+            }));
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
                 JsonRpcProvider: jest.fn(),
                 //@ts-ignore
-                WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) })),
+                WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) }))
             };
 
             new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
@@ -262,12 +266,14 @@ describe("Web3SwapClient", () => {
 
         it("nonce is undefined", () => {
             const mockQueryFilter = jest.fn((event, start, end) => {
-                return ([{
-                    args: {
-                        nonce: { _hex: undefined, _isBigNumber: true },
-                        signerWallet: "a_wAll3t"
+                return [
+                    {
+                        args: {
+                            nonce: { _hex: undefined, _isBigNumber: true },
+                            signerWallet: "a_wAll3t"
+                        }
                     }
-                }])
+                ];
             });
             //@ts-ignore
             Swap.getContract = jest.fn((provider, chainId) => ({
@@ -277,13 +283,13 @@ describe("Web3SwapClient", () => {
                     Cancel: () => "Cancel",
                     Swap: () => "Swap"
                 }
-            }))
+            }));
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
                 JsonRpcProvider: jest.fn(),
                 //@ts-ignore
-                WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) })),
+                WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) }))
             };
 
             new Web3SwapClient(apiKey, fakeDatabase as Database).connectToChain(network);
@@ -295,27 +301,29 @@ describe("Web3SwapClient", () => {
 
     describe("isValidOrder", () => {
         it("should return true, ignore 'SenderAllowanceLow', 'SenderBalanceLow'", async () => {
-            const mockCheck = jest.fn().mockResolvedValue([
-                [
-                    '0x53656e646572416c6c6f77616e63654c6f770000000000000000000000000000',
-                    '0x53656e64657242616c616e63654c6f7700000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000'
-                ],
-                BigNumber.from(0x02)
-            ])
+            const mockCheck = jest
+                .fn()
+                .mockResolvedValue([
+                    [
+                        "0x53656e646572416c6c6f77616e63654c6f770000000000000000000000000000",
+                        "0x53656e64657242616c616e63654c6f7700000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000"
+                    ],
+                    BigNumber.from(0x02)
+                ]);
             // @ts-ignore
             Swap.getContract = jest.fn((provider, chainId) => ({
                 address: "an_address" + chainId,
@@ -325,44 +333,46 @@ describe("Web3SwapClient", () => {
                     Swap: () => "Swap"
                 },
                 check: mockCheck
-            }))
+            }));
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
                 JsonRpcProvider: jest.fn(),
                 //@ts-ignore
-                WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) })),
+                WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) }))
             };
 
             const swapClient = new Web3SwapClient(apiKey, fakeDatabase as Database);
             await swapClient.connectToChain(network);
 
             const isValid = await swapClient.isValidOrder(forgeDbOrder(1));
-            expect(isValid).toBe(true)
-        })
+            expect(isValid).toBe(true);
+        });
 
         it("should return false", async () => {
-            const mockCheck = jest.fn().mockResolvedValue([
-                [
-                    '0x53656e646572416c6c6f77616e63654c6f770000000000000000000000000000',
-                    '0x53656e64657242616c616e63654c6f7700000000000000000000000000000000',
-                    '0x5369676e6174757265496e76616c696400000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000'
-                ],
-                BigNumber.from(0x03)
-            ])
+            const mockCheck = jest
+                .fn()
+                .mockResolvedValue([
+                    [
+                        "0x53656e646572416c6c6f77616e63654c6f770000000000000000000000000000",
+                        "0x53656e64657242616c616e63654c6f7700000000000000000000000000000000",
+                        "0x5369676e6174757265496e76616c696400000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000000"
+                    ],
+                    BigNumber.from(0x03)
+                ]);
             // @ts-ignore
             Swap.getContract = jest.fn((provider, chainId) => ({
                 address: "an_address" + chainId,
@@ -372,20 +382,20 @@ describe("Web3SwapClient", () => {
                     Swap: () => "Swap"
                 },
                 check: mockCheck
-            }))
+            }));
             //@ts-ignore
             mockedEther.providers = {
                 //@ts-ignore
                 JsonRpcProvider: jest.fn(),
                 //@ts-ignore
-                WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) })),
+                WebSocketProvider: jest.fn(() => ({ getBlockNumber: () => Promise.resolve(0) }))
             };
 
             const swapClient = new Web3SwapClient(apiKey, fakeDatabase as Database);
             swapClient.connectToChain(network);
 
             const isValid = await swapClient.isValidOrder(forgeDbOrder(1));
-            expect(isValid).toBe(false)
-        })
-    })
+            expect(isValid).toBe(false);
+        });
+    });
 });

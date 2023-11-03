@@ -1,12 +1,12 @@
-import { FullOrder, OrderResponse, FullOrderERC20, IndexedOrder } from '@airswap/types';
-import { DbOrderERC20, DbOrder, DbOrderFilter } from '../model/DbOrderTypes.js';
+import { FullOrder, OrderResponse, FullOrderERC20, IndexedOrder } from "@airswap/types";
+import { DbOrderERC20, DbOrder, DbOrderFilter } from "../model/DbOrderTypes.js";
 
 export interface Database {
     addOrderERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): Promise<void>;
     addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void>;
 
     addAllOrderERC20(indexedOrdersERC20: Record<string, IndexedOrder<DbOrderERC20>>): Promise<void>;
-    addAllOrder(indexedOrders:  Record<string, IndexedOrder<DbOrder>>): Promise<void>;
+    addAllOrder(indexedOrders: Record<string, IndexedOrder<DbOrder>>): Promise<void>;
 
     deleteOrderERC20(nonce: string, signerWallet: string): Promise<void>;
     deleteOrder(nonce: string, signerWallet: string): Promise<void>;
@@ -38,5 +38,4 @@ export interface Database {
     connect(databaseName: string, deleteOnStart: boolean, databasePath: string): Promise<void>;
 
     close(): Promise<void>;
-
 }

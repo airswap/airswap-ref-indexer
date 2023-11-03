@@ -1,18 +1,17 @@
-import { Database } from './../../database/Database';
-import { Peers } from './../../peer/Peers';
-import { Server } from '@airswap/libraries';
+import { Database } from "./../../database/Database";
+import { Peers } from "./../../peer/Peers";
+import { Server } from "@airswap/libraries";
 import { requestDataFromOtherPeer } from "../requestDataFromOtherPeer";
-import { forgeDbOrderERC20, forgeDbOrder, forgeFullOrderERC20, forgeFullOrder } from '../../Fixtures';
+import { forgeDbOrderERC20, forgeDbOrder, forgeFullOrderERC20, forgeFullOrder } from "../../Fixtures";
 
 let fakeDb: Partial<Database>;
 let fakePeers: Partial<Peers>;
 
-jest.mock('@airswap/libraries', () => ({
+jest.mock("@airswap/libraries", () => ({
     Server: {
         at: jest.fn()
     }
 }));
-
 
 describe("requestDataFromOtherPeer", () => {
     beforeEach(() => {
@@ -22,25 +21,28 @@ describe("requestDataFromOtherPeer", () => {
         };
         fakeDb = {
             addAllOrderERC20: jest.fn(),
-            addAllOrder: jest.fn(),
+            addAllOrder: jest.fn()
         };
         //@ts-ignore
-        Server.at.mockClear()
+        Server.at.mockClear();
     });
 
     test("Nominal", async () => {
         // @ts-ignore
         fakePeers.getConnectablePeers.mockImplementation(() => ["http://first_node/", "http://second_node/"]);
-        const mockGetOrdersERC20 = jest.fn()
+        const mockGetOrdersERC20 = jest
+            .fn()
             .mockResolvedValueOnce(undefined)
-            .mockResolvedValueOnce({ orders: [{ hash: "hash", addedOn: 123, order: forgeFullOrderERC20(1) }] })
-        const mockGetOrders = jest.fn()
+            .mockResolvedValueOnce({ orders: [{ hash: "hash", addedOn: 123, order: forgeFullOrderERC20(1) }] });
+        const mockGetOrders = jest
+            .fn()
             .mockResolvedValueOnce(undefined)
-            .mockResolvedValueOnce({ orders: [{ hash: "hash", addedOn: 123, order: forgeFullOrder(1) }] })
+            .mockResolvedValueOnce({ orders: [{ hash: "hash", addedOn: 123, order: forgeFullOrder(1) }] });
         // @ts-ignore
         Server.at.mockImplementation(() => ({
-            getOrdersERC20: mockGetOrdersERC20, getOrders: mockGetOrders
-        }))
+            getOrdersERC20: mockGetOrdersERC20,
+            getOrders: mockGetOrders
+        }));
 
         await requestDataFromOtherPeer(["http://first_node/", "http://second_node/"], fakeDb as Database, fakePeers as Peers);
 
@@ -62,8 +64,9 @@ describe("requestDataFromOtherPeer", () => {
         const mockGetOrders = jest.fn();
         //@ts-ignore
         Server.at.mockImplementation(() => ({
-            getOrdersERC20: mockGetOrdersERC20, getOrders: mockGetOrders
-        }))
+            getOrdersERC20: mockGetOrdersERC20,
+            getOrders: mockGetOrders
+        }));
         await requestDataFromOtherPeer(["http://first_node/"], fakeDb as Database, fakePeers as Peers);
 
         expect(fakePeers.addPeers).toHaveBeenCalledWith(["http://first_node/"]);
@@ -81,8 +84,9 @@ describe("requestDataFromOtherPeer", () => {
         const mockGetOrders = jest.fn();
         //@ts-ignore
         Server.at.mockImplementation(() => ({
-            getOrdersERC20: mockGetOrdersERC20, getOrders: mockGetOrders
-        }))
+            getOrdersERC20: mockGetOrdersERC20,
+            getOrders: mockGetOrders
+        }));
 
         await requestDataFromOtherPeer([], fakeDb as Database, fakePeers as Peers);
 

@@ -1,30 +1,30 @@
-import { IndexedOrder, OrderResponse, FullOrder } from '@airswap/types';
-import { FullOrderERC20 } from '@airswap/types';
-import { AddressZero } from '@ethersproject/constants';
-import { DbOrderERC20, DbOrder } from './model/DbOrderTypes.js';
-import { JsonRpcResponse } from '@airswap/libraries';
+import { IndexedOrder, OrderResponse, FullOrder } from "@airswap/types";
+import { FullOrderERC20 } from "@airswap/types";
+import { AddressZero } from "@ethersproject/constants";
+import { DbOrderERC20, DbOrder } from "./model/DbOrderTypes.js";
+import { JsonRpcResponse } from "@airswap/libraries";
 
-export function forgeIndexedOrderERC20(expectedAddedDate: number, expiryDate: number, hash = 'hash'): IndexedOrder<DbOrderERC20> {
+export function forgeIndexedOrderERC20(expectedAddedDate: number, expiryDate: number, hash = "hash"): IndexedOrder<DbOrderERC20> {
     return { order: forgeDbOrderERC20(expiryDate), addedOn: expectedAddedDate, hash };
 }
 
-export function forgeIndexedOrder(expectedAddedDate: number, expiryDate: number, hash = 'hash'): IndexedOrder<DbOrder> {
+export function forgeIndexedOrder(expectedAddedDate: number, expiryDate: number, hash = "hash"): IndexedOrder<DbOrder> {
     return { order: forgeDbOrder(expiryDate), addedOn: expectedAddedDate, hash };
 }
 
-export function forgeIndexedOrderResponseERC20(expectedAddedDate: number, expiryDate: number, hash = 'hash'): IndexedOrder<FullOrderERC20> {
+export function forgeIndexedOrderResponseERC20(expectedAddedDate: number, expiryDate: number, hash = "hash"): IndexedOrder<FullOrderERC20> {
     return {
         hash,
         addedOn: expectedAddedDate,
         order: forgeFullOrderERC20(expiryDate)
-    }
+    };
 }
-export function forgeIndexedOrderResponse(expectedAddedDate: number, expiryDate: number, hash = 'hash'): IndexedOrder<FullOrder> {
+export function forgeIndexedOrderResponse(expectedAddedDate: number, expiryDate: number, hash = "hash"): IndexedOrder<FullOrder> {
     return {
         hash,
         addedOn: expectedAddedDate,
         order: forgeFullOrder(expiryDate)
-    }
+    };
 }
 
 export function forgeDbOrderERC20(expiryDate: number): DbOrderERC20 {
@@ -78,8 +78,6 @@ export function forgeDbOrder(expiryDate: number): DbOrder {
         affiliateAmount: "13"
     };
 }
-
-
 
 export function forgeFullOrderERC20(expiryDate: number): FullOrderERC20 {
     return {
@@ -135,15 +133,15 @@ export function forgeOrderERC20Response(): OrderResponse<FullOrderERC20> {
             aze: {
                 addedOn: 1653900784696,
                 hash: "hash",
-                order: forgeFullOrderERC20(1653900784706),
-            },
+                order: forgeFullOrderERC20(1653900784706)
+            }
         },
         pagination: {
             limit: 10,
             offset: 0,
-            total:1
+            total: 1
         }
-    }
+    };
 }
 
 export function forgeOrderResponse(): OrderResponse<FullOrder> {
@@ -152,15 +150,15 @@ export function forgeOrderResponse(): OrderResponse<FullOrder> {
             aze: {
                 addedOn: 1653900784696,
                 hash: "hash",
-                order: forgeFullOrder(1653900784706),
-            },
+                order: forgeFullOrder(1653900784706)
+            }
         },
         pagination: {
             limit: 10,
             offset: 0,
-            total:1
+            total: 1
         }
-    }
+    };
 }
 
 export function forgeJsonRpcResponse(id: string, response: OrderResponse<FullOrderERC20 | FullOrder>): JsonRpcResponse<FullOrderERC20 | FullOrder> {

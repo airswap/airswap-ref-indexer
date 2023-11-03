@@ -1,5 +1,5 @@
-import { DbOrderERC20 } from 'model/DbOrderTypes.js';
-import { toBigInt, toNumber } from '../converter/index.js';
+import { DbOrderERC20 } from "model/DbOrderTypes.js";
+import { toBigInt, toNumber } from "../converter/index.js";
 
 /**
  * Caller should ensure, number fields are present
@@ -24,5 +24,5 @@ export function mapAnyToDbOrderERC20(data: any): DbOrderERC20 {
         v: String(data.v),
         chainId: Number(data.chainId),
         swapContract: String(data.swapContract).toLocaleLowerCase()
-    }
+    };
 }

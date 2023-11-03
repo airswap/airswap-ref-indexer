@@ -1,19 +1,18 @@
-import { FullOrder, IndexedOrder, OrderResponse, SortField, SortOrder } from '@airswap/types';
-import { AceBase, AceBaseLocalSettings, DataReference } from 'acebase';
+import { FullOrder, IndexedOrder, OrderResponse, SortField, SortOrder } from "@airswap/types";
+import { AceBase, AceBaseLocalSettings, DataReference } from "acebase";
 import crypto from "crypto";
 import fs from "fs";
-import { mapAnyToFullOrderERC20 } from '../mapper/mapAnyToFullOrderERC20.js';
-import { Database } from './Database.js';
-import { FullOrderERC20 } from '@airswap/types';
-import { DbOrderERC20, DbOrder, DbOrderParty, DbOrderFilter } from '../model/DbOrderTypes.js';
-import { mapAnyToFullOrder } from '../mapper/mapAnyToFullOrder.js';
+import { mapAnyToFullOrderERC20 } from "../mapper/mapAnyToFullOrderERC20.js";
+import { Database } from "./Database.js";
+import { FullOrderERC20 } from "@airswap/types";
+import { DbOrderERC20, DbOrder, DbOrderParty, DbOrderFilter } from "../model/DbOrderTypes.js";
+import { mapAnyToFullOrder } from "../mapper/mapAnyToFullOrder.js";
 
 const ENTRY_REF_ERC20 = "erc20Orders";
 const ENTRY_REF_ORDERS = "orders";
 const ENTRY_BLOCKS = "lastCheckedBlock";
 
 export class AceBaseClient implements Database {
-
     private db!: AceBase;
     private tokens: string[];
     private chainIds: number[];
@@ -22,11 +21,11 @@ export class AceBaseClient implements Database {
     private refBlocks!: DataReference;
 
     public async connect(databaseName: string, deleteOnStart = false, databasePath: string): Promise<void> {
-        const options = { storage: { path: databasePath }, logLevel: 'error' } as AceBaseLocalSettings;
+        const options = { storage: { path: databasePath }, logLevel: "error" } as AceBaseLocalSettings;
         const dbName = `${databaseName}.acebase`;
-        const fullPath = `${databasePath}/${dbName}`
+        const fullPath = `${databasePath}/${dbName}`;
         if (deleteOnStart && fs.existsSync(fullPath)) {
-            console.log("ACEBASE - Removing previous data...")
+            console.log("ACEBASE - Removing previous data...");
             await fs.promises.rm(fullPath, { recursive: true });
         }
         this.db = new AceBase(databaseName, options);
@@ -35,9 +34,9 @@ export class AceBaseClient implements Database {
                 this.refBlocks = this.db.ref(ENTRY_BLOCKS);
 
                 this.refERC20 = this.db.ref(ENTRY_REF_ERC20);
-                this.db.indexes.create(`${ENTRY_REF_ERC20}`, 'hash');
-                this.db.indexes.create(`${ENTRY_REF_ERC20}`, 'addedOn');
-                this.db.indexes.create(`${ENTRY_REF_ERC20}`, 'order/nonce');
+                this.db.indexes.create(`${ENTRY_REF_ERC20}`, "hash");
+                this.db.indexes.create(`${ENTRY_REF_ERC20}`, "addedOn");
+                this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/nonce");
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/approximatedSignerAmount");
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/approximatedSenderAmount");
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/signerToken");
@@ -47,9 +46,9 @@ export class AceBaseClient implements Database {
                 this.db.indexes.create(`${ENTRY_REF_ERC20}`, "order/chainId");
 
                 this.refOrders = this.db.ref(ENTRY_REF_ORDERS);
-                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, 'hash');
-                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, 'addedOn');
-                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, 'order/nonce');
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "hash");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "addedOn");
+                this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/nonce");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/expiry");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/signer/wallet");
                 this.db.indexes.create(`${ENTRY_REF_ORDERS}`, "order/sender/wallet");
@@ -68,20 +67,20 @@ export class AceBaseClient implements Database {
     }
 
     private async loadChainIdsForCache() {
-        const dataOrder = await this.refOrders.query().take(1000000).get(); // bypass default limitation 
-        const dataERC20 = await this.refERC20.query().take(1000000).get(); // bypass default limitation 
+        const dataOrder = await this.refOrders.query().take(1000000).get(); // bypass default limitation
+        const dataERC20 = await this.refERC20.query().take(1000000).get(); // bypass default limitation
 
-        const chainIds: number[] = []
+        const chainIds: number[] = [];
         dataOrder.forEach((dataSnapshot) => {
             const order = dataSnapshot.val() as IndexedOrder<FullOrder>;
-            chainIds.push(order.order.chainId)
+            chainIds.push(order.order.chainId);
         });
         dataERC20.forEach((dataSnapshot) => {
             const order = dataSnapshot.val() as IndexedOrder<FullOrderERC20>;
-            chainIds.push(order.order.chainId)
+            chainIds.push(order.order.chainId);
         });
-        this.chainIds = [...new Set(chainIds)]
-        console.log("caching previous chainIds:", this.chainIds)
+        this.chainIds = [...new Set(chainIds)];
+        console.log("caching previous chainIds:", this.chainIds);
     }
 
     public constructor() {
@@ -90,58 +89,45 @@ export class AceBaseClient implements Database {
     }
 
     async getLastCheckedBlock(address: string, chainId: number): Promise<number | undefined> {
-        const query = await this.refBlocks.query()
-            .filter('address', '==', address)
-            .filter('chainId', '==', chainId)
-            .get();
+        const query = await this.refBlocks.query().filter("address", "==", address).filter("chainId", "==", chainId).get();
         const serializedBlock = query.values()?.next()?.value?.val();
         if (serializedBlock) {
             return Promise.resolve(serializedBlock["block"]);
         }
     }
     async setLastCheckedBlock(address: string, chainId: number, block: number): Promise<void> {
-        await this.refBlocks.query()
-            .filter('address', '==', address)
-            .filter('chainId', '==', chainId)
-            .remove();
+        await this.refBlocks.query().filter("address", "==", address).filter("chainId", "==", chainId).remove();
         await this.refBlocks.push({ address, chainId, block });
     }
 
     async addOrder(indexedOrder: IndexedOrder<DbOrder>): Promise<void> {
-        await this.refOrders.query()
-            .filter('order/signer/id', '==', indexedOrder.order.signer.id)
-            .remove();
+        await this.refOrders.query().filter("order/signer/id", "==", indexedOrder.order.signer.id).remove();
         await this.refOrders.push(indexedOrder);
-        this.addToken(indexedOrder.order.signer.token)
-        this.addToken(indexedOrder.order.sender.token)
+        this.addToken(indexedOrder.order.signer.token);
+        this.addToken(indexedOrder.order.sender.token);
         if (!this.chainIds.includes(indexedOrder.order.chainId)) {
-            this.chainIds.push(indexedOrder.order.chainId)
+            this.chainIds.push(indexedOrder.order.chainId);
         }
         return Promise.resolve();
     }
     async addAllOrder(indexedOrders: Record<string, IndexedOrder<DbOrder>>): Promise<void> {
-        await Promise.all(Object.keys(indexedOrders).map(async hash => {
-            await this.addOrder(indexedOrders[hash]);
-        }));
+        await Promise.all(
+            Object.keys(indexedOrders).map(async (hash) => {
+                await this.addOrder(indexedOrders[hash]);
+            })
+        );
         return Promise.resolve();
     }
     async deleteOrder(nonce: string, signerWallet: string): Promise<void> {
-        await this.refOrders.query()
-            .filter('order/nonce', '==', nonce)
-            .filter('order/signer/wallet', '==', signerWallet)
-            .remove();
+        await this.refOrders.query().filter("order/nonce", "==", nonce).filter("order/signer/wallet", "==", signerWallet).remove();
         return Promise.resolve();
     }
     async deleteExpiredOrder(timestampInSeconds: number): Promise<void> {
-        await this.refOrders.query()
-            .filter('order/expiry', '<', timestampInSeconds)
-            .remove();
+        await this.refOrders.query().filter("order/expiry", "<", timestampInSeconds).remove();
         return Promise.resolve();
     }
     async getOrder(hash: string): Promise<OrderResponse<FullOrder>> {
-        const query = await this.refOrders.query()
-            .filter('hash', '==', hash)
-            .get();
+        const query = await this.refOrders.query().filter("hash", "==", hash).get();
         const serializedOrder = query.values()?.next()?.value?.val();
         if (!serializedOrder) {
             return Promise.resolve({
@@ -149,8 +135,8 @@ export class AceBaseClient implements Database {
                 pagination: {
                     limit: 1,
                     offset: 0,
-                    total: 0,
-                },
+                    total: 0
+                }
             });
         }
         const result: Record<string, IndexedOrder<FullOrder>> = {};
@@ -160,15 +146,15 @@ export class AceBaseClient implements Database {
             pagination: {
                 limit: 1,
                 offset: 0,
-                total: 1,
-            },
+                total: 1
+            }
         });
     }
     async getOrders(): Promise<OrderResponse<FullOrder>> {
-        const data = await this.refOrders.query().take(1000000).get(); // bypass default limitation 
+        const data = await this.refOrders.query().take(1000000).get(); // bypass default limitation
         const totalResults = await this.refOrders.query().take(1000000).count();
         let mapped = {} as Record<string, IndexedOrder<FullOrder>>;
-        data.forEach(dataSnapshot => {
+        data.forEach((dataSnapshot) => {
             const mapp = this.datarefToOrder(dataSnapshot.val());
             mapped = { ...mapped, ...mapp };
         });
@@ -177,83 +163,88 @@ export class AceBaseClient implements Database {
             pagination: {
                 limit: -1,
                 offset: 0,
-                total: totalResults,
-            },
+                total: totalResults
+            }
         });
     }
     async getOrdersBy(orderFilter: DbOrderFilter): Promise<OrderResponse<FullOrder>> {
         const query = this.refOrders.query();
 
         if (orderFilter.nonce != undefined) {
-            query.filter('order/nonce', '==', orderFilter.nonce);
+            query.filter("order/nonce", "==", orderFilter.nonce);
         }
         if (orderFilter.excludeNonces?.length && orderFilter.excludeNonces?.length > 0) {
-            query.filter('order/nonce', '!in', orderFilter.excludeNonces);
+            query.filter("order/nonce", "!in", orderFilter.excludeNonces);
         }
         if (orderFilter.senderWallet != undefined) {
-            query.filter('order/sender/wallet', '==', orderFilter.senderWallet);
+            query.filter("order/sender/wallet", "==", orderFilter.senderWallet);
         }
         if (orderFilter.signerWallet != undefined) {
-            query.filter('order/signer/wallet', '==', orderFilter.signerWallet);
+            query.filter("order/signer/wallet", "==", orderFilter.signerWallet);
         }
         if (orderFilter.signerTokens != undefined) {
-            query.filter('order/signer/token', 'in', orderFilter.signerTokens);
+            query.filter("order/signer/token", "in", orderFilter.signerTokens);
         }
         if (orderFilter.senderTokens != undefined) {
-            query.filter('order/sender/token', 'in', orderFilter.senderTokens);
+            query.filter("order/sender/token", "in", orderFilter.senderTokens);
         }
         if (orderFilter.senderMinAmount != undefined) {
-            query.filter('order/sender/approximatedAmount', '>=', orderFilter.senderMinAmount);
+            query.filter("order/sender/approximatedAmount", ">=", orderFilter.senderMinAmount);
         }
         if (orderFilter.senderMaxAmount != undefined) {
-            query.filter('order/sender/approximatedAmount', '<=', orderFilter.senderMaxAmount);
+            query.filter("order/sender/approximatedAmount", "<=", orderFilter.senderMaxAmount);
         }
         if (orderFilter.signerMinAmount != undefined) {
-            query.filter('order/signer/approximatedAmount', '>=', orderFilter.signerMinAmount);
+            query.filter("order/signer/approximatedAmount", ">=", orderFilter.signerMinAmount);
         }
         if (orderFilter.signerMaxAmount != undefined) {
-            query.filter('order/signer/approximatedAmount', '<=', orderFilter.signerMaxAmount);
+            query.filter("order/signer/approximatedAmount", "<=", orderFilter.signerMaxAmount);
         }
         if (orderFilter.signerIds != undefined) {
-            query.filter('order/signer/id', 'in', orderFilter.signerIds);
+            query.filter("order/signer/id", "in", orderFilter.signerIds);
         }
         if (orderFilter.senderIds != undefined) {
-            query.filter('order/sender/id', 'in', orderFilter.senderIds);
+            query.filter("order/sender/id", "in", orderFilter.senderIds);
         }
         if (orderFilter.chainId != undefined) {
-            query.filter('order/chainId', '==', orderFilter.chainId);
+            query.filter("order/chainId", "==", orderFilter.chainId);
         }
 
         const isAscSort = orderFilter.sortOrder == SortOrder.ASC;
         if (orderFilter.sortField == SortField.SIGNER_AMOUNT) {
-            query.sort('order/signer/approximatedAmount', isAscSort)
+            query.sort("order/signer/approximatedAmount", isAscSort);
         } else if (orderFilter.sortField == SortField.SENDER_AMOUNT) {
-            query.sort('order/sender/approximatedAmount', isAscSort)
+            query.sort("order/sender/approximatedAmount", isAscSort);
         } else if (orderFilter.sortField == SortField.EXPIRY) {
-            query.sort('order/expiry', isAscSort)
+            query.sort("order/expiry", isAscSort);
         } else if (orderFilter.sortField == SortField.NONCE) {
-            query.sort('order/nonce', isAscSort)
+            query.sort("order/nonce", isAscSort);
         }
 
-        const totalResults = await query.take(1000000).count()
+        const totalResults = await query.take(1000000).count();
         const entriesSkipped = orderFilter.offset;
-        const data = await query.skip(entriesSkipped).take(entriesSkipped + orderFilter.limit).get();
-        const mapped = data.reduce((total, indexedOrder) => {
-            const mapped = this.datarefToOrder(indexedOrder.val());
-            return { ...total, ...mapped };
-        }, {} as Record<string, IndexedOrder<FullOrder>>);
+        const data = await query
+            .skip(entriesSkipped)
+            .take(entriesSkipped + orderFilter.limit)
+            .get();
+        const mapped = data.reduce(
+            (total, indexedOrder) => {
+                const mapped = this.datarefToOrder(indexedOrder.val());
+                return { ...total, ...mapped };
+            },
+            {} as Record<string, IndexedOrder<FullOrder>>
+        );
         return Promise.resolve({
             orders: mapped,
             pagination: {
                 limit: orderFilter.limit,
                 offset: orderFilter.offset,
-                total: totalResults,
-            },
+                total: totalResults
+            }
         });
     }
     async orderExists(hash: string): Promise<boolean> {
-        return await this.refOrders.query()
-            .filter('hash', '==', hash).exists();
+        return await this.refOrders.query().filter("hash", "==", hash).exists();
     }
 
     getTokens(): Promise<string[]> {
@@ -270,108 +261,109 @@ export class AceBaseClient implements Database {
         const query = this.refERC20.query();
 
         if (orderFilter.nonce != undefined) {
-            query.filter('order/nonce', '==', orderFilter.nonce);
+            query.filter("order/nonce", "==", orderFilter.nonce);
         }
         if (orderFilter.excludeNonces?.length && orderFilter.excludeNonces?.length > 0) {
-            query.filter('order/nonce', '!in', orderFilter.excludeNonces);
+            query.filter("order/nonce", "!in", orderFilter.excludeNonces);
         }
         if (orderFilter.signerTokens != undefined) {
-            query.filter('order/signerToken', 'in', orderFilter.signerTokens);
+            query.filter("order/signerToken", "in", orderFilter.signerTokens);
         }
         if (orderFilter.senderTokens != undefined) {
-            query.filter('order/senderToken', 'in', orderFilter.senderTokens);
+            query.filter("order/senderToken", "in", orderFilter.senderTokens);
         }
         if (orderFilter.senderMinAmount != undefined) {
-            query.filter('order/approximatedSenderAmount', '>=', orderFilter.senderMinAmount);
+            query.filter("order/approximatedSenderAmount", ">=", orderFilter.senderMinAmount);
         }
         if (orderFilter.senderMaxAmount != undefined) {
-            query.filter('order/approximatedSenderAmount', '<=', orderFilter.senderMaxAmount);
+            query.filter("order/approximatedSenderAmount", "<=", orderFilter.senderMaxAmount);
         }
         if (orderFilter.signerMinAmount != undefined) {
-            query.filter('order/approximatedSignerAmount', '>=', orderFilter.signerMinAmount);
+            query.filter("order/approximatedSignerAmount", ">=", orderFilter.signerMinAmount);
         }
         if (orderFilter.signerMaxAmount != undefined) {
-            query.filter('order/approximatedSignerAmount', '<=', orderFilter.signerMaxAmount);
+            query.filter("order/approximatedSignerAmount", "<=", orderFilter.signerMaxAmount);
         }
         if (orderFilter.senderWallet != undefined) {
-            query.filter('order/senderWallet', '==', orderFilter.senderWallet);
+            query.filter("order/senderWallet", "==", orderFilter.senderWallet);
         }
         if (orderFilter.signerWallet != undefined) {
-            query.filter('order/signerWallet', '==', orderFilter.signerWallet);
+            query.filter("order/signerWallet", "==", orderFilter.signerWallet);
         }
         if (orderFilter.chainId != undefined) {
-            query.filter('order/chainId', '==', orderFilter.chainId);
+            query.filter("order/chainId", "==", orderFilter.chainId);
         }
 
         const isAscSort = orderFilter.sortOrder == SortOrder.ASC;
         if (orderFilter.sortField == SortField.SIGNER_AMOUNT) {
-            query.sort('order/approximatedSignerAmount', isAscSort)
+            query.sort("order/approximatedSignerAmount", isAscSort);
         } else if (orderFilter.sortField == SortField.SENDER_AMOUNT) {
-            query.sort('order/approximatedSenderAmount', isAscSort)
+            query.sort("order/approximatedSenderAmount", isAscSort);
         } else if (orderFilter.sortField == SortField.EXPIRY) {
-            query.sort('order/expiry', isAscSort)
+            query.sort("order/expiry", isAscSort);
         } else if (orderFilter.sortField == SortField.NONCE) {
-            query.sort('order/nonce', isAscSort)
+            query.sort("order/nonce", isAscSort);
         }
 
-        const totalResults = await query.take(1000000).count()
+        const totalResults = await query.take(1000000).count();
         const entriesSkipped = orderFilter.offset;
-        const data = await query.skip(entriesSkipped).take(entriesSkipped + orderFilter.limit).get();
-        const mapped = data.reduce((total, indexedOrder) => {
-            const mapped = this.datarefToERC20(indexedOrder.val());
-            return { ...total, ...mapped };
-        }, {} as Record<string, IndexedOrder<FullOrderERC20>>);
+        const data = await query
+            .skip(entriesSkipped)
+            .take(entriesSkipped + orderFilter.limit)
+            .get();
+        const mapped = data.reduce(
+            (total, indexedOrder) => {
+                const mapped = this.datarefToERC20(indexedOrder.val());
+                return { ...total, ...mapped };
+            },
+            {} as Record<string, IndexedOrder<FullOrderERC20>>
+        );
         return Promise.resolve({
             orders: mapped,
             pagination: {
                 limit: orderFilter.limit,
                 offset: orderFilter.offset,
-                total: totalResults,
-            },
+                total: totalResults
+            }
         });
     }
 
     close(): Promise<void> {
-        return this.db.close()
+        return this.db.close();
     }
 
     async addOrderERC20(indexedOrder: IndexedOrder<DbOrderERC20>): Promise<void> {
         await this.refERC20.push(indexedOrder);
-        const order = indexedOrder.order as DbOrderERC20
-        this.addToken(indexedOrder.order.signerToken)
-        this.addToken(indexedOrder.order.senderToken)
+        const order = indexedOrder.order as DbOrderERC20;
+        this.addToken(indexedOrder.order.signerToken);
+        this.addToken(indexedOrder.order.senderToken);
         if (!this.chainIds.includes(order.chainId)) {
-            this.chainIds.push(order.chainId)
+            this.chainIds.push(order.chainId);
         }
         return Promise.resolve();
     }
 
     async addAllOrderERC20(orders: Record<string, IndexedOrder<DbOrderERC20>>): Promise<void> {
-        await Promise.all(Object.keys(orders).map(async hash => {
-            await this.addOrderERC20(orders[hash]);
-        }));
+        await Promise.all(
+            Object.keys(orders).map(async (hash) => {
+                await this.addOrderERC20(orders[hash]);
+            })
+        );
         return Promise.resolve();
     }
 
     async deleteOrderERC20(nonce: string, signerWallet: string): Promise<void> {
-        await this.refERC20.query()
-            .filter('order/nonce', '==', nonce)
-            .filter('order/signerWallet', '==', signerWallet)
-            .remove();
+        await this.refERC20.query().filter("order/nonce", "==", nonce).filter("order/signerWallet", "==", signerWallet).remove();
         return Promise.resolve();
     }
 
     async deleteExpiredOrderERC20(timestampInSeconds: number) {
-        await this.refERC20.query()
-            .filter('order/expiry', '<', timestampInSeconds)
-            .remove();
+        await this.refERC20.query().filter("order/expiry", "<", timestampInSeconds).remove();
         return Promise.resolve();
     }
 
     async getOrderERC20(hash: string): Promise<OrderResponse<FullOrderERC20>> {
-        const query = await this.refERC20.query()
-            .filter('hash', '==', hash)
-            .get();
+        const query = await this.refERC20.query().filter("hash", "==", hash).get();
         const serializedOrder = query.values()?.next()?.value?.val();
         if (!serializedOrder) {
             return Promise.resolve({
@@ -379,8 +371,8 @@ export class AceBaseClient implements Database {
                 pagination: {
                     limit: 1,
                     offset: 0,
-                    total: 0,
-                },
+                    total: 0
+                }
             });
         }
         const result: Record<string, IndexedOrder<FullOrderERC20>> = {};
@@ -390,16 +382,16 @@ export class AceBaseClient implements Database {
             pagination: {
                 limit: 1,
                 offset: 0,
-                total: 1,
-            },
+                total: 1
+            }
         });
     }
 
     async getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>> {
-        const data = await this.refERC20.query().take(1000000).get(); // bypass default limitation 
+        const data = await this.refERC20.query().take(1000000).get(); // bypass default limitation
         const totalResults = await this.refERC20.query().take(1000000).count();
         let mapped = {} as Record<string, IndexedOrder<FullOrderERC20>>;
-        data.forEach(dataSnapshot => {
+        data.forEach((dataSnapshot) => {
             const mapp = this.datarefToERC20(dataSnapshot.val());
             mapped = { ...mapped, ...mapp };
         });
@@ -408,13 +400,13 @@ export class AceBaseClient implements Database {
             pagination: {
                 limit: -1,
                 offset: 0,
-                total: totalResults,
-            },
+                total: totalResults
+            }
         });
     }
 
     getAllChainIds(): Promise<number[]> {
-        return Promise.resolve(this.chainIds)
+        return Promise.resolve(this.chainIds);
     }
 
     async erase() {
@@ -446,17 +438,16 @@ export class AceBaseClient implements Database {
     }
 
     async orderERC20Exists(hash: string): Promise<boolean> {
-        return await this.refERC20.query()
-            .filter('hash', '==', hash).exists();
+        return await this.refERC20.query().filter("hash", "==", hash).exists();
     }
 
     generateHashERC20(indexedOrderERC20: IndexedOrder<DbOrderERC20>): string {
         const lightenOrder: Partial<DbOrderERC20> = { ...indexedOrderERC20.order };
         if (lightenOrder.approximatedSenderAmount) {
-            delete lightenOrder.approximatedSenderAmount
+            delete lightenOrder.approximatedSenderAmount;
         }
         if (lightenOrder.approximatedSignerAmount) {
-            delete lightenOrder.approximatedSignerAmount
+            delete lightenOrder.approximatedSignerAmount;
         }
         const stringObject = JSON.stringify(lightenOrder);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
@@ -466,9 +457,9 @@ export class AceBaseClient implements Database {
     generateHash(indexedOrder: IndexedOrder<DbOrder>): string {
         const signer: Partial<DbOrderParty> = { ...indexedOrder.order.signer };
         const sender: Partial<DbOrderParty> = { ...indexedOrder.order.sender };
-        delete signer.approximatedAmount
-        delete sender.approximatedAmount
-        const lightenOrder = { ...indexedOrder.order, signer, sender }
+        delete signer.approximatedAmount;
+        delete sender.approximatedAmount;
+        const lightenOrder = { ...indexedOrder.order, signer, sender };
         const stringObject = JSON.stringify(lightenOrder);
         const hashed = crypto.createHash("sha256").update(stringObject, "utf-8");
         return hashed.digest("hex");

@@ -1,4 +1,4 @@
-import { FullOrderERC20 } from '@airswap/types';
+import { FullOrderERC20 } from "@airswap/types";
 
 export function mapAnyToFullOrderERC20(data: any): FullOrderERC20 {
     return {
@@ -12,9 +12,9 @@ export function mapAnyToFullOrderERC20(data: any): FullOrderERC20 {
         r: String(data.r),
         s: String(data.s),
         v: String(data.v),
-        protocolFee:  String(data.protocolFee), 
-        senderWallet:  String(data.senderWallet),
-        chainId:  Number(data.chainId), 
-        swapContract:  String(data.swapContract)
-    }
+        protocolFee: String(data.protocolFee),
+        senderWallet: String(data.senderWallet),
+        chainId: Number(data.chainId),
+        swapContract: String(data.swapContract)
+    };
 }
