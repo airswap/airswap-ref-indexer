@@ -1,12 +1,12 @@
-import bodyParser from "body-parser";
-import cors from "cors";
-import express, { Express } from "express";
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import express, { Express } from 'express';
 import { Server } from 'http';
 
 const router = express.Router();
 
 export class Webserver {
-  private port: number
+  private port: number;
   private server!: Server;
 
   constructor(port: number) {

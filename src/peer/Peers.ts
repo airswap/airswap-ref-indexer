@@ -2,7 +2,6 @@ import { Database } from '../database/Database.js';
 import { BroadcastClient } from './../client/BroadcastClient';
 
 export class Peers {
-
   peers: string[];
   database: Database;
   host: string;
@@ -13,18 +12,18 @@ export class Peers {
     this.database = database;
     this.host = this.sanitizeUrl(host);
     this.broadcastClient = broadcastClient;
-  };
+  }
 
   addPeer = (url: string) => {
     this.addPeers([url]);
-  }
+  };
 
   addPeers = (urls: string[]) => {
     const sanitizedUrls = urls.map((url) => {
       return this.sanitizeUrl(url);
     });
     this.peers = [...new Set([...this.peers, ...sanitizedUrls])];
-  }
+  };
 
   removePeer = (address: string) => {
     const peerToRemove = this.peers.filter((peerUrl) => peerUrl === address)[0];
@@ -43,24 +42,23 @@ export class Peers {
   };
 
   isValidHttpUrl = (stringUrl: string) => {
-    if(stringUrl == '' || !stringUrl.startsWith("http")) return false
+    if (stringUrl == '' || !stringUrl.startsWith('http')) return false;
     let url;
     try {
       url = new URL(stringUrl);
     } catch (_) {
       return false;
     }
-    return url.protocol === "https:" || url.protocol === "http:";
-  }
-
+    return url.protocol === 'https:' || url.protocol === 'http:';
+  };
 
   getConnectablePeers = () => {
-    return this.peers.filter((host) => host != this.host && this.isValidHttpUrl(host))
+    return this.peers.filter((host) => host != this.host && this.isValidHttpUrl(host));
   };
 
   containsUnknownPeers = (peersUrl: string[]) => {
     return peersUrl.filter((url) => this.peers.indexOf(url) == -1).length > 0;
-  }
+  };
 
   broadcast = (method: string, path: string, body?: any) => {
     this.peers.forEach((clientUrl) => {
@@ -68,13 +66,13 @@ export class Peers {
         this.broadcastClient.broadcastTo(method, clientUrl + path, body);
       }
     });
-  }
+  };
 
   getPeers = () => {
     return this.peers;
   };
 
   private sanitizeUrl(url: string): string {
-    return url.slice(-1) === "/" ? url.slice(0, -1) : url;
+    return url.slice(-1) === '/' ? url.slice(0, -1) : url;
   }
 }
