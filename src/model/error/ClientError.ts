@@ -1,8 +1,8 @@
-import { IndexedOrderError } from "@airswap/libraries";
+import { IndexedOrderError } from '@airswap/libraries';
 
 export class ClientError extends IndexedOrderError {
-    constructor(message: string) {
-        super(message);
-        this.code = 400;
-    }
+  constructor(message: string) {
+    super(message);
+    this.code = 400;
+  }
 }

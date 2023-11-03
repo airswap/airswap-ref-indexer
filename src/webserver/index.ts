@@ -1,33 +1,33 @@
-import bodyParser from "body-parser";
-import cors from "cors";
-import express, { Express } from "express";
-import { Server } from "http";
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import express, { Express } from 'express';
+import { Server } from 'http';
 
 const router = express.Router();
 
 export class Webserver {
-    private port: number;
-    private server!: Server;
+  private port: number;
+  private server!: Server;
 
-    constructor(port: number) {
-        this.port = port;
-    }
+  constructor(port: number) {
+    this.port = port;
+  }
 
-    run(): Express {
-        const app = express();
-        app.use(cors());
-        app.use(bodyParser.json());
+  run(): Express {
+    const app = express();
+    app.use(cors());
+    app.use(bodyParser.json());
 
-        app.use(router);
+    app.use(router);
 
-        this.server = app.listen(this.port, () => {
-            console.log(`Server listening on port ${this.port}`);
-        });
+    this.server = app.listen(this.port, () => {
+      console.log(`Server listening on port ${this.port}`);
+    });
 
-        return app;
-    }
+    return app;
+  }
 
-    stop() {
-        this.server.close();
-    }
+  stop() {
+    this.server.close();
+  }
 }
