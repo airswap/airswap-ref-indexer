@@ -20,8 +20,9 @@ export class InMemoryDatabase implements Database {
     this.chainIds = [];
   }
 
-  connect(): Promise<void> {
+  public async connect(databaseName: string, deleteOnStart = false, databasePath: string): Promise<void> {
     console.log('IN_MEMORY - In ram storage only -');
+    console.log('Ununsed parameter for this DB:', { databaseName, deleteOnStart, databasePath });
     return Promise.resolve();
   }
 
