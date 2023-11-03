@@ -46,9 +46,9 @@ const intervalId = setInterval(() => {
   database.deleteExpiredOrder(currentTimestampInSeconds);
 }, 1000 * 60);
 
-const previsousChainObserved  = await database.getAllChainIds()
+const previousChainObserved  = await database.getAllChainIds()
 
-const swapClients = await getWeb3SwapClient(database, network, previsousChainObserved);
+const swapClients = await getWeb3SwapClient(database, network, previousChainObserved);
 if (swapClients?.swapClientOrderERC20 === null) {
   console.log("Could connect to SwapERC20 smart contract");
   process.exit(4);
@@ -66,7 +66,7 @@ if (!isNumeric(process.env.MAX_RESULTS_FOR_QUERY)) {
 
 const peers = new Peers(database, host, broadcastClient);
 
-const registryClient = await getRegistry(process.env, peers, previsousChainObserved);
+const registryClient = await getRegistry(process.env, peers, previousChainObserved);
 if (registryClient === null) {
   process.exit(3);
 }
@@ -92,7 +92,7 @@ process.on("SIGINT", () => {
   gracefulShutdown(webserver, database, intervalId);
 });
 
-async function getWeb3SwapClient(database: Database, network: number, previsousChainObserved: number[]) {
+async function getWeb3SwapClient(database: Database, network: number, previousChainObserved: number[]) {
   if (!network) {
     return null;
   }
@@ -103,8 +103,8 @@ async function getWeb3SwapClient(database: Database, network: number, previsousC
 
   await swapClientOrder.connectToChain(network);
   await swapClientOrderERC20.connectToChain(network);
-  if (previsousChainObserved.length > 0) {
-    previsousChainObserved.forEach(async chainId => {
+  if (previousChainObserved.length > 0) {
+    previousChainObserved.forEach(async chainId => {
       await swapClientOrder.connectToChain(chainId);
       await swapClientOrderERC20.connectToChain(chainId);
     })
