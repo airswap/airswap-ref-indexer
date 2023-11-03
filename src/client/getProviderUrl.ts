@@ -1,5 +1,5 @@
 import {apiUrls} from '@airswap/constants'
-import { Contract, ethers } from 'ethers';
+import { ethers } from 'ethers';
 
 export function getProviderUrl(chainId: number, apiKey: string) {
     const host = apiUrls[chainId];

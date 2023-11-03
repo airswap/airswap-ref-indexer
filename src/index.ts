@@ -76,7 +76,7 @@ const orderService = new OrderService(database, swapClients!.swapClientOrderERC2
 const rootController = new RootService(peers, database, registryClient);
 
 // Network register & synchronization 
-let peersFromRegistry: string[] = await registryClient.getPeersFromRegistry();
+const peersFromRegistry: string[] = await registryClient.getPeersFromRegistry();
 console.log("Available peers:", peersFromRegistry);
 
 await requestDataFromOtherPeer(peersFromRegistry, database, peers);

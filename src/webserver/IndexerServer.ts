@@ -51,31 +51,35 @@ export class IndexerServer {
                 let result;
                 response.status(200);
                 switch (method) {
-                    case METHODS.getOrdersERC20:
-                        let erc20Orders = await this.orderService.getOrdersERC20(parameters);
+                    case METHODS.getOrdersERC20: {
+                        const erc20Orders = await this.orderService.getOrdersERC20(parameters);
                         result = new JsonRpcResponse(id, erc20Orders);
                         break;
-                    case METHODS.getOrders:
-                        let orders = await this.orderService.getOrders(parameters);
+                    }
+                    case METHODS.getOrders: {
+                        const orders = await this.orderService.getOrders(parameters);
                         result = new JsonRpcResponse(id, orders);
                         break;
-                    case METHODS.addOrderERC20:
+                    }
+                    case METHODS.addOrderERC20: {
                         await this.orderService.addOrderERC20(parameters);
                         this.peers.broadcast(request.method, request.url, request.body);
                         result = new JsonRpcResponse(id, new SuccessResponse("Added"));
                         response.status(201);
                         break;
-                    case METHODS.addOrder:
+                    }
+                    case METHODS.addOrder: {
                         await this.orderService.addOrder(parameters);
                         this.peers.broadcast(request.method, request.url, request.body);
                         result = new JsonRpcResponse(id, new SuccessResponse("Added"));
                         response.status(201);
                         break;
-                    case METHODS.getTokens:
+                    }
+                    case METHODS.getTokens: {
                         const tokens = await this.orderService.getTokens();
-                        //@ts-ignore
                         result = new JsonRpcResponse(id, tokens);
                         break;
+                    }
                 }
                 response.json(result);
             } catch (error) {

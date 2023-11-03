@@ -1,4 +1,4 @@
-import { FullOrder, IndexedOrder, OrderResponse, OrderFilter, SortField, SortOrder } from '@airswap/types';
+import { FullOrder, IndexedOrder, OrderResponse, SortField, SortOrder } from '@airswap/types';
 import { AceBase, AceBaseLocalSettings, DataReference } from 'acebase';
 import crypto from "crypto";
 import fs from "fs";
@@ -30,7 +30,7 @@ export class AceBaseClient implements Database {
             await fs.promises.rm(fullPath, { recursive: true });
         }
         this.db = new AceBase(databaseName, options);
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.db.ready(async () => {
                 this.refBlocks = this.db.ref(ENTRY_BLOCKS);
 
@@ -71,7 +71,7 @@ export class AceBaseClient implements Database {
         const dataOrder = await this.refOrders.query().take(1000000).get(); // bypass default limitation 
         const dataERC20 = await this.refERC20.query().take(1000000).get(); // bypass default limitation 
 
-        let chainIds: number[] = []
+        const chainIds: number[] = []
         dataOrder.forEach((dataSnapshot) => {
             const order = dataSnapshot.val() as IndexedOrder<FullOrder>;
             chainIds.push(order.order.chainId)

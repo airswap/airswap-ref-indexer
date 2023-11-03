@@ -9,7 +9,7 @@ export async function requestDataFromOtherPeer(peersFromRegistry: string[], data
         peers.addPeers(peersFromRegistry);
     }
     const peerUrls = peers.getConnectablePeers();
-    for (let peerUrl of peerUrls) {
+    for (const peerUrl of peerUrls) {
         try {
             const server = await Server.at(peerUrl);
             const erc20Orders = await server.getOrdersERC20({ offset: 0, limit: -1 });

@@ -1,4 +1,4 @@
-import { FullOrder, FullOrderERC20, IndexedOrder, OrderResponse, OrderFilter, SortField, SortOrder } from '@airswap/types';
+import { FullOrder, FullOrderERC20, IndexedOrder, OrderResponse, SortField, SortOrder } from '@airswap/types';
 import crypto from "crypto";
 import { Database } from './Database.js';
 import { DbOrderERC20, DbOrder, DbOrderParty, DbOrderFilter } from '../model/DbOrderTypes.js';
@@ -20,7 +20,7 @@ export class InMemoryDatabase implements Database {
     this.chainIds = [];
   }
 
-  connect(databaseName: string, deleteOnStart: boolean, databasePath: string): Promise<void> {
+  connect(): Promise<void> {
     console.log("IN_MEMORY - In ram storage only -")
     return Promise.resolve();
   }
@@ -237,7 +237,7 @@ export class InMemoryDatabase implements Database {
     }
   }
 
-  private findOrders(predicate: Function): Promise<IndexedOrder<DbOrder>[]> {
+  private findOrders(predicate: (arg0: DbOrder) => boolean): Promise<IndexedOrder<DbOrder>[]> {
     const orders = Object.values(this.orderDatabase).filter((indexedOrder) => {
       const order = indexedOrder.order as DbOrder
       return predicate(order)
